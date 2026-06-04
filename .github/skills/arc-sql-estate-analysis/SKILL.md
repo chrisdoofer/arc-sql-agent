@@ -41,7 +41,7 @@ Use this skill when the user asks to:
 
 # Output requirements
 
-Always produce sections below in order:
+Always produce the sections below in order:
 
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
