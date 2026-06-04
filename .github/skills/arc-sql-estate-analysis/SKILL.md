@@ -43,10 +43,10 @@ Use this skill when the user asks to:
 
 Start with an **Executive Summary** at the top (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction).
 
-Then produce the sections below in order:
+Then produce sections 2–6 below in order:
 
-1. Estate summary
-2. Key optimisation opportunities
-3. Azure target recommendations
-4. Risks and blockers
-5. Data gaps / follow-up questions
+2. Estate summary
+3. Key optimisation opportunities
+4. Azure target recommendations
+5. Risks and blockers
+6. Data gaps / follow-up questions
