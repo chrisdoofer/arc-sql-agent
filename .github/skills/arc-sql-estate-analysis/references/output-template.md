@@ -14,15 +14,15 @@
 
 # Key optimisation opportunities
 
-- Opportunity 1:
-- Opportunity 2:
-- Opportunity 3:
+- Opportunity 1 (Confidence: High | Medium | Low):
+- Opportunity 2 (Confidence: High | Medium | Low):
+- Opportunity 3 (Confidence: High | Medium | Low):
 
 # Azure target recommendations
 
-- Candidate workloads for Azure SQL Managed Instance:
-- Candidate workloads for SQL Server on Azure Virtual Machines:
-- Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
+- Candidate workloads for Azure SQL Managed Instance (Confidence: High | Medium | Low):
+- Candidate workloads for SQL Server on Azure Virtual Machines (Confidence: High | Medium | Low):
+- Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path (Confidence: High | Medium | Low):
 
 # Risks and blockers
 

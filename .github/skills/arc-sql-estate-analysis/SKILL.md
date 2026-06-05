@@ -38,6 +38,13 @@ Use this skill when the user asks to:
 - Do not claim utilisation, savings, or migration suitability unless the source data supports it.
 - If required fields are missing, state that plainly under Data gaps / follow-up questions.
 - Prefer concise, customer-ready wording.
+- Apply confidence inline to each recommendation only in:
+  - Key optimisation opportunities
+  - Azure target recommendations
+- Use only these confidence levels:
+  - High = strong direct evidence
+  - Medium = reasonable inference with some gaps
+  - Low = limited data or assumptions required
 
 # Output requirements
 
