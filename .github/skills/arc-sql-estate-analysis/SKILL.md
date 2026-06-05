@@ -44,7 +44,13 @@ Use this skill when the user asks to:
 Always produce the sections below in order:
 
 1. Estate summary
-2. Key optimisation opportunities
+2. Prioritised action plan
 3. Azure target recommendations
 4. Risks and blockers
 5. Data gaps / follow-up questions
+
+For section 2, group recommendations into:
+
+- High priority: immediate risk or significant impact (for example EOL or security).
+- Medium priority: optimisation opportunities.
+- Low priority: longer-term improvements.

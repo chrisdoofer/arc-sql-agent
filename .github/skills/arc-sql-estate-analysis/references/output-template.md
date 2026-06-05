@@ -4,11 +4,14 @@
 - Key version / edition findings:
 - End-of-support or end-of-life exposure:
 
-# Key optimisation opportunities
+# Prioritised action plan
 
-- Opportunity 1:
-- Opportunity 2:
-- Opportunity 3:
+- High priority (immediate risk or significant impact, for example EOL or security):
+  - Action 1:
+- Medium priority (optimisation opportunities):
+  - Action 1:
+- Low priority (longer-term improvements):
+  - Action 1:
 
 # Azure target recommendations
 
