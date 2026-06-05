@@ -12,6 +12,11 @@
 - Key version / edition findings:
 - End-of-support or end-of-life exposure:
 - Host / platform summary:
+- Licensing position:
+  - Licensing model (ServerCAL / per-core / unknown):
+  - Software Assurance status (yes / no / unknown):
+  - Billing type (Paid / PAYG / unknown):
+  - Evidence / notes (use "mixed signals" if fields conflict):
 - Backup / monitoring / security posture:
 
 # Key optimisation opportunities

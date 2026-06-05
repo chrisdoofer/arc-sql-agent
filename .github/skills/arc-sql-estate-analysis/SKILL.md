@@ -134,8 +134,10 @@ Use this skill when the user asks to:
   
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance, and billing type as separate dimensions
+   - Report licensing model only when explicitly evidenced (for example: ServerCAL, per-core, unknown)
    - Do not assume Software Assurance status from licenseType alone
-   - If multiple signals are inconsistent, surface this explicitly as a data gap
+   - Do not infer ServerCAL from Paid billing or Software Assurance signals
+   - If multiple signals are inconsistent or incomplete, mark licensing as unknown or mixed and surface this explicitly as a data gap
 
 5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
    - combining licensing optimisation (e.g. edition downgrade)

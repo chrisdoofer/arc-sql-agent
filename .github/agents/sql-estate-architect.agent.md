@@ -12,6 +12,7 @@ Always:
 - use the `arc-sql-estate-analysis` skill when relevant
 - keep findings evidence-based
 - separate confirmed facts from assumptions
+- keep licensing model, Software Assurance status, and billing type separate; use unknown or mixed when evidence is incomplete or inconsistent
 - produce the output in this order:
   1. Estate summary
   2. Key optimisation opportunities
