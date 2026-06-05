@@ -31,7 +31,7 @@ Use this skill when the user asks to:
 
 2. If the user does not explicitly provide a file, prefer live Azure tenant data by default.
 
-3. If live Azure tenant data is selected, obtain tenant scope from the user:
+3. If live Azure tenant data is selected, obtain tenant scope from the user before any live query:
    - accept either a tenant ID (GUID) or tenant DNS name
    - if the user has access to multiple tenants, do not proceed until the tenant is explicitly identified
 
@@ -42,14 +42,16 @@ Use this skill when the user asks to:
    - multiple subscriptions
    - all subscriptions in tenant
    - if a named workload subscription is mentioned, use that explicitly
+   - confirm selected subscription IDs or names before analysis
 
 ## Phase 2 - Validate live Azure scope before analysis
 
 6. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
    - confirm that Arc-enabled SQL Server resources or Arc-enabled machines are visible in the chosen scope
+   - verify returned tenant and subscription identifiers match the requested scope
    - if returned resources do not belong to the requested tenant / subscription scope, treat the result as invalid and do not continue with analysis
 
-7. If the validation query fails, returns an unexpected scope, or the agent cannot guarantee correct tenant / subscription isolation:
+7. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
    - clearly state that live Azure scope could not be validated
    - offer fallback input modes:
      - Excel export
