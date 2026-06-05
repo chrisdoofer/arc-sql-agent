@@ -152,6 +152,7 @@ Use this skill when the user asks to:
 - Prefer validated, scope-aligned data over first-returned results.
 - Clearly communicate when fallback methods are used to obtain reliable data.
 
+
 # Output requirements
 
 Always produce the sections below in order:
