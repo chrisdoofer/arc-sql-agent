@@ -2,7 +2,7 @@
 
 # Regression Test Prompts (Do not modify)
 
-These prompts are used after each change to validate output consistency and quality.
+⚠️ These prompts are used for regression testing. Do not modify without updating expected behaviour.
 
 ## Test 1 – Generic estate
 Analyse an Arc-enabled SQL estate and recommend Azure optimisation paths.
