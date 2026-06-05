@@ -87,4 +87,14 @@ User expectation: Arc-enabled SQL resources exist in the selected subscription.
 If live Azure scope cannot be validated, offer Excel / JSON / CSV upload instead of producing an untrusted analysis.
 
 
+## Test 8 – Wrong-scope protection
+
+Connect to tenant <tenant-id> and analyse an Arc-enabled SQL estate. 
+
+Requirements:
+- Do not proceed with analysis unless tenant and subscription scope is validated
+- If returned resources do not belong to the requested tenant or subscription, stop and report a scope error
+- Do not produce analysis using unverified or cross-tenant results
+- Offer fallback to Excel, JSON, or CSV input if validation fails
+
 
