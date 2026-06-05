@@ -80,13 +80,30 @@ Use this skill when the user asks to:
 
 ## Phase 3 - Acquire estate data
 
-1. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
+1. When collecting live Azure data:
+   - do not rely on a single successful query as authoritative
+   - confirm that returned data:
+     - belongs to the requested tenant and subscription
+     - matches expected resource types
+     - is consistent across repeated queries if necessary
+
+2. If initial tool results appear incomplete or inconsistent:
+   - re-run queries using:
+     - alternate filtering patterns
+     - explicit subscription scoping parameters
+   - if still unresolved, attempt fallback acquisition methods before analysis
+
+3. If a fallback query method is used (e.g. Azure CLI):
+   - treat the fallback result as the authoritative dataset if it resolves previous inconsistencies
+   - clearly note that an alternative acquisition method was required
+
+4. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
    - SQL Server instances
    - databases
    - Arc-enabled host machines
    - any available assessment / readiness / backup / security metadata
 
-2. If uploaded data is used instead:
+5. If uploaded data is used instead:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
@@ -125,6 +142,15 @@ Use this skill when the user asks to:
 - If returned resources belong to a different subscription or tenant than requested, stop and report a scope validation failure.
 - Do not produce a full estate analysis until scope has been validated.
 - If live tenant scope cannot be validated, offer fallback analysis via uploaded Excel, JSON, or CSV data.
+
+Tool reliability guardrails
+
+- Do not assume that execution tools (e.g. Azure MCP, Resource Graph) correctly apply tenant or subscription scoping.
+- Treat empty or unexpected query results as potentially unreliable when they conflict with user expectations.
+- Always attempt to validate or corroborate query results before concluding that no resources exist.
+- Use alternative query approaches or execution methods when initial results are inconsistent or suspect.
+- Prefer validated, scope-aligned data over first-returned results.
+- Clearly communicate when fallback methods are used to obtain reliable data.
 
 # Output requirements
 
