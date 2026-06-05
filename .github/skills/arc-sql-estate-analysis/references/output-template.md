@@ -1,35 +1,77 @@
 # Executive Summary
 
-- CIO/IT Director summary point 1:
-- CIO/IT Director summary point 2:
-- CIO/IT Director summary point 3:
-- CIO/IT Director summary point 4 (optional):
-- CIO/IT Director summary point 5 (optional):
+- Summary point 1
+- Summary point 2
+- Summary point 3
+- Summary point 4
+- Summary point 5
 
 # Estate summary
 
 - Scope of estate analysed:
 - Key version / edition findings:
 - End-of-support or end-of-life exposure:
+- Host / platform summary:
+- Backup / monitoring / security posture:
 
 # Key optimisation opportunities
 
-- Opportunity 1 (Confidence: High | Medium | Low):
-- Opportunity 2 (Confidence: High | Medium | Low):
-- Opportunity 3 (Confidence: High | Medium | Low):
+- Opportunity 1:
+- Opportunity 2:
+- Opportunity 3:
+
+# Quick wins
+
+- Quick win 1:
+  - Why it matters:
+  - Expected benefit:
+  - Confidence:
+
+- Quick win 2:
+  - Why it matters:
+  - Expected benefit:
+  - Confidence:
+
+- Quick win 3:
+  - Why it matters:
+  - Expected benefit:
+  - Confidence:
+
+# Strategic moves
+
+- Strategic move 1:
+  - Why it matters:
+  - Dependency / blocker:
+  - Expected long-term benefit:
+  - Confidence:
+
+- Strategic move 2:
+  - Why it matters:
+  - Dependency / blocker:
+  - Expected long-term benefit:
+  - Confidence:
+
+- Strategic move 3:
+  - Why it matters:
+  - Dependency / blocker:
+  - Expected long-term benefit:
+  - Confidence:
 
 # Azure target recommendations
 
-- Candidate workloads for Azure SQL Managed Instance (Confidence: High | Medium | Low):
-- Candidate workloads for SQL Server on Azure Virtual Machines (Confidence: High | Medium | Low):
-- Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path (Confidence: High | Medium | Low):
+- Candidate workloads for Azure SQL Managed Instance:
+- Candidate workloads for SQL Server on Azure Virtual Machines:
+- Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
+- Preferred target and rationale:
 
 # Risks and blockers
 
 - Risk 1:
 - Risk 2:
+- Risk 3:
 
 # Data gaps / follow-up questions
 
 - Missing field or evidence 1:
 - Missing field or evidence 2:
+- Missing field or evidence 3:
