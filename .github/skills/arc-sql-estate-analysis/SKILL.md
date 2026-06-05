@@ -46,12 +46,32 @@ Use this skill when the user asks to:
 
 ## Phase 2 - Validate live Azure scope before analysis
 
-6. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
+1. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
    - confirm that Arc-enabled SQL Server resources or Arc-enabled machines are visible in the chosen scope
    - verify returned tenant and subscription identifiers match the requested scope
    - if returned resources do not belong to the requested tenant / subscription scope, treat the result as invalid and do not continue with analysis
+   - Detect potential false-negative or unreliable query results:
+   - If the validation query returns no resources but the user explicitly expects data:
+     - treat the result as potentially unreliable
+     - do not conclude that no resources exist yet
 
-7. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
+2. If query results are inconsistent, empty, or suspected to be incorrect:
+   - attempt an alternative query approach before proceeding, such as:
+     - adjusting the query structure
+     - removing inline filters and relying on explicit subscription scoping
+     - using an alternative execution method (e.g. Azure CLI)
+
+3. Only proceed to analysis when:
+   - at least one validated and consistent dataset has been obtained
+   - or the agent has clearly confirmed that no data exists after multiple query attempts
+
+4. If multiple query methods produce conflicting results:
+   - prefer the dataset that:
+     - aligns with explicit tenant and subscription scope
+     - returns consistent and complete resource identifiers
+   - clearly explain which data source was used and why
+
+5. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
    - clearly state that live Azure scope could not be validated
    - offer fallback input modes:
      - Excel export
@@ -60,29 +80,29 @@ Use this skill when the user asks to:
 
 ## Phase 3 - Acquire estate data
 
-8. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
+1. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
    - SQL Server instances
    - databases
    - Arc-enabled host machines
    - any available assessment / readiness / backup / security metadata
 
-9. If uploaded data is used instead:
+2. If uploaded data is used instead:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
 
 ## Phase 4 - Analyse estate
 
-10. Summarise the estate by host, instance, version, and edition where possible.
-11. Flag end-of-support or end-of-life exposure.
-12. Identify edition-related optimisation opportunities such as Enterprise-to-Standard downgrade candidates.
-13. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
-14. Recommend candidate Azure target options, for example:
+1. Summarise the estate by host, instance, version, and edition where possible.
+2. Flag end-of-support or end-of-life exposure.
+3. Identify edition-related optimisation opportunities such as Enterprise-to-Standard downgrade candidates.
+4. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
+5. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
-15. Separate confirmed findings from assumptions, unknowns, or missing fields.
-16. Produce the final answer using the structure in `references/output-template.md`.
+6. Separate confirmed findings from assumptions, unknowns, or missing fields.
+7. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
