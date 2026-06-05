@@ -53,34 +53,36 @@ Use this skill when the user asks to:
    - Evaluate query reliability:
       - detect potential false-negative results
       - detect inconsistent or cross-tenant results
-   - If the validation query returns no resources but the user explicitly expects data:
+   - If the validation query returns no resources:
      - treat the result as potentially unreliable
      - do not conclude that no resources exist yet
 
-2. If query results are inconsistent, empty, or suspected to be incorrect:- If the query returns no resources:
-  - always confirm with the user before concluding that no resources exist
-  - ask whether data is expected in the selected scope
-   attempt an alternative query approach immediately when:
-      - results are empty but expected
-      - results appear inconsistent
-      - scope cannot be validated
+2. If the query returns no resources:
+   - always confirm with the user before concluding that no resources exist
+   - ask whether data is expected in the selected scope
 
-Preferred fallback order:
-1. Adjust query structure
-2. Remove inline filters
-3. Use alternate execution method (e.g. Azure CLI)
+3. If query results are inconsistent, empty, or suspected to be incorrect:
+   - attempt an alternative query approach immediately when:
+     - results are empty but expected
+     - results appear inconsistent
+     - scope cannot be validated
 
-3. Only proceed to analysis when:
+4. Preferred fallback order:
+   - adjust the query structure
+   - remove inline filters and rely on explicit subscription scoping
+   - use an alternative execution method (e.g. Azure CLI)
+
+5. Only proceed to analysis when:
    - at least one validated and consistent dataset has been obtained
    - or the agent has clearly confirmed that no data exists after multiple query attempts
 
-4. If multiple query methods produce conflicting results:
+6. If multiple query methods produce conflicting results:
    - prefer the dataset that:
      - aligns with explicit tenant and subscription scope
      - returns consistent and complete resource identifiers
    - clearly explain which data source was used and why
 
-5. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
+8. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
    - clearly state that live Azure scope could not be validated
    - offer fallback input modes:
      - Excel export
@@ -102,19 +104,19 @@ Preferred fallback order:
      - explicit subscription scoping parameters
    - if still unresolved, attempt fallback acquisition methods before analysis
 
-4. When using fallback or multiple query methods:
+3. When using fallback or multiple query methods:
    - explicitly confirm that the dataset has been validated
    - state whether the data source is:
      - primary (MCP)
      - fallback (CLI or alternate method)
 
-5. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
+4. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
    - SQL Server instances
    - databases
    - Arc-enabled host machines
    - any available assessment / readiness / backup / security metadata
 
-6. If uploaded data is used instead:
+5. If uploaded data is used instead:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
@@ -157,12 +159,26 @@ Preferred fallback order:
 ## Tool reliability guardrails
 
 - Do not assume that execution tools (e.g. Azure MCP, Resource Graph) correctly apply tenant or subscription scoping.
-- Treat empty or unexpected query results as potentially unreliable when they conflict with user expectations.
-- Always attempt to validate or corroborate query results before concluding that no resources exist.
-- Use alternative query approaches or execution methods when initial results are inconsistent or suspect.
-- Prefer validated, scope-aligned data over first-returned results.
-- Clearly communicate when fallback methods are used to obtain reliable data.
 
+- Treat empty or unexpected query results as potentially unreliable.
+
+- Never conclude that no resources exist based on a single query result.
+
+- If a query returns no resources:
+  - confirm whether data is expected in the selected scope before proceeding
+  - do not assume the result is correct without validation
+
+- When results are empty, inconsistent, or conflict with expected scope:
+  - actively attempt to validate or corroborate the result
+
+- Use alternative query approaches or execution methods when results are unreliable, including:
+  - adjusting the query structure
+  - removing inline filters
+  - using an alternative execution method (e.g. Azure CLI)
+
+- Prefer validated, scope-aligned data over first-returned results.
+
+- Clearly communicate when fallback methods are used and which data source was ultimately trusted.
 
 # Output requirements
 
