@@ -17,6 +17,9 @@ Use this skill when the user asks to:
 - find optimisation opportunities before migrating to Azure
 - recommend candidate Azure landing options for SQL workloads
 - separate evidence-based findings from assumptions or missing data
+- analyse a tenant-scoped Arc-enabled SQL Server estate from live Azure data
+- prompt for tenant ID or tenant DNS name before querying live Azure data
+- fall back to Excel, JSON, or CSV input if live Azure access is unavailable or cannot be validated
 
 # Analysis workflow
 
