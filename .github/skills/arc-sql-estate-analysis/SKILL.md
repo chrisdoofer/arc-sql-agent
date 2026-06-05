@@ -143,7 +143,7 @@ Use this skill when the user asks to:
 - Do not produce a full estate analysis until scope has been validated.
 - If live tenant scope cannot be validated, offer fallback analysis via uploaded Excel, JSON, or CSV data.
 
-Tool reliability guardrails
+## Tool reliability guardrails
 
 - Do not assume that execution tools (e.g. Azure MCP, Resource Graph) correctly apply tenant or subscription scoping.
 - Treat empty or unexpected query results as potentially unreliable when they conflict with user expectations.
