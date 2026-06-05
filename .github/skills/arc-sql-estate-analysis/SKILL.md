@@ -127,12 +127,27 @@ Use this skill when the user asks to:
 2. Flag end-of-support or end-of-life exposure.
 3. Identify edition-related optimisation opportunities such as Enterprise-to-Standard downgrade candidates.
 4. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
-5. Recommend candidate Azure target options, for example:
+5. Prioritise recommendations that:
+     - reduce cost quickly
+     - simplify the estate
+     - enable migration to Azure services
+6. Where possible, recommend a phased optimisation path:
+     - immediate actions (e.g. licensing or PAYG changes)
+     - mid-term actions (e.g. right-sizing)
+     - long-term actions (e.g. PaaS migration)
+7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
-6. Separate confirmed findings from assumptions, unknowns, or missing fields.
-7. Produce the final answer using the structure in `references/output-template.md`.
+8. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
+   - combining licensing optimisation (e.g. Enterprise → Standard downgrade)
+   - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
+   - highlight where multiple changes can be applied together for maximum impact
+9. Surface "quick win" optimisation actions where:
+   - minimal effort is required
+   - immediate cost reduction or risk reduction can be achieved
+10. Separate confirmed findings from assumptions, unknowns, or missing fields.
+11. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
