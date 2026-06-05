@@ -20,17 +20,64 @@ Use this skill when the user asks to:
 
 # Analysis workflow
 
-1. Confirm the dataset scope and what fields are available.
-2. Summarise the estate by host, instance, version, and edition where possible.
-3. Flag end-of-support or end-of-life exposure.
-4. Identify edition-related optimisation opportunities such as possible Enterprise-to-Standard downgrade candidates.
-5. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
-6. Recommend candidate Azure target options, for example:
+## Phase 1 - Determine data acquisition mode
+
+1. Determine whether the user wants:
+   - live Azure tenant data, or
+   - uploaded estate data (Excel / JSON / CSV)
+
+2. If the user does not explicitly provide a file, prefer live Azure tenant data by default.
+
+3. If live Azure tenant data is selected, obtain tenant scope from the user:
+   - accept either a tenant ID (GUID) or tenant DNS name
+   - if the user has access to multiple tenants, do not proceed until the tenant is explicitly identified
+
+4. Resolve the subscriptions available in the selected tenant.
+
+5. Ask the user to confirm the subscription scope for analysis:
+   - single subscription
+   - multiple subscriptions
+   - all subscriptions in tenant
+   - if a named workload subscription is mentioned, use that explicitly
+
+## Phase 2 - Validate live Azure scope before analysis
+
+6. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
+   - confirm that Arc-enabled SQL Server resources or Arc-enabled machines are visible in the chosen scope
+   - if returned resources do not belong to the requested tenant / subscription scope, treat the result as invalid and do not continue with analysis
+
+7. If the validation query fails, returns an unexpected scope, or the agent cannot guarantee correct tenant / subscription isolation:
+   - clearly state that live Azure scope could not be validated
+   - offer fallback input modes:
+     - Excel export
+     - JSON export
+     - CSV export
+
+## Phase 3 - Acquire estate data
+
+8. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
+   - SQL Server instances
+   - databases
+   - Arc-enabled host machines
+   - any available assessment / readiness / backup / security metadata
+
+9. If uploaded data is used instead:
+   - infer schema from the uploaded file
+   - map fields to the analysis model where possible
+   - clearly state any missing columns or unsupported inputs
+
+## Phase 4 - Analyse estate
+
+10. Summarise the estate by host, instance, version, and edition where possible.
+11. Flag end-of-support or end-of-life exposure.
+12. Identify edition-related optimisation opportunities such as Enterprise-to-Standard downgrade candidates.
+13. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
+14. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
-7. Separate confirmed findings from assumptions, unknowns, or missing fields.
-8. Produce the final answer using the structure in `references/output-template.md`.
+15. Separate confirmed findings from assumptions, unknowns, or missing fields.
+16. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
@@ -45,6 +92,14 @@ Use this skill when the user asks to:
   - High = strong direct evidence
   - Medium = reasonable inference with some gaps
   - Low = limited data or assumptions required
+ 
+## Tenant and scope guardrails
+
+- Never assume that a tenant or subscription filter has been applied correctly just because it was passed to a tool.
+- Always verify that returned resources belong to the tenant / subscription scope requested by the user before continuing with analysis.
+- If returned resources belong to a different subscription or tenant than requested, stop and report a scope validation failure.
+- Do not produce a full estate analysis until scope has been validated.
+- If live tenant scope cannot be validated, offer fallback analysis via uploaded Excel, JSON, or CSV data.
 
 # Output requirements
 
