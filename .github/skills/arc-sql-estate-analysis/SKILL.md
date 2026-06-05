@@ -50,16 +50,25 @@ Use this skill when the user asks to:
    - confirm that Arc-enabled SQL Server resources or Arc-enabled machines are visible in the chosen scope
    - verify returned tenant and subscription identifiers match the requested scope
    - if returned resources do not belong to the requested tenant / subscription scope, treat the result as invalid and do not continue with analysis
-   - Detect potential false-negative or unreliable query results:
+   - Evaluate query reliability:
+      - detect potential false-negative results
+      - detect inconsistent or cross-tenant results
    - If the validation query returns no resources but the user explicitly expects data:
      - treat the result as potentially unreliable
      - do not conclude that no resources exist yet
 
-2. If query results are inconsistent, empty, or suspected to be incorrect:
-   - attempt an alternative query approach before proceeding, such as:
-     - adjusting the query structure
-     - removing inline filters and relying on explicit subscription scoping
-     - using an alternative execution method (e.g. Azure CLI)
+2. If query results are inconsistent, empty, or suspected to be incorrect:- If the query returns no resources:
+  - always confirm with the user before concluding that no resources exist
+  - ask whether data is expected in the selected scope
+   attempt an alternative query approach immediately when:
+      - results are empty but expected
+      - results appear inconsistent
+      - scope cannot be validated
+
+Preferred fallback order:
+1. Adjust query structure
+2. Remove inline filters
+3. Use alternate execution method (e.g. Azure CLI)
 
 3. Only proceed to analysis when:
    - at least one validated and consistent dataset has been obtained
@@ -93,17 +102,19 @@ Use this skill when the user asks to:
      - explicit subscription scoping parameters
    - if still unresolved, attempt fallback acquisition methods before analysis
 
-3. If a fallback query method is used (e.g. Azure CLI):
-   - treat the fallback result as the authoritative dataset if it resolves previous inconsistencies
-   - clearly note that an alternative acquisition method was required
+4. When using fallback or multiple query methods:
+   - explicitly confirm that the dataset has been validated
+   - state whether the data source is:
+     - primary (MCP)
+     - fallback (CLI or alternate method)
 
-4. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
+5. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
    - SQL Server instances
    - databases
    - Arc-enabled host machines
    - any available assessment / readiness / backup / security metadata
 
-5. If uploaded data is used instead:
+6. If uploaded data is used instead:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
