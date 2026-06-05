@@ -171,6 +171,9 @@ Use this skill when the user asks to:
 - If returned resources belong to a different subscription or tenant than requested, stop and report a scope validation failure.
 - Do not produce a full estate analysis until scope has been validated.
 - If live tenant scope cannot be validated, offer fallback analysis via uploaded Excel, JSON, or CSV data.
+- Never proceed to analysis if tenant or subscription scope cannot be confidently validated.
+- If returned resources appear to belong to a different tenant or subscription than requested, stop and report the issue.
+- Always prioritise correctness of scope over completeness of output.
 
 ## Tool reliability guardrails
 
