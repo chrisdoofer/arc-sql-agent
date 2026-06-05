@@ -131,24 +131,29 @@ Use this skill when the user asks to:
    - edition optimisation (e.g. Enterprise → Standard downgrade)
    - rightsizing opportunities
    - operational improvements (e.g. backup, monitoring, security)
+  
+4. When interpreting licensing:
+   - Treat licensing model, Software Assurance, and billing type as separate dimensions
+   - Do not assume Software Assurance status from licenseType alone
+   - If multiple signals are inconsistent, surface this explicitly as a data gap
 
-4. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
+5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
    - combining licensing optimisation (e.g. edition downgrade)
    - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
    - prioritising changes that can be applied together for maximum impact
 
-5. Classify recommendations into:
+6. Classify recommendations into:
    - Quick wins = low effort, immediate cost or risk reduction
    - Strategic moves = higher effort changes that provide medium- to long-term optimisation or Azure migration value
 
-6. Recommend candidate Azure target options, for example:
+7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
 
-7. Separate confirmed findings from assumptions, unknowns, or missing fields.
+8. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
-8. Produce the final answer using the structure in `references/output-template.md`.
+9. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
