@@ -124,30 +124,31 @@ Use this skill when the user asks to:
 ## Phase 4 - Analyse estate
 
 1. Summarise the estate by host, instance, version, and edition where possible.
+
 2. Flag end-of-support or end-of-life exposure.
-3. Identify edition-related optimisation opportunities such as Enterprise-to-Standard downgrade candidates.
-4. Review available sizing or utilisation indicators and note obvious rightsizing opportunities.
-5. Prioritise recommendations that:
-     - reduce cost quickly
-     - simplify the estate
-     - enable migration to Azure services
-6. Where possible, recommend a phased optimisation path:
-     - immediate actions (e.g. licensing or PAYG changes)
-     - mid-term actions (e.g. right-sizing)
-     - long-term actions (e.g. PaaS migration)
-7. Recommend candidate Azure target options, for example:
+
+3. Identify optimisation opportunities, including:
+   - edition optimisation (e.g. Enterprise → Standard downgrade)
+   - rightsizing opportunities
+   - operational improvements (e.g. backup, monitoring, security)
+
+4. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
+   - combining licensing optimisation (e.g. edition downgrade)
+   - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
+   - prioritising changes that can be applied together for maximum impact
+
+5. Classify recommendations into:
+   - Quick wins = low effort, immediate cost or risk reduction
+   - Strategic moves = higher effort changes that provide medium- to long-term optimisation or Azure migration value
+
+6. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
-8. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
-   - combining licensing optimisation (e.g. Enterprise → Standard downgrade)
-   - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
-   - highlight where multiple changes can be applied together for maximum impact
-9. Surface "quick win" optimisation actions where:
-   - minimal effort is required
-   - immediate cost reduction or risk reduction can be achieved
-10. Separate confirmed findings from assumptions, unknowns, or missing fields.
-11. Produce the final answer using the structure in `references/output-template.md`.
+
+7. Separate confirmed findings from assumptions, unknowns, or missing fields.
+
+8. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
