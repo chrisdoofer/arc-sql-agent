@@ -123,8 +123,37 @@ Use this skill when the user asks to:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
+  
+## Phase 4 - Enterprise downgrade audit
 
-## Phase 4 - Analyse estate
+1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
+
+2. For each relevant user database on each Arc-enabled SQL instance, use an approved execution path (for example Arc Run Command or equivalent) to run:
+
+   SELECT feature_name
+   FROM sys.dm_db_persisted_sku_features;
+
+3. Treat the results as follows:
+   - If rows are returned:
+     - surface the feature names clearly
+     - treat them as potential downgrade blockers until interpreted against SQL Server 2022 Standard support
+   - If no rows are returned:
+     - state explicitly that no persisted edition-restricted features were returned by the DMV
+     - do not treat this as final proof that Enterprise is unnecessary
+   - If the query cannot be executed:
+     - explicitly state that the Enterprise downgrade audit could not be completed
+     - do not claim that no Enterprise features are in use
+     - reduce downgrade confidence to Low
+
+4. The downgrade recommendation must distinguish between:
+   - persisted feature evidence
+   - target edition support interpretation
+   - remaining human validation required
+
+5. You MUST NOT claim “no Enterprise features in use” unless the downgrade audit has been executed successfully or equivalent evidence is explicitly available.
+
+
+## Phase 5 - Analyse estate
 
 1. Summarise the estate by host, instance, version, and edition where possible.
 
