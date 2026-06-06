@@ -83,6 +83,9 @@ Use this skill when the user asks to:
    - clearly explain which data source was used and why
 
 8. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
+   - stop immediately and report a scope validation error
+   - in the error response, include requested tenant/subscription scope, observed scope from returned resources, and reason validation failed
+   - do not produce estate analysis from unverified scope data (including unintended cross-tenant or cross-subscription results)
    - clearly state that live Azure scope could not be validated
    - offer fallback input modes:
      - Excel export

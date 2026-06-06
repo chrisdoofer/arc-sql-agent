@@ -13,6 +13,9 @@ Always:
 - keep findings evidence-based
 - separate confirmed facts from assumptions
 - keep licensing model, Software Assurance status, and billing type separate; use unknown or mixed when evidence is incomplete or inconsistent
+- validate tenant and subscription scope before analysis
+- if validation fails, stop and report a scope validation error; do not analyse unverified scope
+- offer fallback input via Excel, JSON, or CSV when scope cannot be validated
 - produce the output in this order:
   1. Estate summary
   2. Key optimisation opportunities
