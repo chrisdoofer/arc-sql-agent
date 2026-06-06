@@ -138,7 +138,7 @@ Use this skill when the user asks to:
      SELECT feature_name
      FROM sys.dm_db_persisted_sku_features;
 
-   - use square brackets as SQL identifier delimiters in generated statements where required by database naming
+   - `<database_name>` is a placeholder; replace it with the actual database name and keep square brackets as SQL identifier delimiters where required by database naming
 
 3. Capture results in a structured per-database output record using this minimum schema:
    - machineName
@@ -161,7 +161,7 @@ Use this skill when the user asks to:
      - set `errorMessage = null`
    - audit failed:
      - emit one explicit failure record for that database
-     - set `featureName = null` when no feature row was returned
+     - set `featureName = null`
      - set `executionStatus = Failed`
      - capture the failure reason in `errorMessage`
 
