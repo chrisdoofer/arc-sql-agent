@@ -97,7 +97,19 @@ Requirements:
 - Do not produce analysis using unverified or cross-tenant results
 - Offer fallback to Excel, JSON, or CSV input if validation fails
 
-## Test 9 – Licensing signal ambiguity handling
+## Test 9 – MI readiness blocker explanation
+
+Assess an Arc-enabled SQL estate where Azure SQL Managed Instance readiness metadata marks a workload as Not Ready.
+
+✅ Expected behaviour:
+
+- Retrieve the blocker detail from the readiness evidence
+- Explain why the workload is marked Not Ready
+- Provide concise remediation steps
+- If blocker detail is missing, say so and treat it as a data gap
+- Keep the existing output sections and keep wording concise
+
+## Test 10 – Licensing signal ambiguity handling
 
 Analyse this Arc-enabled SQL estate where:
 - `licenseType` is present but licensing model is not explicitly stated
@@ -109,4 +121,3 @@ Analyse this Arc-enabled SQL estate where:
 - Do not infer Server/CAL unless explicitly confirmed in source data
 - Use Unknown or Mixed where evidence is incomplete or inconsistent
 - Use cautious wording such as "appears" or "not confirmed"
-
