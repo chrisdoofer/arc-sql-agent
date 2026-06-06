@@ -83,6 +83,9 @@ Use this skill when the user asks to:
    - clearly explain which data source was used and why
 
 8. If the validation query fails, returns an unexpected scope, or live access cannot be trusted for tenant / subscription isolation:
+   - stop immediately and report a scope validation error
+   - in the error response, include requested tenant/subscription scope, observed scope from returned resources, and reason validation failed
+   - do not produce estate analysis from unverified scope data (including unintended cross-tenant or cross-subscription results)
    - clearly state that live Azure scope could not be validated
    - offer fallback input modes:
      - Excel export
@@ -133,11 +136,14 @@ Use this skill when the user asks to:
    - operational improvements (e.g. backup, monitoring, security)
   
 4. When interpreting licensing:
-   - Treat licensing model, Software Assurance, and billing type as separate dimensions
-   - Report licensing model only when explicitly evidenced (for example: ServerCAL, per-core, unknown)
+   - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
+   - Assess each dimension independently from source evidence
+   - Report licensing model only when explicitly evidenced (for example: Server/CAL, Core, Unknown)
    - Do not assume Software Assurance status from licenseType alone
-   - Do not infer ServerCAL from Paid billing or Software Assurance signals
-   - If multiple signals are inconsistent or incomplete, mark licensing as unknown or mixed and surface this explicitly as a data gap
+   - Report Software Assurance as Enabled / Not enabled / Unknown based on explicit signals only
+   - Report billing mode as Paid / PAYG / Free / Unknown based on explicit signals only
+   - Do not infer Server/CAL from Paid billing or Software Assurance signals
+   - If multiple signals are inconsistent or incomplete, mark licensing as Unknown or Mixed, use cautious wording (for example "appears", "not confirmed"), and surface this explicitly as a data gap
 
 5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
    - combining licensing optimisation (e.g. edition downgrade)

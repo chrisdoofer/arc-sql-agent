@@ -109,3 +109,15 @@ Assess an Arc-enabled SQL estate where Azure SQL Managed Instance readiness meta
 - If blocker detail is missing, say so and treat it as a data gap
 - Keep the existing output sections and keep wording concise
 
+## Test 10 – Licensing signal ambiguity handling
+
+Analyse this Arc-enabled SQL estate where:
+- `licenseType` is present but licensing model is not explicitly stated
+- Software Assurance evidence is partial and inconsistent across hosts
+- Billing signal shows Paid for some resources and PAYG for others
+
+✅ Expected behaviour:
+- Report licensing model, Software Assurance, and billing mode as separate attributes
+- Do not infer Server/CAL unless explicitly confirmed in source data
+- Use Unknown or Mixed where evidence is incomplete or inconsistent
+- Use cautious wording such as "appears" or "not confirmed"
