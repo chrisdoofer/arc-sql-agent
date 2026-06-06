@@ -134,8 +134,41 @@ Use this skill when the user asks to:
    - edition optimisation (e.g. Enterprise → Standard downgrade)
    - rightsizing opportunities
    - operational improvements (e.g. backup, monitoring, security)
-  
-4. When interpreting licensing:
+
+4. For each SQL Server instance running Enterprise edition, perform an Enterprise downgrade audit:
+
+   a. Use Azure Arc Run Command (or an equivalent approved remote execution path) to execute the following T-SQL against each relevant user database on the instance:
+      ```sql
+      SELECT feature_name, feature_id
+      FROM sys.dm_db_persisted_sku_features;
+      ```
+
+   b. Collect results centrally for analysis.
+
+   c. Interpret results:
+      - If the DMV returns one or more rows:
+        - Surface each `feature_name` value clearly in the output
+        - Treat each returned feature as a potential downgrade blocker pending interpretation against the SQL Server 2022 Standard edition support matrix
+        - Do not recommend a downgrade for that database until each flagged feature has been assessed against Standard edition capability
+      - If the DMV returns no rows:
+        - Record this as positive evidence that no persisted Enterprise-only features are active in that database
+        - Do not treat a clean result as final proof that Enterprise edition is unnecessary — other factors (e.g. performance, HA topology, licensing) may still justify it
+      - If the audit could not be executed (e.g. Arc Run Command unavailable, connectivity error, permission denied):
+        - Record the failure reason
+        - Do not issue a downgrade recommendation for that instance based on inventory heuristics alone
+        - Surface the gap under Data gaps / follow-up questions
+
+   d. Report downgrade confidence per instance or database:
+      - High: DMV returned no rows across all audited databases and no other Enterprise-specific signals are present
+      - Medium: DMV returned no rows but audit coverage is incomplete or other signals are uncertain
+      - Low: DMV returned one or more feature rows, or the audit could not be executed
+
+   e. Produce an Enterprise downgrade audit section in the output (see output template) that clearly separates:
+      - persisted feature findings from the DMV
+      - interpretation of those features against the SQL Server 2022 Standard edition support matrix
+      - remaining steps that require human confirmation before a downgrade is actioned
+
+5. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
    - Assess each dimension independently from source evidence
    - Report licensing model only when explicitly evidenced (for example: Server/CAL, Core, Unknown)
@@ -145,16 +178,16 @@ Use this skill when the user asks to:
    - Do not infer Server/CAL from Paid billing or Software Assurance signals
    - If multiple signals are inconsistent or incomplete, mark licensing as Unknown or Mixed, use cautious wording (for example "appears", "not confirmed"), and surface this explicitly as a data gap
 
-5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
+6. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
    - combining licensing optimisation (e.g. edition downgrade)
    - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
    - prioritising changes that can be applied together for maximum impact
 
-6. Classify recommendations into:
+7. Classify recommendations into:
    - Quick wins = low effort, immediate cost or risk reduction
    - Strategic moves = higher effort changes that provide medium- to long-term optimisation or Azure migration value
 
-7. Recommend candidate Azure target options, for example:
+8. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
@@ -165,9 +198,9 @@ Use this skill when the user asks to:
      - provide concise remediation steps tied to the evidenced blocker
      - if blocker detail is not available, state that clearly and add it to Data gaps / follow-up questions instead of inferring a reason
 
-8. Separate confirmed findings from assumptions, unknowns, or missing fields.
+9. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
-9. Produce the final answer using the structure in `references/output-template.md`.
+10. Produce the final answer using the structure in `references/output-template.md`.
 
 # Guardrails
 
@@ -184,6 +217,16 @@ Use this skill when the user asks to:
   - Medium = reasonable inference with some gaps
   - Low = limited data or assumptions required
  
+## Enterprise downgrade audit guardrails
+
+- Never recommend an Enterprise → Standard downgrade based solely on inventory heuristics when audit data is absent.
+- Treat `sys.dm_db_persisted_sku_features` as an important input, not the sole decision gate.
+- If the DMV returns rows, surface feature names clearly and treat them as potential blockers until each has been assessed against the SQL Server 2022 Standard edition support matrix.
+- If the DMV returns no rows, report this as positive evidence; do not claim downgrade is safe without additional human confirmation.
+- If the Arc Run Command audit could not be executed for an instance, do not issue a downgrade recommendation for that instance; surface the gap under Data gaps / follow-up questions.
+- Preserve cautious wording ("may be safe to downgrade pending confirmation", "audit evidence supports further investigation") wherever feature interpretation is uncertain.
+- Do not over-claim downgrade suitability; keep wording customer-safe and defensible.
+
 ## Tenant and scope guardrails
 
 - Never assume that a tenant or subscription filter has been applied correctly just because it was passed to a tool.
@@ -226,6 +269,7 @@ Always produce the sections below in order:
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
 3. Key optimisation opportunities
-4. Azure target recommendations
-5. Risks and blockers
-6. Data gaps / follow-up questions
+4. Enterprise downgrade audit
+5. Azure target recommendations
+6. Risks and blockers
+7. Data gaps / follow-up questions
