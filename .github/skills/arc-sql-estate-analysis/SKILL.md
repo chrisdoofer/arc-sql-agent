@@ -131,10 +131,10 @@ Use this skill when the user asks to:
 
 2. Use a real execution path after tenant/subscription scope has been validated:
    - identify target Arc-enabled SQL instances from the validated scope dataset
-   - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because the DMV query is read-only
-   - execute the downgrade DMV in each user database using Arc Run Command (or equivalent approved execution method), for example:
-   
-     USE [<DatabaseName>];
+   - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because they can still return persisted feature evidence
+   - execute the downgrade DMV in each user database using Arc Run Command (or equivalent approved execution method)
+   - set database context via the execution method's database parameter/context option for each database (do not rely on a `USE` statement as the only context selector)
+   - run:
      SELECT feature_name
      FROM sys.dm_db_persisted_sku_features;
 
@@ -172,7 +172,7 @@ Use this skill when the user asks to:
 6. Handle results as follows:
    - If rows are returned:
      - surface the feature names clearly
-     - treat them as potential downgrade blockers until interpreted against target Standard edition support for the selected SQL Server version
+     - treat them as potential downgrade blockers until interpreted against target Standard edition support for the chosen downgrade target version (default SQL Server 2022 Standard unless another target is specified)
    - If no rows are returned:
      - explicitly state that the DMV returned no persisted edition-restricted features
      - treat this as positive evidence, but NOT conclusive proof that Enterprise is unnecessary
