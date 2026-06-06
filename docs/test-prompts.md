@@ -121,3 +121,22 @@ Analyse this Arc-enabled SQL estate where:
 - Do not infer Server/CAL unless explicitly confirmed in source data
 - Use Unknown or Mixed where evidence is incomplete or inconsistent
 - Use cautious wording such as "appears" or "not confirmed"
+
+## Test 11 – Enterprise downgrade DMV execution outcomes
+
+Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunities.
+
+✅ Expected behaviour:
+- Execute `sys.dm_db_persisted_sku_features` against relevant user databases on validated Arc-enabled SQL instances using Arc Run Command (or equivalent approved execution path)
+- Return structured per-database audit records containing:
+  - `machineName`
+  - `instanceName`
+  - `databaseName`
+  - `featureName`
+  - `executionStatus`
+  - `errorMessage`
+- Distinguish clearly between:
+  - successful execution with returned feature rows
+  - successful execution with no persisted features (`featureName = null` with success status)
+  - failed execution (`executionStatus = Failed` with captured error)
+- Keep downgrade confidence Low when execution fails or cannot be completed
