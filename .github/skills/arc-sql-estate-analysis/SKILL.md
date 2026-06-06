@@ -171,6 +171,8 @@ Use this skill when the user asks to:
    - edition optimisation (e.g. Enterprise → Standard downgrade)
    - rightsizing opportunities
    - operational improvements (e.g. backup, monitoring, security)
+   - Do not use indirect signals (e.g. database properties such as isMemoryOptimizationEnabled) as proof of Enterprise feature usage.
+   - Treat such signals as indicative only and require DMV confirmation for downgrade decisions.
 
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
