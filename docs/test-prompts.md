@@ -137,6 +137,6 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
   - `errorMessage`
 - Distinguish clearly between:
   - successful execution with returned feature rows
-  - successful execution with no persisted features (`featureName = null` with success status)
+  - successful execution with no persisted features (`featureName = null`, `executionStatus = Succeeded`)
   - failed execution (`executionStatus = Failed` with captured error)
 - Keep downgrade confidence Low when execution fails or cannot be completed

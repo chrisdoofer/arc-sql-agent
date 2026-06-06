@@ -138,6 +138,8 @@ Use this skill when the user asks to:
      SELECT feature_name
      FROM sys.dm_db_persisted_sku_features;
 
+   - use square brackets as SQL identifier delimiters in generated statements where required by database naming
+
 3. Capture results in a structured per-database output record using this minimum schema:
    - machineName
    - instanceName
@@ -149,6 +151,7 @@ Use this skill when the user asks to:
 4. Populate structured output as follows:
    - audit succeeded with findings:
      - emit one record per returned feature row
+     - set `featureName` to the returned DMV value
      - set `executionStatus = Succeeded`
      - set `errorMessage = null`
    - audit succeeded with no persisted features returned:
@@ -158,6 +161,7 @@ Use this skill when the user asks to:
      - set `errorMessage = null`
    - audit failed:
      - emit one explicit failure record for that database
+     - set `featureName = null` when no feature row was returned
      - set `executionStatus = Failed`
      - capture the failure reason in `errorMessage`
 
