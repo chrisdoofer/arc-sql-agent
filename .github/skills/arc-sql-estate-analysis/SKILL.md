@@ -129,20 +129,50 @@ Use this skill when the user asks to:
 
 1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
 
-2. For each relevant user database on each Arc-enabled SQL instance:
-   - attempt to execute the following query using an approved execution path (for example Arc Run Command or equivalent):
-   
+2. Use a real execution path after tenant/subscription scope has been validated:
+   - identify target Arc-enabled SQL instances from the validated scope dataset
+   - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because they can still return persisted feature evidence
+   - execute the downgrade DMV in each user database using Arc Run Command (or equivalent approved execution method)
+   - set database context via the execution method's database parameter/context option for each database (do not rely on a `USE` statement as the only context selector)
+   - run:
      SELECT feature_name
      FROM sys.dm_db_persisted_sku_features;
 
-3. Treat this step as a REQUIRED data acquisition step:
+3. Capture results in a structured per-database output record using this minimum schema:
+   - machineName
+   - instanceName
+   - databaseName
+   - featureName
+   - executionStatus
+   - errorMessage
+   - field names are mandatory and must use this exact camelCase naming
+   - downstream processing depends on exact key matches; do not rename or reformat these keys
+
+4. Populate structured output as follows:
+   - audit succeeded with findings:
+     - emit one record per returned feature row
+     - set `featureName` to the returned DMV value
+     - set `executionStatus = Succeeded`
+     - set `errorMessage = null`
+   - audit succeeded with no persisted features returned:
+     - emit one explicit success record for that database
+     - set `featureName = null`
+     - set `executionStatus = Succeeded`
+     - set `errorMessage = null`
+   - audit failed:
+     - emit one explicit failure record for that database
+     - set `featureName = null`
+     - set `executionStatus = Failed`
+     - capture the failure reason in `errorMessage`
+
+5. Treat this step as a REQUIRED data acquisition step:
    - do not skip execution due to partial data availability
    - do not proceed as if the audit was completed unless results are actually obtained
 
-4. Handle results as follows:
+6. Handle results as follows:
    - If rows are returned:
      - surface the feature names clearly
-     - treat them as potential downgrade blockers until interpreted against SQL Server 2022 Standard support
+     - treat them as potential downgrade blockers until interpreted against target Standard edition support for the chosen downgrade target version (default SQL Server 2022 Standard unless another target is specified)
    - If no rows are returned:
      - explicitly state that the DMV returned no persisted edition-restricted features
      - treat this as positive evidence, but NOT conclusive proof that Enterprise is unnecessary
@@ -151,12 +181,12 @@ Use this skill when the user asks to:
      - do not claim that no Enterprise features are in use
      - downgrade confidence for any Enterprise → Standard recommendation must be Low
 
-5. The downgrade recommendation MUST distinguish between:
+7. The downgrade recommendation MUST distinguish between:
    - persisted feature evidence
    - target edition support interpretation
    - remaining human validation required
 
-6. You MUST NOT:
+8. You MUST NOT:
    - claim "no Enterprise features in use" without DMV evidence
    - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
