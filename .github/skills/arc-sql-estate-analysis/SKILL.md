@@ -123,34 +123,42 @@ Use this skill when the user asks to:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
-  
+
+
 ## Phase 4 - Enterprise downgrade audit
 
 1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
 
-2. For each relevant user database on each Arc-enabled SQL instance, use an approved execution path (for example Arc Run Command or equivalent) to run:
+2. For each relevant user database on each Arc-enabled SQL instance:
+   - attempt to execute the following query using an approved execution path (for example Arc Run Command or equivalent):
+   
+     SELECT feature_name
+     FROM sys.dm_db_persisted_sku_features;
 
-   SELECT feature_name
-   FROM sys.dm_db_persisted_sku_features;
+3. Treat this step as a REQUIRED data acquisition step:
+   - do not skip execution due to partial data availability
+   - do not proceed as if the audit was completed unless results are actually obtained
 
-3. Treat the results as follows:
+4. Handle results as follows:
    - If rows are returned:
      - surface the feature names clearly
      - treat them as potential downgrade blockers until interpreted against SQL Server 2022 Standard support
    - If no rows are returned:
-     - state explicitly that no persisted edition-restricted features were returned by the DMV
-     - do not treat this as final proof that Enterprise is unnecessary
-   - If the query cannot be executed:
-     - explicitly state that the Enterprise downgrade audit could not be completed
+     - explicitly state that the DMV returned no persisted edition-restricted features
+     - treat this as positive evidence, but NOT conclusive proof that Enterprise is unnecessary
+   - If execution fails or cannot be performed:
+     - explicitly state that the Enterprise downgrade audit could not be executed
      - do not claim that no Enterprise features are in use
-     - reduce downgrade confidence to Low
+     - downgrade confidence for any Enterprise → Standard recommendation must be Low
 
-4. The downgrade recommendation must distinguish between:
+5. The downgrade recommendation MUST distinguish between:
    - persisted feature evidence
    - target edition support interpretation
    - remaining human validation required
 
-5. You MUST NOT claim “no Enterprise features in use” unless the downgrade audit has been executed successfully or equivalent evidence is explicitly available.
+6. You MUST NOT:
+   - claim "no Enterprise features in use" without DMV evidence
+   - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
 
 ## Phase 5 - Analyse estate
@@ -163,7 +171,7 @@ Use this skill when the user asks to:
    - edition optimisation (e.g. Enterprise → Standard downgrade)
    - rightsizing opportunities
    - operational improvements (e.g. backup, monitoring, security)
-  
+
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
    - Assess each dimension independently from source evidence
@@ -204,6 +212,7 @@ Use this skill when the user asks to:
 - Do not claim utilisation, savings, or migration suitability unless the source data supports it.
 - If required fields are missing, state that plainly under Data gaps / follow-up questions.
 - Do not infer Azure SQL Managed Instance blockers or remediation without explicit readiness evidence.
+- Never recommend Enterprise → Standard downgrade with Medium or High confidence unless the Enterprise downgrade audit has executed successfully or equivalent evidence is explicitly available.
 - Prefer concise, customer-ready wording.
 - Apply confidence inline to each recommendation only in:
   - Key optimisation opportunities
