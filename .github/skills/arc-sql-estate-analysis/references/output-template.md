@@ -13,10 +13,10 @@
 - End-of-support or end-of-life exposure:
 - Host / platform summary:
 - Licensing position:
-  - Licensing model (ServerCAL / per-core / unknown):
-  - Software Assurance status (yes / no / unknown):
-  - Billing type (Paid / PAYG / unknown):
-  - Evidence / notes (use "mixed signals" if fields conflict):
+  - Licensing model (Server/CAL / Core / Unknown):
+  - Software Assurance status (Enabled / Not enabled / Unknown):
+  - Billing mode (Paid / PAYG / Free / Unknown):
+  - Evidence / notes (cite explicit source signals; use "not confirmed" or "mixed signals" if fields are ambiguous or conflicting):
 - Backup / monitoring / security posture:
 
 # Key optimisation opportunities

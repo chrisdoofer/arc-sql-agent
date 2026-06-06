@@ -97,4 +97,16 @@ Requirements:
 - Do not produce analysis using unverified or cross-tenant results
 - Offer fallback to Excel, JSON, or CSV input if validation fails
 
+## Test 9 – Licensing signal ambiguity handling
+
+Analyse this Arc-enabled SQL estate where:
+- `licenseType` is present but licensing model is not explicitly stated
+- Software Assurance evidence is partial and inconsistent across hosts
+- Billing signal shows Paid for some resources and PAYG for others
+
+✅ Expected behaviour:
+- Report licensing model, Software Assurance, and billing mode as separate attributes
+- Do not infer Server/CAL unless explicitly confirmed in source data
+- Use Unknown or Mixed where evidence is incomplete or inconsistent
+- Use cautious wording such as "appears" or "not confirmed"
 
