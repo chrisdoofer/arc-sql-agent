@@ -134,7 +134,7 @@ Use this skill when the user asks to:
    - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because the DMV query is read-only
    - execute the downgrade DMV in each user database using Arc Run Command (or equivalent approved execution method), for example:
    
-     USE [YourDatabaseName];
+     USE [<DatabaseName>];
      SELECT feature_name
      FROM sys.dm_db_persisted_sku_features;
 
@@ -146,6 +146,7 @@ Use this skill when the user asks to:
    - executionStatus
    - errorMessage
    - field names are mandatory and must use this exact camelCase naming
+   - downstream processing depends on exact key matches; do not rename or reformat these keys
 
 4. Populate structured output as follows:
    - audit succeeded with findings:
