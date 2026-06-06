@@ -97,4 +97,15 @@ Requirements:
 - Do not produce analysis using unverified or cross-tenant results
 - Offer fallback to Excel, JSON, or CSV input if validation fails
 
+## Test 9 – MI readiness blocker explanation
+
+Assess an Arc-enabled SQL estate where Azure SQL Managed Instance readiness metadata marks a workload as Not Ready.
+
+✅ Expected behaviour:
+
+- Retrieve the blocker detail from the readiness evidence
+- Explain why the workload is marked Not Ready
+- Provide concise remediation steps
+- If blocker detail is missing, say so and treat it as a data gap
+- Keep the existing output sections and keep wording concise
 

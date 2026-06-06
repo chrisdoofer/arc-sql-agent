@@ -152,6 +152,12 @@ Use this skill when the user asks to:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
+   - When Azure SQL Managed Instance readiness metadata is available:
+     - report the readiness state for each MI candidate
+     - if a workload is marked Not Ready, retrieve the blocker details from the source data
+     - explain briefly why the blocker prevents MI readiness
+     - provide concise remediation steps tied to the evidenced blocker
+     - if blocker detail is not available, state that clearly and add it to Data gaps / follow-up questions instead of inferring a reason
 
 8. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
@@ -162,6 +168,7 @@ Use this skill when the user asks to:
 - Keep findings evidence-based.
 - Do not claim utilisation, savings, or migration suitability unless the source data supports it.
 - If required fields are missing, state that plainly under Data gaps / follow-up questions.
+- Do not infer Azure SQL Managed Instance blockers or remediation without explicit readiness evidence.
 - Prefer concise, customer-ready wording.
 - Apply confidence inline to each recommendation only in:
   - Key optimisation opportunities

@@ -65,6 +65,10 @@
 # Azure target recommendations
 
 - Candidate workloads for Azure SQL Managed Instance:
+  - Readiness status:
+  - If Not Ready, blocker details:
+  - Why it is blocked:
+  - Remediation:
 - Candidate workloads for SQL Server on Azure Virtual Machines:
 - Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
 - Preferred target and rationale:
