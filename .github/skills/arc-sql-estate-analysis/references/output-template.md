@@ -22,6 +22,25 @@
 # Key optimisation opportunities
 
 - Opportunity 1:
+  - Persisted feature findings:
+  - Target edition support interpretation:
+  - Runtime validation checklist (required before confirming Enterprise → Standard downgrade is safe):
+    - Index operations (for example online index rebuild / create activity):
+      - Why it matters:
+      - How to validate:
+    - HA / DR configuration (for example Always On AG versus Basic AG):
+      - Why it matters:
+      - How to validate:
+    - Partitioning operations (for example partition switching / sliding window):
+      - Why it matters:
+      - How to validate:
+    - Workload governance (Resource Governor):
+      - Why it matters:
+      - How to validate:
+    - Compression usage for performance-critical workloads:
+      - Why it matters:
+      - How to validate:
+  - Downgrade safety status:
 - Opportunity 2:
 - Opportunity 3:
 

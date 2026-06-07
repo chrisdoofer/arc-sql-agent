@@ -128,6 +128,7 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
 
 ✅ Expected behaviour:
 - Execute `sys.dm_db_persisted_sku_features` against relevant user databases on validated Arc-enabled SQL instances using Arc Run Command (or equivalent approved execution path)
+- Clearly separate persisted feature validation from runtime / operational feature usage validation
 - Return structured per-database audit records containing:
   - `machineName`
   - `instanceName`
@@ -139,4 +140,12 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
   - successful execution with returned feature rows
   - successful execution with no persisted features (`featureName = null`, `executionStatus = Succeeded`)
   - failed execution (`executionStatus = Failed` with captured error)
+- Include a structured runtime validation checklist covering:
+  - index operations
+  - HA / DR configuration
+  - partitioning operations
+  - Resource Governor
+  - compression usage for performance-critical workloads
+- For each runtime checklist item, explain why it matters and how to validate it
+- Do not present the downgrade as fully safe unless runtime validation is also completed
 - Keep downgrade confidence Low when execution fails or cannot be completed

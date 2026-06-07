@@ -184,9 +184,24 @@ Use this skill when the user asks to:
 7. The downgrade recommendation MUST distinguish between:
    - persisted feature evidence
    - target edition support interpretation
+   - runtime / operational feature usage that still requires validation
    - remaining human validation required
 
-8. You MUST NOT:
+8. You MUST add a separate runtime feature validation stage alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
+   - treat the DMV audit as persisted feature validation only
+   - explicitly state that runtime / operational feature usage remains a separate validation step
+   - include a structured runtime validation checklist covering at least:
+     - index operations (for example online index rebuild / create activity)
+     - high availability / disaster recovery configuration (for example Always On AG versus Basic AG)
+     - partitioning operations (for example partition switching or sliding-window maintenance)
+     - workload governance (Resource Governor)
+     - compression usage for performance-critical workloads
+   - for each runtime validation item, include:
+     - why it matters to an Enterprise → Standard downgrade decision
+     - concise guidance on how to validate it
+   - if runtime validation has not been completed, state clearly that the downgrade is not fully validated for safe execution
+
+9. You MUST NOT:
    - claim "no Enterprise features in use" without DMV evidence
    - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
@@ -203,6 +218,11 @@ Use this skill when the user asks to:
    - operational improvements (e.g. backup, monitoring, security)
    - Do not use indirect signals (e.g. database properties such as isMemoryOptimizationEnabled) as proof of Enterprise feature usage.
    - Treat such signals as indicative only and require DMV confirmation for downgrade decisions.
+   - For Enterprise → Standard downgrade candidates, present:
+     - persisted feature findings from `sys.dm_db_persisted_sku_features`
+     - target edition support interpretation
+     - a separate runtime validation checklist with why-it-matters and how-to-validate guidance
+   - Do not describe an Enterprise → Standard downgrade as fully safe unless the runtime checklist has been validated
 
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
@@ -245,6 +265,7 @@ Use this skill when the user asks to:
 - If required fields are missing, state that plainly under Data gaps / follow-up questions.
 - Do not infer Azure SQL Managed Instance blockers or remediation without explicit readiness evidence.
 - Never recommend Enterprise → Standard downgrade with Medium or High confidence unless the Enterprise downgrade audit has executed successfully or equivalent evidence is explicitly available.
+- Never describe an Enterprise → Standard downgrade as fully safe unless runtime feature validation has also been completed.
 - Prefer concise, customer-ready wording.
 - Apply confidence inline to each recommendation only in:
   - Key optimisation opportunities
