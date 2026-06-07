@@ -91,7 +91,8 @@
     - treat this as positive evidence, not final proof
   - Compression interpretation:
     - SQL Server 2022 Standard supports compression
-    - if targeting an older Standard version, validate compression support against that target version
+    - SQL Server Standard gained compression support in SQL Server 2016 SP1
+    - if targeting pre-2016 SP1 Standard, treat compression as a potential blocker and validate explicitly
 
 ---
 

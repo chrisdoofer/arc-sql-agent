@@ -211,6 +211,7 @@ Use this skill when the user asks to:
        WHERE js.command LIKE '%ONLINE%=%ON%';
    - adapt `Invoke-Sqlcmd` parameters to host module capability:
      - older environments may not support `-TrustServerCertificate`
+     - detect support by checking available `Invoke-Sqlcmd` parameters (or SqlServer module version) before command construction
      - include `-TrustServerCertificate` only when supported/required by the host
    - capture runtime results in a structured per-check output record using this minimum schema:
      - machineName
@@ -226,6 +227,11 @@ Use this skill when the user asks to:
      - successful execution with no blockers:
        - set `executionStatus = Succeeded`
        - set `result = null` or `No blockers detected`
+       - valid no-blocker examples include:
+         - Always On AG query returns zero rows
+         - Resource Governor query returns `is_enabled = 0`
+         - partitioned table query returns zero rows
+         - online index operation query returns zero rows
      - execution failure:
        - set `executionStatus = Failed`
        - set `result = null`

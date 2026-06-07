@@ -98,8 +98,9 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
          │                      │
          ▼                      │
 ┌──────────────────────────────────────┐
-│ FOR EACH DATABASE / INSTANCE          │
-│ (sequential per host):                │
+│ FOR EACH HOST (sequential):           │
+│ - Per-database DMV checks             │
+│ - Per-instance runtime checks         │
 │                                      │
 │  ┌────────────────────────────────┐  │
 │  │ Arc Run Command:               │  │
@@ -166,7 +167,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 | CLI fallback | Do CLI results match requested tenant? | **STOP** — report error, offer file upload |
 | Enterprise detection | Any Enterprise Engine instances? | Skip downgrade audit |
 | Run Command execution | Did execution succeed? | Record as Failed, confidence = Low |
-| Combined persisted + runtime results | Are persisted and runtime checks both clean? | AMBER/RED depending on blockers or incomplete runtime checks |
+| Combined persisted + runtime results | Are persisted and runtime checks both clean? | GREEN if both clean; otherwise AMBER/RED based on blockers/completeness |
 
 ---
 
