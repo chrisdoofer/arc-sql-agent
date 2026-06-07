@@ -203,14 +203,14 @@ Use this skill when the user asks to:
 
 9. You MUST classify each Enterprise → Standard downgrade readiness using the following classification model:
    - GREEN = ready to downgrade:
-     - No persisted features detected in DMV audit
+     - DMV audit executed successfully with no persisted features detected
      - Runtime validation completed with no blockers identified
    - AMBER = requires runtime validation:
-     - No persisted features detected in DMV audit
+     - DMV audit executed successfully with no persisted features detected
      - Runtime validation not yet completed or status unknown
    - RED = blocked by persisted or confirmed features:
-     - Persisted features present in DMV audit, OR
-     - DMV audit execution failed, OR
+     - Persisted features present in DMV audit (successful execution with features returned), OR
+     - DMV audit execution failed or could not be completed, OR
      - Confirmed runtime blockers identified
 
 10. The classification MUST be surfaced in:

@@ -3,8 +3,9 @@
 - Summary point 1
 - Summary point 2
 - Summary point 3
-- Summary point 4 (include Enterprise → Standard downgrade readiness classification if applicable: GREEN / AMBER / RED)
+- Summary point 4
 - Summary point 5
+- Enterprise → Standard downgrade readiness (if applicable): [GREEN / AMBER / RED]
 
 
 # Estate summary
@@ -105,17 +106,17 @@
 ## Downgrade readiness classification
 
 - GREEN:
-  - No persisted features detected
+  - DMV audit executed successfully with no persisted features detected
   - Runtime validation completed with no blockers identified
   - Safe to proceed
 
 - AMBER:
-  - No persisted features detected
+  - DMV audit executed successfully with no persisted features detected
   - Runtime validation not yet completed or status unknown
   - Proceed after validation
 
 - RED:
-  - Persisted features detected OR audit failed OR confirmed runtime blockers
+  - Persisted features detected in successful DMV audit OR audit failed or could not be completed OR confirmed runtime blockers
   - Do not proceed without remediation
 
 - Current status:
