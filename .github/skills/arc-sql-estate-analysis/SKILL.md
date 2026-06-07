@@ -201,11 +201,28 @@ Use this skill when the user asks to:
      - concise guidance on how to validate it
    - if runtime validation has not been completed, state clearly that the downgrade is not fully validated for safe execution
 
-9. You MUST NOT:
+9. You MUST classify each Enterprise → Standard downgrade readiness using the following classification model:
+   - GREEN = ready to downgrade:
+     - DMV audit executed successfully with no persisted features detected
+     - Runtime validation completed with no blockers identified
+   - AMBER = requires runtime validation:
+     - DMV audit executed successfully with no persisted features detected
+     - Runtime validation not yet completed or status unknown
+   - RED = blocked by persisted or confirmed features:
+     - Persisted features present in DMV audit (successful execution with features returned), OR
+     - DMV audit execution failed or could not be completed, OR
+     - Confirmed runtime blockers identified
+
+10. The classification MUST be surfaced in:
+   - Executive Summary (include classification status for any downgrade opportunities)
+   - Key optimisation opportunities (for Enterprise → Standard recommendations)
+   - Enterprise downgrade audit section (detailed classification)
+
+11. You MUST NOT:
    - claim "no Enterprise features in use" without DMV evidence
    - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
-10. Execution reliability considerations:
+12. Execution reliability considerations:
 
 - You MUST consider execution reliability when using Arc Run Command or equivalent execution methods.
 

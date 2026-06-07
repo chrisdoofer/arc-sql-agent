@@ -149,3 +149,11 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
 - For each runtime checklist item, explain why it matters and how to validate it
 - Do not present the downgrade as fully safe unless runtime validation is also completed
 - Keep downgrade confidence Low when execution fails or cannot be completed
+- Include downgrade readiness classification (GREEN / AMBER / RED) in:
+  - Executive Summary
+  - Key optimisation opportunities
+  - Enterprise downgrade audit section
+- Apply classification logic:
+  - GREEN = no persisted features + runtime validation completed with no blockers
+  - AMBER = no persisted features + runtime validation not yet completed
+  - RED = persisted features present OR audit failed OR confirmed runtime blockers
