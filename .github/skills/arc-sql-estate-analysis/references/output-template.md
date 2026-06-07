@@ -89,10 +89,6 @@
   - If no features are returned:
     - state clearly that no persisted edition-restricted features were returned by the DMV
     - treat this as positive evidence, not final proof
-  - Compression interpretation:
-    - SQL Server 2022 Standard supports compression
-    - SQL Server Standard gained compression support in SQL Server 2016 SP1
-    - If targeting pre-2016 SP1 Standard, treat compression as a potential blocker and validate explicitly
 
 ---
 
@@ -106,6 +102,10 @@
   - Support status for chosen target version:
 - Online index operations:
   - Runtime maintenance impact:
+- Compression interpretation:
+  - SQL Server 2022 Standard supports compression
+  - SQL Server Standard gained compression support in SQL Server 2016 SP1
+  - If targeting pre-2016 SP1 Standard, treat compression as a potential blocker and validate explicitly
 
 ---
 
