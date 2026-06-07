@@ -27,9 +27,13 @@ This document provides full transparency on the data collected, accessed, and re
 
 | Query Executed | Target | Fields Returned | Purpose |
 |----------------|--------|-----------------|---------|
-| `SELECT feature_name FROM sys.dm_db_persisted_sku_features` | Each user database (database_id > 4) on Enterprise instances | feature_name (if any) | Detect persisted Enterprise-only features to validate downgrade safety |
+| `SELECT feature_name FROM sys.dm_db_persisted_sku_features` | Each user database (database_id > 4) on Enterprise instances | feature_name (if any) | Detect persisted Enterprise-only features |
+| `SELECT ag.name AS ag_name, ar.replica_server_name, ar.availability_mode_desc FROM sys.availability_groups ag JOIN sys.availability_replicas ar ON ag.group_id = ar.group_id` | Enterprise instances | ag_name, replica_server_name, availability_mode_desc | Detect Always On AG runtime usage |
+| `SELECT is_enabled FROM sys.resource_governor_configuration` | Enterprise instances | is_enabled | Detect Resource Governor runtime usage |
+| `SELECT OBJECT_SCHEMA_NAME(p.object_id) AS schema_name, OBJECT_NAME(p.object_id) AS table_name, COUNT(DISTINCT p.partition_number) AS partition_count FROM sys.partitions p WHERE p.partition_number > 1 AND p.index_id IN (0,1) GROUP BY p.object_id` | Enterprise instances | schema_name, table_name, partition_count | Detect partitioned table usage |
+| `SELECT j.name AS job_name, js.command FROM msdb.dbo.sysjobs j JOIN msdb.dbo.sysjobsteps js ON j.job_id = js.job_id WHERE js.command LIKE '%ONLINE%=%ON%'` | Enterprise instances | job_name, command | Detect maintenance jobs relying on online index operations |
 
-> **This is the only query executed on target SQL Servers.** It is a read-only system DMV that returns the names of any persisted edition-restricted features. It does not modify data, schema, or configuration.
+> Arc Run Command executes read-only metadata queries only. These checks do not modify data, schema, or SQL Server configuration.
 
 ### From Azure Subscription API (read-only)
 

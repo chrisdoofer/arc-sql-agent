@@ -140,13 +140,19 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
   - successful execution with returned feature rows
   - successful execution with no persisted features (`featureName = null`, `executionStatus = Succeeded`)
   - failed execution (`executionStatus = Failed` with captured error)
-- Include a structured runtime validation checklist covering:
-  - index operations
-  - HA / DR configuration
-  - partitioning operations
+- Execute runtime validation checks via Arc Run Command for:
+  - Always On availability groups
   - Resource Governor
-  - compression usage for performance-critical workloads
-- For each runtime checklist item, explain why it matters and how to validate it
+  - partitioned tables
+  - SQL Agent job steps using `ONLINE=ON` index operations
+- Return structured per-check runtime records containing:
+  - `machineName`
+  - `instanceName`
+  - `checkName`
+  - `result`
+  - `executionStatus`
+  - `errorMessage`
+- Interpret compression support against target downgrade version (SQL Server 2022 Standard supports compression)
 - Do not present the downgrade as fully safe unless runtime validation is also completed
 - Keep downgrade confidence Low when execution fails or cannot be completed
 - Include downgrade readiness classification (GREEN / AMBER / RED) in:

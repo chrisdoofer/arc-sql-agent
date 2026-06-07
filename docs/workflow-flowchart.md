@@ -98,16 +98,18 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
          │                      │
          ▼                      │
 ┌──────────────────────────────────────┐
-│ FOR EACH DATABASE (sequential/host): │
+│ FOR EACH DATABASE / INSTANCE          │
+│ (sequential per host):                │
 │                                      │
 │  ┌────────────────────────────────┐  │
 │  │ Arc Run Command:               │  │
-│  │ Invoke-Sqlcmd -Query           │  │
-│  │   'SELECT feature_name         │  │
-│  │    FROM sys.dm_db_persisted_   │  │
-│  │    sku_features'               │  │
-│  │ -Database '<db_name>'          │  │
-│  │ -ServerInstance 'localhost'     │  │
+│  │ Invoke-Sqlcmd executes:        │  │
+│  │ 1) DMV query per user DB       │  │
+│  │ 2) Runtime checks per instance │  │
+│  │    - Always On AG              │  │
+│  │    - Resource Governor         │  │
+│  │    - Partitioned tables        │  │
+│  │    - ONLINE=ON job steps       │  │
 │  └───────────────┬────────────────┘  │
 │                  │                    │
 │         ┌────────┴────────┐          │
@@ -164,7 +166,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 | CLI fallback | Do CLI results match requested tenant? | **STOP** — report error, offer file upload |
 | Enterprise detection | Any Enterprise Engine instances? | Skip downgrade audit |
 | Run Command execution | Did execution succeed? | Record as Failed, confidence = Low |
-| DMV results | Any persisted features returned? | Positive evidence (AMBER), not conclusive (GREEN requires runtime validation) |
+| Combined persisted + runtime results | Are persisted and runtime checks both clean? | AMBER/RED depending on blockers or incomplete runtime checks |
 
 ---
 
