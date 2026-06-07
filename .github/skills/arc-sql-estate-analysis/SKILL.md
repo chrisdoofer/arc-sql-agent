@@ -205,6 +205,35 @@ Use this skill when the user asks to:
    - claim "no Enterprise features in use" without DMV evidence
    - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
+10. Execution reliability considerations:
+
+- You MUST consider execution reliability when using Arc Run Command or equivalent execution methods.
+
+- Execution sequencing:
+  - Prefer sequential execution per machine.
+  - Avoid creating multiple Run Command executions concurrently on the same machine, as this may result in execution conflicts (for example HCRP500 errors).
+
+- Execution environment variability:
+  - Be aware that execution environments may differ by host version.
+  - Older SQL Server hosts may use earlier versions of the SqlServer PowerShell module.
+  - Adapt command parameters accordingly (for example, some environments may not support -TrustServerCertificate).
+
+- Script execution approach:
+  - Prefer simple, single-command execution patterns.
+  - Avoid multi-line script constructs where transmission or parsing reliability is uncertain.
+
+- Output interpretation:
+  - If execution returns empty output:
+    - distinguish between:
+      - a valid "no rows returned" DMV result
+      - execution failure or output capture issues
+  - Only treat empty DMV results as valid evidence when:
+    - executionStatus indicates success, and
+    - no errorMessage is present
+
+- You MUST use executionStatus and errorMessage fields to disambiguate successful execution from failed or incomplete execution.
+``
+
 
 ## Phase 5 - Analyse estate
 
