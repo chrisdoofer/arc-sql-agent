@@ -81,6 +81,35 @@
   - Expected long-term benefit:
   - Confidence:
 
+# Enterprise downgrade audit
+
+- Instances / databases audited:
+- Audit method: Arc Run Command executing `sys.dm_db_persisted_sku_features`
+
+## Persisted feature findings
+
+| Instance | Database | Feature name | Feature ID | Finding |
+|----------|----------|--------------|------------|---------|
+| | | | | No persisted Enterprise features detected / Feature detected — see interpretation |
+
+## Target edition interpretation (SQL Server 2022 Standard)
+
+- Feature(s) found and Standard edition support:
+  - Feature name: [feature]  |  Supported in Standard: Yes / No / Verify required
+- Interpretation notes (cite the SQL Server 2022 edition comparison matrix; use "requires verification" where uncertain):
+
+## Remaining human validation required
+
+- Items that must be confirmed before actioning a downgrade:
+  - Item 1:
+  - Item 2:
+
+## Downgrade confidence
+
+- Per-instance or per-database confidence level (High / Medium / Low):
+  - Instance / Database: [name]  |  Confidence: [level]  |  Rationale:
+- Overall downgrade recommendation: [Conditional — confirm items above before proceeding / Not recommended — persisted features present / Insufficient data — audit could not be executed]
+
 # Azure target recommendations
 
 - Candidate workloads for Azure SQL Managed Instance:

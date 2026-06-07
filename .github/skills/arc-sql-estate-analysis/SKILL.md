@@ -275,6 +275,16 @@ Use this skill when the user asks to:
   - Medium = reasonable inference with some gaps
   - Low = limited data or assumptions required
  
+## Enterprise downgrade audit guardrails
+
+- Never recommend an Enterprise → Standard downgrade based solely on inventory heuristics when audit data is absent.
+- Treat `sys.dm_db_persisted_sku_features` as an important input, not the sole decision gate.
+- If the DMV returns rows, surface feature names clearly and treat them as potential blockers until each has been assessed against the SQL Server 2022 Standard edition support matrix.
+- If the DMV returns no rows, report this as positive evidence; do not claim downgrade is safe without additional human confirmation.
+- If the Arc Run Command audit could not be executed for an instance, do not issue a downgrade recommendation for that instance; surface the gap under Data gaps / follow-up questions.
+- Preserve cautious wording ("may be safe to downgrade pending confirmation", "audit evidence supports further investigation") wherever feature interpretation is uncertain.
+- Do not over-claim downgrade suitability; keep wording customer-safe and defensible.
+
 ## Tenant and scope guardrails
 
 - Never assume that a tenant or subscription filter has been applied correctly just because it was passed to a tool.
@@ -317,6 +327,7 @@ Always produce the sections below in order:
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
 3. Key optimisation opportunities
-4. Azure target recommendations
-5. Risks and blockers
-6. Data gaps / follow-up questions
+4. Enterprise downgrade audit
+5. Azure target recommendations
+6. Risks and blockers
+7. Data gaps / follow-up questions
