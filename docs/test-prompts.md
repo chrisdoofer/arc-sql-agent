@@ -122,34 +122,30 @@ Analyse this Arc-enabled SQL estate where:
 - Use Unknown or Mixed where evidence is incomplete or inconsistent
 - Use cautious wording such as "appears" or "not confirmed"
 
-## Test 11 – Enterprise downgrade audit
+## Test 11 – Enterprise downgrade DMV execution outcomes
 
-Assess an Arc-enabled SQL estate that includes Enterprise edition instances.
+Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunities.
 
 ✅ Expected behaviour:
-
-1. Audit execution
-   - Attempt to run `sys.dm_db_persisted_sku_features` via Arc Run Command against each relevant user database on Enterprise edition instances
-   - Record results per database; record any execution failure (connectivity, permission) with the failure reason
-
-2. Output with persisted features detected
-   - If the DMV returns one or more rows, surface each `feature_name` value clearly
-   - Treat each feature as a potential downgrade blocker pending interpretation against SQL Server 2022 Standard
-   - Do not recommend a downgrade for that database until each feature has been assessed
-   - Set downgrade confidence to Low for that instance / database
-
-3. Output with clean DMV result (no rows)
-   - If the DMV returns no rows, record this as positive evidence
-   - Do not claim the downgrade is safe without additional human confirmation
-   - Set downgrade confidence to High only when no other Enterprise-specific signals are present; Medium when coverage is incomplete
-
-4. Output when audit cannot be executed
-   - Do not issue a downgrade recommendation based on inventory heuristics alone
-   - Record the failure reason in the Enterprise downgrade audit section
-   - Surface the gap under Data gaps / follow-up questions
-   - Set downgrade confidence to Low
-
-5. Output structure
-   - Include a dedicated "Enterprise downgrade audit" section (after Key optimisation opportunities, before Azure target recommendations)
-   - The section must clearly separate: persisted feature findings, target edition interpretation, and remaining human validation required
-   - Use cautious, customer-safe wording; do not over-claim downgrade suitability
+- Execute `sys.dm_db_persisted_sku_features` against relevant user databases on validated Arc-enabled SQL instances using Arc Run Command (or equivalent approved execution path)
+- Clearly separate persisted feature validation from runtime / operational feature usage validation
+- Return structured per-database audit records containing:
+  - `machineName`
+  - `instanceName`
+  - `databaseName`
+  - `featureName`
+  - `executionStatus`
+  - `errorMessage`
+- Distinguish clearly between:
+  - successful execution with returned feature rows
+  - successful execution with no persisted features (`featureName = null`, `executionStatus = Succeeded`)
+  - failed execution (`executionStatus = Failed` with captured error)
+- Include a structured runtime validation checklist covering:
+  - index operations
+  - HA / DR configuration
+  - partitioning operations
+  - Resource Governor
+  - compression usage for performance-critical workloads
+- For each runtime checklist item, explain why it matters and how to validate it
+- Do not present the downgrade as fully safe unless runtime validation is also completed
+- Keep downgrade confidence Low when execution fails or cannot be completed
