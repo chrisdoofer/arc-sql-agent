@@ -106,16 +106,16 @@
 
 - GREEN:
   - No persisted features detected
-  - No runtime blockers identified
+  - Runtime validation completed with no blockers identified
   - Safe to proceed
 
 - AMBER:
   - No persisted features detected
-  - Runtime validation outstanding
+  - Runtime validation not yet completed or status unknown
   - Proceed after validation
 
 - RED:
-  - Persisted features detected OR audit failed
+  - Persisted features detected OR audit failed OR confirmed runtime blockers
   - Do not proceed without remediation
 
 - Current status:
