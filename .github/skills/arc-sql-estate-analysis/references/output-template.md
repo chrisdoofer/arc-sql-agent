@@ -3,7 +3,7 @@
 - Summary point 1
 - Summary point 2
 - Summary point 3
-- Summary point 4
+- Summary point 4 (include Enterprise → Standard downgrade readiness classification if applicable: GREEN / AMBER / RED)
 - Summary point 5
 
 
@@ -26,6 +26,7 @@
 # Key optimisation opportunities
 
 - Opportunity 1:
+  - Downgrade readiness: [GREEN / AMBER / RED]
   - Persisted feature findings:
   - Target edition support interpretation:
   - Runtime validation checklist:
