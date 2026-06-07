@@ -1,23 +1,79 @@
-# Arc SQL Agent Starter
+# Arc SQL Estate Analyser
 
-Starter repo for a portable GitHub Copilot skill and a thin custom agent to analyse an Arc-enabled SQL Server estate and recommend Azure optimisation paths.
+A GitHub Copilot skill and custom agent that performs live assessment of Arc-enabled SQL Server estates and produces structured optimisation and migration recommendations for Azure.
 
-## Included
+## What it does
 
-- `.github/skills/arc-sql-estate-analysis/SKILL.md`
-- `.github/skills/arc-sql-estate-analysis/references/output-template.md`
-- `.github/agents/sql-estate-architect.agent.md`
-- `docs/example-prompts.md`
+- Connects to an Azure tenant and discovers Arc-enabled SQL Server instances, databases, and host machines
+- Validates tenant/subscription scope before analysis (rejects cross-tenant data leaks)
+- Executes Enterprise → Standard edition downgrade audits via Arc Run Command
+- Produces a customer-ready report covering estate summary, optimisation opportunities, Azure target recommendations, risks, and data gaps
+- Applies evidence-based confidence levels (High / Medium / Low) and downgrade readiness classifications (GREEN / AMBER / RED)
 
-## Suggested next steps
+## Quick Start
 
-1. Initialise a git repo here if you want version control:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial Arc SQL agent starter"
-   ```
-2. Open the folder in your editor / GitHub Copilot CLI workspace.
-3. Test the skill with a prompt such as:
-   - `Analyse this Arc-enabled SQL estate and recommend Azure optimisation paths.`
-4. Refine the output sections and triggers based on your real estate data.
+```bash
+# 1. Authenticate to your Azure tenant
+az login --tenant <your-tenant-id>
+
+# 2. Open the repository in GitHub Copilot CLI
+cd arc-sql-estate-analysis
+
+# 3. Run an analysis
+#    Prompt: "Connect to tenant <tenant-id> and analyse Arc-enabled SQL estate"
+```
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Solution Architecture](docs/architecture.md) | Component roles, data flow, design principles |
+| [Prerequisites](docs/prerequisites.md) | Required software, RBAC permissions, Arc requirements |
+| [Workflow Flowchart](docs/workflow-flowchart.md) | Step-by-step execution flow with decision points |
+| [Data Transparency](docs/data-transparency.md) | Exactly what data is collected, where it goes, and what is NOT accessed |
+| [Example Prompts](docs/example-prompts.md) | Sample prompts for different analysis scenarios |
+
+## Key Technologies
+
+| Technology | Role |
+|-----------|------|
+| GitHub Copilot CLI | Agent runtime and orchestration |
+| Azure Resource Graph | Primary data source for inventory queries |
+| Azure CLI | Fallback query execution and scope validation |
+| Arc Run Command | Remote T-SQL execution for Enterprise downgrade audit |
+| Azure Arc-enabled SQL Server | Source estate being analysed |
+
+## Repository Structure
+
+```
+.github/
+  agents/
+    sql-estate-architect.agent.md    ← Agent persona (delegates to skill)
+  skills/
+    arc-sql-estate-analysis/
+      SKILL.md                       ← Core analysis workflow and guardrails
+      references/
+        output-template.md           ← Canonical report structure
+docs/
+  architecture.md                    ← Solution architecture
+  prerequisites.md                   ← Setup and RBAC requirements
+  workflow-flowchart.md              ← Execution flowchart
+  data-transparency.md              ← Data collection transparency
+  example-prompts.md                 ← Example usage prompts
+  test-prompts.md                    ← Test scenarios
+README.md                            ← This file
+```
+
+## Security & Data Handling
+
+- **Read-only** — All inventory data is collected via read-only Resource Graph queries
+- **Minimal execution** — Only one T-SQL DMV query is run remotely (`sys.dm_db_persisted_sku_features`), which is metadata-only with zero performance impact
+- **No user data accessed** — No table data, credentials, query plans, or application code is read
+- **Scope-validated** — Analysis refuses to proceed if tenant/subscription scope cannot be verified
+- **No data leaves tenant** — Everything runs within the Azure control plane; reports are generated locally
+
+See [Data Transparency](docs/data-transparency.md) for full details.
+
+## Licence
+
+MIT
