@@ -195,6 +195,7 @@ Use this skill when the user asks to:
        SELECT ag.name AS ag_name, ar.replica_server_name, ar.availability_mode_desc
        FROM sys.availability_groups ag
        JOIN sys.availability_replicas ar ON ag.group_id = ar.group_id;
+       - interpret returned rows against Basic AG limits on Standard edition (for example single database per AG, no readable secondary scale-out)
      - Resource Governor:
        SELECT is_enabled FROM sys.resource_governor_configuration;
      - Partitioned tables:
@@ -212,8 +213,8 @@ Use this skill when the user asks to:
    - adapt `Invoke-Sqlcmd` parameters to host module capability:
      - older environments may not support `-TrustServerCertificate`
      - detect support by checking `Get-Command Invoke-Sqlcmd` parameter metadata for `TrustServerCertificate` before command construction
-     - if parameter metadata is unavailable, run without `-TrustServerCertificate` and retry with it only when TLS validation errors indicate it is required/supported
      - include `-TrustServerCertificate` only when supported/required by the host
+     - if host policy requires trusted certificates and the parameter is unavailable, surface this as an execution prerequisite gap (module upgrade/certificate remediation) instead of forcing retries
    - capture runtime results in a structured per-check output record using this minimum schema:
      - machineName
      - instanceName

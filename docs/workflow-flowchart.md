@@ -99,7 +99,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
          ▼                      │
 ┌──────────────────────────────────────┐
 │ FOR EACH HOST (sequential):           │
-│ - Per-database DMV checks             │
+│ - Per-database persisted DMV check    │
 │ - Per-instance runtime checks         │
 │                                      │
 │  ┌────────────────────────────────┐  │

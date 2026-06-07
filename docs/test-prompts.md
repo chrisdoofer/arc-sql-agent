@@ -155,6 +155,7 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
 - Interpret compression support against target downgrade version:
   - SQL Server 2022 Standard is the default downgrade target and supports compression
   - If a pre-2016 SP1 Standard target is chosen, treat compression as a potential blocker
+  - For pre-2016 SP1 targets, validate compression usage explicitly (for example, check `sys.partitions.data_compression_desc` for PAGE/ROW compression)
 - Do not present the downgrade as fully safe unless runtime validation is also completed
 - Keep downgrade confidence Low when execution fails or cannot be completed
 - Include downgrade readiness classification (GREEN / AMBER / RED) in:
