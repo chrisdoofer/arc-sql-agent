@@ -211,7 +211,8 @@ Use this skill when the user asks to:
        WHERE js.command LIKE '%ONLINE%=%ON%';
    - adapt `Invoke-Sqlcmd` parameters to host module capability:
      - older environments may not support `-TrustServerCertificate`
-     - detect support by checking available `Invoke-Sqlcmd` parameters (or SqlServer module version) before command construction
+     - detect support by checking `Get-Command Invoke-Sqlcmd` parameter metadata for `TrustServerCertificate` before command construction
+     - if parameter metadata is unavailable, run without `-TrustServerCertificate` and retry with it only when TLS validation errors indicate it is required/supported
      - include `-TrustServerCertificate` only when supported/required by the host
    - capture runtime results in a structured per-check output record using this minimum schema:
      - machineName
