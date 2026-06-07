@@ -184,30 +184,72 @@ Use this skill when the user asks to:
 7. The downgrade recommendation MUST distinguish between:
    - persisted feature evidence
    - target edition support interpretation
-   - runtime / operational feature usage that still requires validation
-   - remaining human validation required
+   - runtime / operational feature usage results
+   - remaining business-impact validation required
 
-8. You MUST add a separate runtime feature validation stage alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
+8. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
    - treat the DMV audit as persisted feature validation only
-   - explicitly state that runtime / operational feature usage remains a separate validation step
-   - include a structured runtime validation checklist covering at least:
-     - index operations (for example online index rebuild / create activity)
-     - high availability / disaster recovery configuration (for example Always On AG versus Basic AG)
-     - partitioning operations (for example partition switching or sliding-window maintenance)
-     - workload governance (Resource Governor)
-     - compression usage for performance-critical workloads
-   - for each runtime validation item, include:
-     - why it matters to an Enterprise → Standard downgrade decision
-     - concise guidance on how to validate it
-   - if runtime validation has not been completed, state clearly that the downgrade is not fully validated for safe execution
+   - execute runtime checks sequentially per machine (avoid concurrent Run Command conflicts on the same host)
+   - execute the following runtime queries on each relevant instance:
+     - Always On availability groups:
+       SELECT ag.name AS ag_name, ar.replica_server_name, ar.availability_mode_desc
+       FROM sys.availability_groups ag
+       JOIN sys.availability_replicas ar ON ag.group_id = ar.group_id;
+       - interpret returned rows against Basic AG limits on Standard edition (for example single database per AG, no readable secondary scale-out)
+     - Resource Governor:
+       SELECT is_enabled FROM sys.resource_governor_configuration;
+     - Partitioned tables:
+       SELECT OBJECT_SCHEMA_NAME(p.object_id) AS schema_name,
+              OBJECT_NAME(p.object_id) AS table_name,
+              COUNT(DISTINCT p.partition_number) AS partition_count
+       FROM sys.partitions p
+       WHERE p.partition_number > 1 AND p.index_id IN (0,1)
+       GROUP BY p.object_id;
+     - SQL Agent job steps using online index operations:
+       SELECT j.name AS job_name, js.command
+       FROM msdb.dbo.sysjobs j
+       JOIN msdb.dbo.sysjobsteps js ON j.job_id = js.job_id
+       WHERE js.command LIKE '%ONLINE%=%ON%';
+   - adapt `Invoke-Sqlcmd` parameters to host module capability:
+     - older environments may not support `-TrustServerCertificate`
+     - detect support by checking `Get-Command Invoke-Sqlcmd` parameter metadata for `TrustServerCertificate` before command construction
+     - include `-TrustServerCertificate` only when supported/required by the host
+     - if host policy requires trusted certificates and the parameter is unavailable, surface this as an execution prerequisite gap (module upgrade/certificate remediation) instead of forcing retries
+   - capture runtime results in a structured per-check output record using this minimum schema:
+     - machineName
+     - instanceName
+     - checkName
+     - result
+     - executionStatus
+     - errorMessage
+   - classify runtime checks as follows:
+     - successful execution with blockers/evidence returned:
+       - set `executionStatus = Succeeded`
+       - set `result` to concise blocker details
+     - successful execution with no blockers:
+       - set `executionStatus = Succeeded`
+       - set `result = null` or `No blockers detected`
+       - valid no-blocker examples include:
+         - Always On AG query returns zero rows
+         - Resource Governor query returns `is_enabled = 0`
+         - partitioned table query returns zero rows
+         - online index operation query returns zero rows
+     - execution failure:
+       - set `executionStatus = Failed`
+       - set `result = null`
+       - capture error in `errorMessage`
+   - include compression interpretation in downgrade analysis:
+     - SQL Server 2022 Standard supports compression
+     - for older downgrade targets, validate compression support explicitly against target version
 
 9. You MUST classify each Enterprise → Standard downgrade readiness using the following classification model:
    - GREEN = ready to downgrade:
      - DMV audit executed successfully with no persisted features detected
      - Runtime validation completed with no blockers identified
+     - technical checks are complete; only business scheduling/impact approvals remain
    - AMBER = requires runtime validation:
      - DMV audit executed successfully with no persisted features detected
-     - Runtime validation not yet completed or status unknown
+     - Runtime validation incomplete, failed, or status unknown for one or more required checks
    - RED = blocked by persisted or confirmed features:
      - Persisted features present in DMV audit (successful execution with features returned), OR
      - DMV audit execution failed or could not be completed, OR
@@ -266,9 +308,9 @@ Use this skill when the user asks to:
    - Treat such signals as indicative only and require DMV confirmation for downgrade decisions.
    - For Enterprise → Standard downgrade candidates, present:
      - persisted feature findings from `sys.dm_db_persisted_sku_features`
-     - target edition support interpretation
-     - a separate runtime validation checklist with why-it-matters and how-to-validate guidance
-   - Do not describe an Enterprise → Standard downgrade as fully safe unless the runtime checklist has been validated
+     - runtime validation execution results from Arc Run Command checks
+     - target edition support interpretation (including compression support for selected target version)
+   - GREEN readiness can be used only when persisted and runtime technical checks are completed and clean
 
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
@@ -326,7 +368,7 @@ Use this skill when the user asks to:
 - Never recommend an Enterprise → Standard downgrade based solely on inventory heuristics when audit data is absent.
 - Treat `sys.dm_db_persisted_sku_features` as an important input, not the sole decision gate.
 - If the DMV returns rows, surface feature names clearly and treat them as potential blockers until each has been assessed against the SQL Server 2022 Standard edition support matrix.
-- If the DMV returns no rows, report this as positive evidence; do not claim downgrade is safe without additional human confirmation.
+- If the DMV returns no rows, report this as positive evidence and require runtime validation execution results before declaring technical downgrade readiness.
 - If the Arc Run Command audit could not be executed for an instance, do not issue a downgrade recommendation for that instance; surface the gap under Data gaps / follow-up questions.
 - Preserve cautious wording ("may be safe to downgrade pending confirmation", "audit evidence supports further investigation") wherever feature interpretation is uncertain.
 - Do not over-claim downgrade suitability; keep wording customer-safe and defensible.

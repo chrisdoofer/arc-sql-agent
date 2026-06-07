@@ -52,7 +52,7 @@ It connects directly to an Azure tenant, queries live infrastructure data via Az
 | **output-template.md** (reference) | Canonical output structure. All reports must follow this section order. |
 | **Azure Resource Graph** | Primary data source for inventory (SQL instances, databases, machines). Queried via MCP tools and Azure CLI. |
 | **Azure CLI** | Fallback data source when MCP scope validation fails. Also used for Arc Run Command execution. |
-| **Arc Run Command** | Remote execution mechanism for running T-SQL diagnostic queries (e.g., `sys.dm_db_persisted_sku_features`) on Arc-enabled SQL hosts. |
+| **Arc Run Command** | Remote execution mechanism for running T-SQL diagnostic queries (`sys.dm_db_persisted_sku_features` plus runtime validation queries) on Arc-enabled SQL hosts. |
 
 ---
 
@@ -85,8 +85,8 @@ User prompt (tenant ID)
           ▼
 ┌─────────────────────┐
 │ Phase 4: Enterprise │──▶ Identify Enterprise instances with user databases
-│ Downgrade Audit     │──▶ Execute DMV via Arc Run Command per database
-│                     │──▶ Capture structured results (pass/fail/features)
+│ Downgrade Audit     │──▶ Execute DMV + runtime checks via Arc Run Command
+│                     │──▶ Capture structured persisted/runtime results
 └─────────┬───────────┘
           │
           ▼

@@ -29,9 +29,8 @@
 - Opportunity 1:
   - Downgrade readiness: [GREEN / AMBER / RED]
   - Persisted feature findings:
+  - Runtime validation results summary:
   - Target edition support interpretation:
-  - Runtime validation checklist:
-    - See "Enterprise downgrade audit" section for detailed validation steps
   - Downgrade safety status:
 
 - Opportunity 2:
@@ -43,7 +42,7 @@
 
 - Instances / databases audited:
 - Audit method:
-  Arc Run Command executing `sys.dm_db_persisted_sku_features`
+  Arc Run Command executing `sys.dm_db_persisted_sku_features` and required runtime validation queries
 
 ---
 
@@ -64,7 +63,21 @@
 
 ---
 
-## Target edition support interpretation (SQL Server 2022 Standard)
+## Runtime validation results (Arc Run Command)
+
+| machineName | instanceName | checkName | result | executionStatus | errorMessage |
+|-------------|--------------|-----------|--------|-----------------|--------------|
+|             |              |           |        |                 |              |
+
+- Required checks:
+  - alwaysOnAvailabilityGroups
+  - resourceGovernor
+  - partitionedTables
+  - onlineIndexOperations
+
+---
+
+## Target edition support interpretation (SQL Server 2022 Standard default)
 
 - Interpret persisted feature findings against SQL Server 2022 Standard edition support:
 
@@ -79,27 +92,20 @@
 
 ---
 
-## Runtime feature validation checklist (required before downgrade)
+## Runtime validation interpretation
 
-- Index operations (for example online index rebuild / create activity):
-  - Why it matters:
-  - How to validate:
-
-- HA / DR configuration (for example Always On AG versus Basic AG):
-  - Why it matters:
-  - How to validate:
-
-- Partitioning operations (for example partition switching / sliding window):
-  - Why it matters:
-  - How to validate:
-
-- Workload governance (Resource Governor):
-  - Why it matters:
-  - How to validate:
-
-- Compression usage for performance-critical workloads:
-  - Why it matters:
-  - How to validate:
+- Always On availability groups:
+  - Basic AG-only compatible or blocker identified:
+- Resource Governor:
+  - Enabled/disabled assessment:
+- Partitioning:
+  - Support status for chosen target version:
+- Online index operations:
+  - Runtime maintenance impact:
+- Compression interpretation:
+  - SQL Server 2022 Standard supports compression
+  - SQL Server Standard gained compression support in SQL Server 2016 SP1
+  - If targeting pre-2016 SP1 Standard, treat compression as a potential blocker and validate explicitly
 
 ---
 
@@ -108,11 +114,11 @@
 - GREEN:
   - DMV audit executed successfully with no persisted features detected
   - Runtime validation completed with no blockers identified
-  - Safe to proceed
+  - Technically ready to proceed (subject to business approval/change window)
 
 - AMBER:
   - DMV audit executed successfully with no persisted features detected
-  - Runtime validation not yet completed or status unknown
+  - Runtime validation incomplete, failed, or status unknown
   - Proceed after validation
 
 - RED:
@@ -132,9 +138,10 @@
     Rationale:
 
 - Overall recommendation:
-  - Conditional — confirm runtime validation before proceeding  
-  - Not recommended — persisted blockers present  
-  - Insufficient data — audit execution incomplete  
+  - Recommended — persisted and runtime technical checks are clean
+  - Conditional — runtime validation incomplete or pending business decision
+  - Not recommended — persisted blockers present
+  - Insufficient data — audit execution incomplete
 
 ---
 
@@ -145,7 +152,7 @@
 
 - Decision rationale:
   - Based on persisted feature audit
-  - Runtime validation status
+  - Runtime validation execution status and blockers
   - Remaining risks and unknowns
 
 

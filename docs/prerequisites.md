@@ -44,7 +44,7 @@ If the operator has access to multiple tenants, the correct tenant **must** be s
 | Resource Group(s) with Arc machines | `Microsoft.HybridCompute/machines/runcommands/read` | Read Run Command results |
 | Resource Group(s) with Arc machines | `Microsoft.HybridCompute/machines/runcommands/delete` | Clean up Run Commands after execution |
 
-> **Note:** The Enterprise downgrade audit executes `SELECT feature_name FROM sys.dm_db_persisted_sku_features` on each user database via Arc Run Command. This is a read-only DMV query with no side effects on the target SQL Server.
+> **Note:** The Enterprise downgrade audit executes read-only DMV/metadata queries via Arc Run Command, including `sys.dm_db_persisted_sku_features` and runtime validation queries (Always On AG, Resource Governor, partitioning, and `ONLINE=ON` SQL Agent job checks). These queries have no side effects on the target SQL Server.
 
 ### Recommended built-in roles
 

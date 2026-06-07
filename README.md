@@ -67,7 +67,7 @@ README.md                            ← This file
 ## Security & Data Handling
 
 - **Read-only** — All inventory data is collected via read-only Resource Graph queries
-- **Minimal execution** — Only one T-SQL DMV query is run remotely (`sys.dm_db_persisted_sku_features`), which is metadata-only with zero performance impact
+- **Minimal execution** — A small set of read-only T-SQL metadata queries are run remotely for downgrade validation (`sys.dm_db_persisted_sku_features` plus runtime checks for AG, Resource Governor, partitioning, and `ONLINE=ON` job usage)
 - **No user data accessed** — No table data, credentials, query plans, or application code is read
 - **Scope-validated** — Analysis refuses to proceed if tenant/subscription scope cannot be verified
 - **No data leaves tenant** — Everything runs within the Azure control plane; reports are generated locally
