@@ -95,7 +95,7 @@ Use this skill when the user asks to:
 ## Phase 3 - Collect licensing declarations
 
 1. After tenant / subscription scope has been validated, but before licensing recommendations are formed, prompt the user via `ask_user`:
-   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licences in this estate?"
+   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licenses in this estate?"
    - Choices: `Yes` / `No` / `Unsure`
 
 2. If the user selects `Yes`, immediately follow up via `ask_user` with:
