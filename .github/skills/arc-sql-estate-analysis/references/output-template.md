@@ -233,7 +233,7 @@
 
 # Data gaps / follow-up questions
 
-- Confirm whether any SQL Server licenses in this estate have active Software Assurance coverage if AHB eligibility is still not confirmed.
+- Confirm whether any SQL Server licences in this estate have active Software Assurance coverage if AHB eligibility is still not confirmed.
 
 - Missing field or evidence 1:
 - Missing field or evidence 2:

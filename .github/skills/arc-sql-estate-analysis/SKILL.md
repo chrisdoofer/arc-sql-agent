@@ -95,7 +95,7 @@ Use this skill when the user asks to:
 ## Phase 3 - Collect licensing declarations
 
 1. After tenant / subscription scope has been validated, but before licensing recommendations are formed, prompt the user via `ask_user`:
-   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licenses in this estate?"
+   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licences in this estate?"
    - Choices: `Yes` / `No` / `Unsure`
 
 2. If the user selects `Yes`, immediately follow up via `ask_user` with:
@@ -114,7 +114,7 @@ Use this skill when the user asks to:
    - Populate the `Software Assurance status` field in Estate summary from the declared answer
    - Use declared Standard and Enterprise SA-covered core counts to assess Azure Hybrid Benefit eligibility
    - Factor declared SA-covered cores into TCO comparisons for Azure target recommendations
-   - If Enterprise SA-covered cores are declared but the recommendation favours Standard edition, highlight that SA entitlements may need reassignment or repurposing
+   - If Enterprise SA-covered cores are declared but the recommendation favours Standard edition, highlight in `Key optimisation opportunities` and `Azure target recommendations` that SA entitlements may need reassignment or repurposing
 
 ## Phase 4 - Acquire estate data
 
@@ -346,7 +346,8 @@ Use this skill when the user asks to:
    - Report billing mode as Paid / PAYG / Free / Unknown based on explicit signals only
    - Do not infer Server/CAL from Paid billing or Software Assurance signals
    - Use declared Standard and Enterprise SA-covered core counts to determine whether Azure Hybrid Benefit applies fully, partially, or cannot be confirmed
-   - If declared SA-covered cores are lower than the target Azure core requirement, state that only the covered portion appears eligible for Azure Hybrid Benefit and treat the remainder as licence-included / PAYG exposure unless other explicit evidence exists
+   - If declared SA-covered cores are lower than the target Azure core requirement, quantify the covered and uncovered core split and surface it in Estate summary and Azure target recommendations using the `Confirmed eligible cores` and `Unconfirmed or uncovered cores` fields
+   - Treat any uncovered portion as licence-included / PAYG exposure unless other explicit evidence exists
    - If multiple signals are inconsistent or incomplete, mark licensing as Unknown or Mixed, use cautious wording (for example "appears", "not confirmed"), and surface this explicitly as a data gap
 
 5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
