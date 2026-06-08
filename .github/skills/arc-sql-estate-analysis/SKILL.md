@@ -156,6 +156,13 @@ Use this skill when the user asks to:
      - use `skuRecommendationResults` and `serverAssessments` from the ARM properties as the data source
      - this data is programmatically accessible and should be used for MI/VM/DB readiness and SKU recommendations
    - There is currently no documented public API for reading assessment telemetry data directly — the portal uses an internal telemetry endpoint
+   - If a user asks whether `getTelemetry` can be called programmatically:
+     - you may attempt an ARM action probe (for example via `az rest --method POST`) only after tenant/subscription scope validation
+     - treat a successful payload response as exceptional and verify response scope before using it
+     - if the action is unavailable, unauthorized, undocumented, or returns no usable schema, treat telemetry as not publicly accessible and continue with ARM-synced guidance
+   - There is currently no documented public API for triggering the portal "Run Assessment" action directly
+     - do not claim that assessment sync can be forced via public API automation
+     - recommend the user trigger "Run Assessment" in the Azure portal or wait for scheduled sync
    - Surface the sync-pending state in the output under "Data gaps / follow-up questions" with guidance to check the portal, rather than claiming the assessment does not exist
 
 6. If uploaded data is used instead:
@@ -627,6 +634,12 @@ Use this skill when the user asks to:
   - "Assessment synced but incomplete" (assessmentUploadTime set, but fields missing) — partial data, report what is available
 
 - Never infer MI/VM readiness status from the absence of synced ARM data alone. If ARM data is unavailable, state the limitation and direct the user to the portal assessment blade.
+
+- If a `getTelemetry` ARM action probe is attempted and fails due to authorization, API exposure, schema, or endpoint availability:
+  - report the probe result as evidence that telemetry is not publicly consumable in the current context
+  - continue analysis using ARM-synced fields and sync-pending guidance only
+
+- Do not claim that "Run Assessment" can be automated through a documented public API unless explicit public documentation is provided in the current session evidence.
 
 # Output requirements
 

@@ -181,3 +181,17 @@ Assess this Arc-enabled SQL estate and provide Azure licensing guidance.
 - Use declared core counts to assess Azure Hybrid Benefit eligibility and TCO guidance
 - If the answer is `No` or `Unsure`, continue analysis but state that AHB eligibility is not confirmed
 - Add missing Software Assurance confirmation to `Data gaps / follow-up questions`
+
+## Test 13 – Assessment telemetry sync-pending handling
+
+Assess an Arc-enabled SQL estate where:
+- Instance A has `assessment.enabled = true`, `assessmentUploadTime = null`, and `skuRecommendationResults = null`
+- Instance B has `assessment.enabled = true`, `assessmentUploadTime` populated, and non-null `skuRecommendationResults`
+- The Azure portal shows assessment details for both instances
+
+✅ Expected behaviour:
+- Do not classify Instance A as "no assessment exists"
+- Classify Instance A as sync-pending and state that assessment data may exist in the portal telemetry plane
+- Use ARM `skuRecommendationResults` / `serverAssessments` for Instance B because sync is complete
+- If asked about programmatic telemetry retrieval, state that no documented public API is currently available unless validated evidence is returned in-session
+- Recommend portal "Run Assessment" or waiting for scheduled sync for sync-pending instances
