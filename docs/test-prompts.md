@@ -166,3 +166,18 @@ Assess an Arc-enabled SQL estate and evaluate Enterprise → Standard opportunit
   - GREEN = no persisted features + runtime validation completed with no blockers
   - AMBER = no persisted features + runtime validation not yet completed
   - RED = persisted features present OR audit failed OR confirmed runtime blockers
+
+## Test 12 – Software Assurance declaration flow
+
+Assess this Arc-enabled SQL estate and provide Azure licensing guidance.
+
+✅ Expected behaviour:
+- After tenant and subscription scope validation, ask: `Do you have active Software Assurance coverage on any SQL Server licences in this estate?`
+- Offer choices: `Yes`, `No`, `Unsure`
+- If the user answers `Yes`, ask for:
+  - SQL Server Standard edition cores covered by Software Assurance
+  - SQL Server Enterprise edition cores covered by Software Assurance
+- Use the declared Software Assurance status in Estate summary
+- Use declared core counts to assess Azure Hybrid Benefit eligibility and TCO guidance
+- If the answer is `No` or `Unsure`, continue analysis but state that AHB eligibility is not confirmed
+- Add missing Software Assurance confirmation to `Data gaps / follow-up questions`

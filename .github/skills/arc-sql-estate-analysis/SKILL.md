@@ -92,7 +92,31 @@ Use this skill when the user asks to:
      - JSON export
      - CSV export
 
-## Phase 3 - Acquire estate data
+## Phase 3 - Collect licensing declarations
+
+1. After tenant / subscription scope has been validated, but before licensing recommendations are formed, prompt the user via `ask_user`:
+   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licences in this estate?"
+   - Choices: `Yes` / `No` / `Unsure`
+
+2. If the user selects `Yes`, immediately follow up via `ask_user` with:
+   - Prompt 2: "How many SQL Server Standard edition cores are covered by Software Assurance?"
+   - Prompt 3: "How many SQL Server Enterprise edition cores are covered by Software Assurance?"
+   - Accept freeform numeric input for both prompts
+   - Store the declared values separately as Standard SA-covered cores and Enterprise SA-covered cores
+
+3. If the user selects `No` or `Unsure`:
+   - Record Software Assurance status as `Not confirmed` for `No`
+   - Record Software Assurance status as `Unknown` for `Unsure`
+   - Continue the analysis, but state that Azure Hybrid Benefit eligibility could not be confirmed
+   - Add the missing SA confirmation to `Data gaps / follow-up questions`
+
+4. Use the declared Software Assurance response during analysis:
+   - Populate the `Software Assurance status` field in Estate summary from the declared answer
+   - Use declared Standard and Enterprise SA-covered core counts to assess Azure Hybrid Benefit eligibility
+   - Factor declared SA-covered cores into TCO comparisons for Azure target recommendations
+   - If Enterprise SA-covered cores are declared but the recommendation favors Standard edition, highlight in `Key optimisation opportunities` and `Azure target recommendations` that SA entitlements may need reassignment or repurposing
+
+## Phase 4 - Acquire estate data
 
 1. When collecting live Azure data:
    - do not rely on a single successful query as authoritative
@@ -125,7 +149,7 @@ Use this skill when the user asks to:
    - clearly state any missing columns or unsupported inputs
 
 
-## Phase 4 - Enterprise downgrade audit
+## Phase 5 - Enterprise downgrade audit
 
 1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
 
@@ -294,7 +318,7 @@ Use this skill when the user asks to:
 ``
 
 
-## Phase 5 - Analyse estate
+## Phase 6 - Analyse estate
 
 1. Summarise the estate by host, instance, version, and edition where possible.
 
@@ -317,9 +341,15 @@ Use this skill when the user asks to:
    - Assess each dimension independently from source evidence
    - Report licensing model only when explicitly evidenced (for example: Server/CAL, Core, Unknown)
    - Do not assume Software Assurance status from licenseType alone
-   - Report Software Assurance as Enabled / Not enabled / Unknown based on explicit signals only
+   - Prefer the user's declared response from the licensing declaration phase for Software Assurance status over ambiguous Azure metadata
+   - Report Software Assurance as Enabled / Not confirmed / Unknown based on the declared response when available; otherwise use explicit source signals only
    - Report billing mode as Paid / PAYG / Free / Unknown based on explicit signals only
    - Do not infer Server/CAL from Paid billing or Software Assurance signals
+   - Use declared Standard and Enterprise SA-covered core counts to determine whether Azure Hybrid Benefit applies fully, partially, or cannot be confirmed
+   - If declared SA-covered cores are lower than the target Azure core requirement:
+     - quantify the covered and uncovered core split
+     - surface that split in Estate summary and Azure target recommendations using the `Confirmed eligible cores` and `Unconfirmed or uncovered cores` fields
+     - treat any uncovered portion as licence-included / PAYG exposure unless other explicit evidence exists
    - If multiple signals are inconsistent or incomplete, mark licensing as Unknown or Mixed, use cautious wording (for example "appears", "not confirmed"), and surface this explicitly as a data gap
 
 5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
@@ -335,6 +365,8 @@ Use this skill when the user asks to:
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
+   - explicitly state whether Azure Hybrid Benefit appears eligible based on the declared SA-covered cores
+   - reflect the declared SA position in TCO comparisons and PAYG versus licence-included guidance
    - When Azure SQL Managed Instance readiness metadata is available:
      - report the readiness state for each MI candidate
      - if a workload is marked Not Ready, retrieve the blocker details from the source data

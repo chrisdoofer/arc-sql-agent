@@ -17,8 +17,14 @@
 
 - Licensing position:
   - Licensing model (Server/CAL / Core / Unknown):
-  - Software Assurance status (Enabled / Not enabled / Unknown):
+  - Software Assurance status (Enabled / Not confirmed / Unknown):
+  - Declared SA-covered cores:
+    - Standard edition:
+    - Enterprise edition:
   - Billing mode (Paid / PAYG / Free / Unknown):
+  - Azure Hybrid Benefit position:
+    - Confirmed eligible cores:
+    - Unconfirmed or uncovered cores:
   - Evidence / notes (cite explicit source signals; use "not confirmed" or "mixed signals" if fields are ambiguous or conflicting):
 
 - Backup / monitoring / security posture:
@@ -31,6 +37,8 @@
   - Persisted feature findings:
   - Runtime validation results summary:
   - Target edition support interpretation:
+  - SA / AHB interpretation:
+  - TCO note:
   - Downgrade safety status:
 
 - Opportunity 2:
@@ -199,13 +207,19 @@
 
 - Candidate workloads for Azure SQL Managed Instance:
   - Readiness status:
+  - Licensing / AHB note:
+  - TCO note:
   - If Not Ready, blocker details:
   - Why it is blocked:
   - Remediation:
 
 - Candidate workloads for SQL Server on Azure Virtual Machines:
+  - Licensing / AHB note:
+  - TCO note:
 
 - Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
+  - Licensing / AHB note:
+  - TCO note:
 
 - Preferred target and rationale:
 
@@ -218,6 +232,8 @@
 
 
 # Data gaps / follow-up questions
+
+_If Software Assurance status is `Not confirmed` or `Unknown`, add a follow-up asking the user to confirm active Software Assurance coverage and covered Standard / Enterprise core counts._
 
 - Missing field or evidence 1:
 - Missing field or evidence 2:
