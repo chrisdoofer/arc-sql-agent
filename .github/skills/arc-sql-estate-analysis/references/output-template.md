@@ -17,7 +17,7 @@
 
 - Licensing position:
   - Licensing model (Server/CAL / Core / Unknown):
-  - Software Assurance status (Enabled / Not confirmed / Unknown):
+  - Software Assurance status (Enabled / Not confirmed [declared No] / Unknown [declared Unsure or no explicit evidence]):
   - Declared SA-covered cores:
     - Standard edition:
     - Enterprise edition:

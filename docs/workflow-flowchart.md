@@ -63,9 +63,10 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
        │               │         └─────────────────────┘
        ▼               ▼
 ┌──────────────────────────────────────┐
-│ 4. SA DECLARATION PROMPTS            │
-│    • Ask if active SQL Server SA     │
-│      coverage exists in the estate   │
+│ 4. SOFTWARE ASSURANCE PROMPTS        │
+│    • Ask if active SQL Server        │
+│      Software Assurance coverage     │
+│      exists in the estate            │
 │    • If Yes, collect Standard and    │
 │      Enterprise SA-covered cores     │
 │    • If No/Unsure, continue but mark │

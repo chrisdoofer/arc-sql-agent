@@ -341,7 +341,7 @@ Use this skill when the user asks to:
    - Assess each dimension independently from source evidence
    - Report licensing model only when explicitly evidenced (for example: Server/CAL, Core, Unknown)
    - Do not assume Software Assurance status from licenseType alone
-   - Prefer the user's declared Phase 3 response for Software Assurance status over ambiguous Azure metadata
+   - Prefer the user's declared response from the licensing declaration phase for Software Assurance status over ambiguous Azure metadata
    - Report Software Assurance as Enabled / Not confirmed / Unknown based on the declared response when available; otherwise use explicit source signals only
    - Report billing mode as Paid / PAYG / Free / Unknown based on explicit signals only
    - Do not infer Server/CAL from Paid billing or Software Assurance signals
