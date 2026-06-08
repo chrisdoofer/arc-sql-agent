@@ -144,7 +144,21 @@ Use this skill when the user asks to:
    - Arc-enabled host machines
    - any available assessment / readiness / backup / security metadata
 
-5. If uploaded data is used instead:
+5. Migration assessment data handling:
+   - Assessment results are stored in a **telemetry data plane** (accessed via the `getTelemetry` action), not directly in ARM resource properties
+   - The ARM property `properties.migration.assessment.skuRecommendationResults` is only populated after the Arc SQL extension syncs a summary to the resource — indicated by `assessmentUploadTime` being non-null
+   - When `assessment.enabled = true` but `assessmentUploadTime = null`:
+     - do NOT conclude that no assessment exists
+     - report this as: "Assessment collected but not yet synced to ARM — data may be available in the Azure portal"
+     - recommend the user trigger a fresh assessment via the portal ("Run Assessment" button) or wait for the next scheduled sync
+     - do NOT list this as a "no assessment data" gap — instead surface it as a sync-pending state
+   - When `assessmentUploadTime` is non-null:
+     - use `skuRecommendationResults` and `serverAssessments` from the ARM properties as the data source
+     - this data is programmatically accessible and should be used for MI/VM/DB readiness and SKU recommendations
+   - There is currently no documented public API for reading assessment telemetry data directly — the portal uses an internal telemetry endpoint
+   - Surface the sync-pending state in the output under "Data gaps / follow-up questions" with guidance to check the portal, rather than claiming the assessment does not exist
+
+6. If uploaded data is used instead:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
@@ -595,6 +609,24 @@ Use this skill when the user asks to:
 - Prefer validated, scope-aligned data over first-returned results.
 
 - Clearly communicate when fallback methods are used and which data source was ultimately trusted.
+
+## Migration assessment data guardrails
+
+- Do not conclude that no migration assessment exists based solely on `assessmentUploadTime = null` or `skuRecommendationResults = null` in ARM properties or Resource Graph.
+
+- Assessment data is stored in a telemetry data plane (not ARM properties). The ARM resource only contains a synced summary. The portal reads from both sources; programmatic access is limited to the synced summary.
+
+- When `assessment.enabled = true` and `assessmentUploadTime = null`:
+  - treat this as a **sync-pending state**, not a data absence
+  - do not report "no assessment data uploaded" as a data gap
+  - instead report: "Assessment collected but ARM sync pending — check Azure portal for latest results or trigger 'Run Assessment' to force sync"
+
+- When reporting assessment gaps in output, distinguish between:
+  - "Assessment not enabled" (assessment.enabled = false) — genuine gap, recommend enabling
+  - "Assessment enabled, sync pending" (enabled = true, assessmentUploadTime = null) — data likely exists in portal
+  - "Assessment synced but incomplete" (assessmentUploadTime set, but fields missing) — partial data, report what is available
+
+- Never infer MI/VM readiness status from the absence of synced ARM data alone. If ARM data is unavailable, state the limitation and direct the user to the portal assessment blade.
 
 # Output requirements
 
