@@ -1,6 +1,10 @@
 # Branded report HTML template
 
-Use this self-contained template when `/export-pdf` (or equivalent export prompt) is requested.
+Use this self-contained template when `/export-pdf` (or equivalent export prompt such as `export report`, `save as PDF`, or `generate branded PDF`) is requested.
+
+- Date placeholder format: render `{{generationDate}}` in ISO 8601 UTC format (`YYYY-MM-DDTHH:mm:ssZ`) and use the same value in both main report metadata display and footer.
+- Section layout must follow `references/output-template.md` exactly.
+- The canonical `references/output-template.md` in this repo includes detailed sections beyond the five high-level agent summary buckets; keep all detailed sections in order.
 
 ```html
 <!doctype html>
@@ -103,7 +107,7 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
       vertical-align: middle;
     }
     .badge.green { background: var(--badge-green); }
-    .badge.amber { background: #7f4f00; color: var(--badge-amber); border: 1px solid var(--badge-amber); }
+    .badge.amber { background: var(--badge-amber); color: #1f2937; }
     .badge.red { background: var(--badge-red); }
     footer {
       position: fixed;
@@ -125,6 +129,7 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
   <header class="header">
     <div class="brand">
       <svg width="24" height="24" viewBox="0 0 24 24" role="img" aria-label="Microsoft logo" xmlns="http://www.w3.org/2000/svg">
+        <title>Microsoft logo</title>
         <rect x="0" y="0" width="11" height="11" fill="#f25022" />
         <rect x="13" y="0" width="11" height="11" fill="#7fba00" />
         <rect x="0" y="13" width="11" height="11" fill="#00a4ef" />
