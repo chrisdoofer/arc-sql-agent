@@ -132,11 +132,13 @@ Use this skill when the user asks to:
 2. Use a real execution path after tenant/subscription scope has been validated:
    - identify target Arc-enabled SQL instances from the validated scope dataset
    - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because they can still return persisted feature evidence
-   - execute the downgrade DMV in each user database using Arc Run Command (or equivalent approved execution method)
-   - set database context via the execution method's database parameter/context option for each database (do not rely on a `USE` statement as the only context selector)
-   - run:
-     SELECT feature_name
-     FROM sys.dm_db_persisted_sku_features;
+   - execute the downgrade DMV across ALL user databases on each machine in a SINGLE consolidated script execution via Arc Run Command
+   - the consolidated script MUST:
+     - enumerate user databases dynamically (database_id > 4, state_desc = 'ONLINE')
+     - execute `SELECT feature_name FROM sys.dm_db_persisted_sku_features` in each database
+     - output structured JSON results for all databases in one response
+   - this reduces round-trips from N (one per database) to 1 per machine
+   - see "Consolidated script patterns" under Execution reliability considerations for the reference implementation
 
 3. Capture results in a structured per-database output record using this minimum schema:
    - machineName
@@ -189,8 +191,8 @@ Use this skill when the user asks to:
 
 8. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
    - treat the DMV audit as persisted feature validation only
-   - execute runtime checks sequentially per machine (avoid concurrent Run Command conflicts on the same host)
-   - execute the following runtime queries on each relevant instance:
+   - execute ALL runtime checks on each machine in a SINGLE consolidated script execution (not one query per round-trip)
+   - the consolidated runtime script MUST execute the following queries and return structured JSON output:
      - Always On availability groups:
        SELECT ag.name AS ag_name, ar.replica_server_name, ar.availability_mode_desc
        FROM sys.availability_groups ag
@@ -210,10 +212,10 @@ Use this skill when the user asks to:
        FROM msdb.dbo.sysjobs j
        JOIN msdb.dbo.sysjobsteps js ON j.job_id = js.job_id
        WHERE js.command LIKE '%ONLINE%=%ON%';
+   - this reduces runtime validation from 4 round-trips per machine to 1
+   - see "Consolidated script patterns" under Execution reliability considerations for the reference implementation
    - adapt `Invoke-Sqlcmd` parameters to host module capability:
-     - older environments may not support `-TrustServerCertificate`
-     - detect support by checking `Get-Command Invoke-Sqlcmd` parameter metadata for `TrustServerCertificate` before command construction
-     - include `-TrustServerCertificate` only when supported/required by the host
+     - the consolidated script MUST auto-detect `-TrustServerCertificate` support at runtime (see reference implementation) rather than relying on prior knowledge or retries
      - if host policy requires trusted certificates and the parameter is unavailable, surface this as an execution prerequisite gap (module upgrade/certificate remediation) instead of forcing retries
    - capture runtime results in a structured per-check output record using this minimum schema:
      - machineName
@@ -279,13 +281,19 @@ Use this skill when the user asks to:
   - On FIRST execution against a machine:
     1. List existing run commands with `az connectedmachine run-command list`
     2. Check whether reusable slots already exist from a prior session
-    3. If slots exist: UPDATE them with the new script using `az connectedmachine run-command update --set "source.script=<new script>"`
+    3. If slots exist: UPDATE them with the new script using `az connectedmachine run-command update --force-string --set "source.script=<new script>"`
     4. If slots do not exist and quota allows: CREATE new commands using the slot naming convention
   - On SUBSEQUENT executions within the same session:
     - Always UPDATE existing slots rather than creating new commands
-    - Process checks sequentially: update slot → wait for completion → read output → update slot with next script
   - This approach avoids the 25-command limit entirely by reusing the same named resources.
-  - Maximum slots needed per machine: 1 (sequential reuse) or up to 5 (parallel batch, but prefer sequential for reliability)
+  - Maximum slots needed per machine: 2 (one for DMV audit, one for runtime checks — both run as consolidated scripts)
+
+- Parallel execution across machines:
+  - When multiple machines require audit, submit run commands on EACH machine simultaneously using `--no-wait`
+  - Then poll for results across all machines
+  - This overlaps execution time: 2 machines × 2 scripts = 4 operations, but elapsed time ≈ 2 sequential operations (not 4)
+  - DO NOT run multiple concurrent commands on the SAME machine (risk of HCRP500)
+  - DO run commands on DIFFERENT machines in parallel
 
 - Fallback: quota cleanup (use only when reusable slots cannot be created):
   - If the machine is already at 25/25 and no reusable slots exist from a prior session:
@@ -295,17 +303,83 @@ Use this skill when the user asks to:
     4. Log the number of stale commands identified and the deletion approach used
 
 - Execution sequencing:
-  - Prefer sequential execution per machine.
+  - Prefer sequential execution of operations on the SAME machine (one slot update at a time).
+  - Use parallel execution ACROSS different machines (submit to machine A and machine B simultaneously).
   - Avoid creating multiple Run Command executions concurrently on the same machine, as this may result in execution conflicts (for example HCRP500 errors).
 
 - Execution environment variability:
   - Be aware that execution environments may differ by host version.
   - Older SQL Server hosts may use earlier versions of the SqlServer PowerShell module.
-  - Adapt command parameters accordingly (for example, some environments may not support -TrustServerCertificate).
+  - The consolidated scripts auto-detect parameter support at runtime (see below).
 
-- Script execution approach:
-  - Prefer simple, single-command execution patterns.
-  - Avoid multi-line script constructs where transmission or parsing reliability is uncertain.
+- Script execution approach — CONSOLIDATED SCRIPTS WITH ENCODING:
+  - ALWAYS use `powershell -EncodedCommand <base64>` to submit scripts via Arc Run Command.
+  - This avoids all Azure CLI argument parsing issues with SQL queries containing joins, LIKE clauses, percent signs, and nested quotes.
+  - Encoding workflow:
+    1. Build the full PowerShell script as a string variable
+    2. Encode: `$encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($script))`
+    3. Submit: `--script "powershell -EncodedCommand $encoded"` (for create) or `--force-string --set "source.script=powershell -EncodedCommand $encoded"` (for update)
+  - DO NOT attempt to pass complex SQL queries directly via `--script` — they will fail due to CLI argument parsing.
+
+- Consolidated script patterns:
+
+  PATTERN 1 — DMV AUDIT (all databases on one instance, single execution):
+
+  ```powershell
+  $hasTsc = (Get-Command Invoke-Sqlcmd).Parameters.ContainsKey('TrustServerCertificate')
+  $baseParams = @{ ServerInstance = 'localhost' }
+  if ($hasTsc) { $baseParams['TrustServerCertificate'] = $true }
+  $dbs = Invoke-Sqlcmd -Query "SELECT name FROM sys.databases WHERE database_id > 4 AND state_desc = 'ONLINE'" @baseParams
+  $results = @()
+  foreach ($db in $dbs) {
+      try {
+          $features = Invoke-Sqlcmd -Query "SELECT feature_name FROM sys.dm_db_persisted_sku_features" -Database $db.name @baseParams
+          if ($features) {
+              foreach ($f in $features) {
+                  $results += @{ databaseName = $db.name; featureName = $f.feature_name; executionStatus = 'Succeeded'; errorMessage = $null }
+              }
+          } else {
+              $results += @{ databaseName = $db.name; featureName = $null; executionStatus = 'Succeeded'; errorMessage = $null }
+          }
+      } catch {
+          $results += @{ databaseName = $db.name; featureName = $null; executionStatus = 'Failed'; errorMessage = $_.Exception.Message }
+      }
+  }
+  $results | ConvertTo-Json -Depth 3
+  ```
+
+  PATTERN 2 — RUNTIME VALIDATION (all checks on one instance, single execution):
+
+  ```powershell
+  $hasTsc = (Get-Command Invoke-Sqlcmd).Parameters.ContainsKey('TrustServerCertificate')
+  $baseParams = @{ ServerInstance = 'localhost' }
+  if ($hasTsc) { $baseParams['TrustServerCertificate'] = $true }
+  $results = @()
+  # Always On AG
+  try {
+      $ag = Invoke-Sqlcmd -Query "SELECT ag.name AS ag_name, ar.replica_server_name, ar.availability_mode_desc FROM sys.availability_groups ag JOIN sys.availability_replicas ar ON ag.group_id = ar.group_id" @baseParams
+      $results += @{ checkName = 'alwaysOnAvailabilityGroups'; result = if ($ag) { ($ag | ConvertTo-Json -Compress) } else { 'No blockers detected' }; executionStatus = 'Succeeded'; errorMessage = $null }
+  } catch { $results += @{ checkName = 'alwaysOnAvailabilityGroups'; result = $null; executionStatus = 'Failed'; errorMessage = $_.Exception.Message } }
+  # Resource Governor
+  try {
+      $rg = Invoke-Sqlcmd -Query "SELECT is_enabled FROM sys.resource_governor_configuration" @baseParams
+      $results += @{ checkName = 'resourceGovernor'; result = "is_enabled=$($rg.is_enabled)"; executionStatus = 'Succeeded'; errorMessage = $null }
+  } catch { $results += @{ checkName = 'resourceGovernor'; result = $null; executionStatus = 'Failed'; errorMessage = $_.Exception.Message } }
+  # Partitioned tables
+  try {
+      $pt = Invoke-Sqlcmd -Query "SELECT OBJECT_SCHEMA_NAME(p.object_id) AS schema_name, OBJECT_NAME(p.object_id) AS table_name, COUNT(DISTINCT p.partition_number) AS partition_count FROM sys.partitions p WHERE p.partition_number > 1 AND p.index_id IN (0,1) GROUP BY p.object_id" @baseParams
+      $results += @{ checkName = 'partitionedTables'; result = if ($pt) { ($pt | ConvertTo-Json -Compress) } else { 'No blockers detected' }; executionStatus = 'Succeeded'; errorMessage = $null }
+  } catch { $results += @{ checkName = 'partitionedTables'; result = $null; executionStatus = 'Failed'; errorMessage = $_.Exception.Message } }
+  # Online index operations
+  try {
+      $oi = Invoke-Sqlcmd -Query "SELECT j.name AS job_name, js.command FROM msdb.dbo.sysjobs j JOIN msdb.dbo.sysjobsteps js ON j.job_id = js.job_id WHERE js.command LIKE '%ONLINE%=%ON%'" -Database msdb @baseParams
+      $results += @{ checkName = 'onlineIndexOperations'; result = if ($oi) { ($oi | ConvertTo-Json -Compress) } else { 'No blockers detected' }; executionStatus = 'Succeeded'; errorMessage = $null }
+  } catch { $results += @{ checkName = 'onlineIndexOperations'; result = $null; executionStatus = 'Failed'; errorMessage = $_.Exception.Message } }
+  $results | ConvertTo-Json -Depth 3
+  ```
+
+  - These patterns reduce total execution from 15 sequential round-trips (at ~3-5 min each) to 4 total operations (2 per machine), or 2 elapsed operations when machines are run in parallel.
+  - Expected total execution time: ~10-15 minutes (down from 45-75 minutes).
 
 - Output interpretation:
   - If execution returns empty output:
