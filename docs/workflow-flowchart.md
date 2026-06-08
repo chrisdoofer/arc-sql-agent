@@ -63,7 +63,18 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
        │               │         └─────────────────────┘
        ▼               ▼
 ┌──────────────────────────────────────┐
-│ 4. DATA ACQUISITION                  │
+│ 4. SA DECLARATION PROMPTS            │
+│    • Ask if active SQL Server SA     │
+│      coverage exists in the estate   │
+│    • If Yes, collect Standard and    │
+│      Enterprise SA-covered cores     │
+│    • If No/Unsure, continue but mark │
+│      AHB as not confirmed            │
+└──────────────┬───────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────┐
+│ 5. DATA ACQUISITION                  │
 │    • SQL instances (version, edition,│
 │      licensing, vCores, status)      │
 │    • Databases (size, recovery,      │
@@ -76,7 +87,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
                │
                ▼
 ┌──────────────────────────────────────┐
-│ 5. IDENTIFY ENTERPRISE INSTANCES     │
+│ 6. IDENTIFY ENTERPRISE INSTANCES     │
 │    • Filter instances with           │
 │      edition = Enterprise            │
 │    • Filter service type = Engine    │
@@ -92,7 +103,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
        │               │
        ▼               ▼
 ┌─────────────────┐  ┌──────────────────────┐
-│ 6. DOWNGRADE    │  │ Skip to Analysis     │
+│ 7. DOWNGRADE    │  │ Skip to Analysis     │
 │    AUDIT        │  └──────────┬───────────┘
 └────────┬────────┘             │
          │                      │
@@ -136,7 +147,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
                    │
                    ▼
 ┌──────────────────────────────────────┐
-│ 7. CLASSIFY DOWNGRADE READINESS      │
+│ 8. CLASSIFY DOWNGRADE READINESS      │
 │                                      │
 │  GREEN  = DMV clean + runtime valid  │
 │  AMBER  = DMV clean + runtime TBD   │
@@ -145,7 +156,7 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
                │
                ▼
 ┌──────────────────────────────────────┐
-│ 8. ANALYSIS & REPORT GENERATION      │
+│ 9. ANALYSIS & REPORT GENERATION      │
 │                                      │
 │  1. Executive Summary                │
 │  2. Estate Summary                   │
