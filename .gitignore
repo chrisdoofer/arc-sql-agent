@@ -1,0 +1,5 @@
+# Generated reports - customer-sensitive output
+*.pdf
+*.html
+estate-report.*
+Arc-SQL-Estate-Analysis-Report.*
