@@ -101,20 +101,20 @@ Use this skill when the user asks to:
 2. If the user selects `Yes`, immediately follow up via `ask_user` with:
    - Prompt 2: "How many SQL Server Standard edition cores are covered by Software Assurance?"
    - Prompt 3: "How many SQL Server Enterprise edition cores are covered by Software Assurance?"
-   - accept freeform numeric input for both prompts
-   - store the declared values separately as Standard SA-covered cores and Enterprise SA-covered cores
+   - Accept freeform numeric input for both prompts
+   - Store the declared values separately as Standard SA-covered cores and Enterprise SA-covered cores
 
 3. If the user selects `No` or `Unsure`:
-   - record Software Assurance status as `Not confirmed` for `No`
-   - record Software Assurance status as `Unknown` for `Unsure`
-   - continue the analysis, but state that Azure Hybrid Benefit eligibility could not be confirmed
-   - add the missing SA confirmation to `Data gaps / follow-up questions`
+   - Record Software Assurance status as `Not confirmed` for `No`
+   - Record Software Assurance status as `Unknown` for `Unsure`
+   - Continue the analysis, but state that Azure Hybrid Benefit eligibility could not be confirmed
+   - Add the missing SA confirmation to `Data gaps / follow-up questions`
 
 4. Use the declared Software Assurance response during analysis:
-   - populate the `Software Assurance status` field in Estate summary from the declared answer
-   - use declared Standard and Enterprise SA-covered core counts to assess Azure Hybrid Benefit eligibility
-   - factor declared SA-covered cores into TCO comparisons for Azure target recommendations
-   - if Enterprise SA-covered cores are declared but the recommendation favours Standard edition, highlight that SA entitlements may need reassignment or repurposing
+   - Populate the `Software Assurance status` field in Estate summary from the declared answer
+   - Use declared Standard and Enterprise SA-covered core counts to assess Azure Hybrid Benefit eligibility
+   - Factor declared SA-covered cores into TCO comparisons for Azure target recommendations
+   - If Enterprise SA-covered cores are declared but the recommendation favours Standard edition, highlight that SA entitlements may need reassignment or repurposing
 
 ## Phase 4 - Acquire estate data
 
