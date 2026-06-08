@@ -8,6 +8,7 @@ A GitHub Copilot skill and custom agent that performs live assessment of Arc-ena
 - Validates tenant/subscription scope before analysis (rejects cross-tenant data leaks)
 - Executes Enterprise → Standard edition downgrade audits via Arc Run Command
 - Produces a customer-ready report covering estate summary, optimisation opportunities, Azure target recommendations, risks, and data gaps
+- Can export the final report as branded self-contained HTML or PDF (`/export-pdf`)
 - Applies evidence-based confidence levels (High / Medium / Low) and downgrade readiness classifications (GREEN / AMBER / RED)
 
 ## Quick Start
@@ -54,6 +55,7 @@ cd arc-sql-estate-analysis
       SKILL.md                       ← Core analysis workflow and guardrails
       references/
         output-template.md           ← Canonical report structure
+        branded-report-template.md   ← Branded self-contained HTML template for PDF export
 docs/
   architecture.md                    ← Solution architecture
   prerequisites.md                   ← Setup and RBAC requirements
