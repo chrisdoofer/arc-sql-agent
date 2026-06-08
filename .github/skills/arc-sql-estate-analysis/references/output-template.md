@@ -17,7 +17,7 @@
 
 - Licensing position:
   - Licensing model (Server/CAL / Core / Unknown):
-  - Software Assurance status (Enabled / Not confirmed [declared No] / Unknown [declared Unsure or no explicit evidence]):
+  - Software Assurance status (Enabled / Not confirmed / Unknown):
   - Declared SA-covered cores:
     - Standard edition:
     - Enterprise edition:
@@ -233,7 +233,7 @@
 
 # Data gaps / follow-up questions
 
-- Confirm whether any SQL Server licences in this estate have active Software Assurance coverage if AHB eligibility is still not confirmed.
+_If Software Assurance status is `Not confirmed` or `Unknown`, add a follow-up asking the user to confirm active Software Assurance coverage and covered Standard / Enterprise core counts._
 
 - Missing field or evidence 1:
 - Missing field or evidence 2:
