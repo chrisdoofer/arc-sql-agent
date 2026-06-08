@@ -20,6 +20,7 @@ Use this skill when the user asks to:
 - analyse a tenant-scoped Arc-enabled SQL Server estate from live Azure data
 - prompt for tenant ID or tenant DNS name before querying live Azure data
 - fall back to Excel, JSON, or CSV input if live Azure access is unavailable or cannot be validated
+- export the final analysis as a branded HTML or PDF report (including `/export-pdf`)
 
 # Analysis workflow
 
@@ -478,6 +479,54 @@ Use this skill when the user asks to:
 
 9. Produce the final answer using the structure in `references/output-template.md`.
 
+## Phase 7 - Optional report export (HTML/PDF)
+
+1. If the user requests export (for example "export report", "save as PDF", or `/export-pdf`), generate a self-contained HTML report:
+   - use `references/output-template.md` for section order and headings
+   - use `references/branded-report-template.md` for branded HTML structure and styling
+
+2. Build branded HTML using the structure in `references/branded-report-template.md`:
+   - Microsoft four-square logo as inline SVG
+   - `Microsoft` wordmark text
+   - Azure Arc pill/badge with `SQL Server Estate Analysis` label
+   - Blue gradient header bar (`#0078d4` to `#005a9e`)
+   - Fluent UI / Segoe UI styling with colour-coded readiness badges (`GREEN`, `AMBER`, `RED`)
+   - Confidential watermark and footer with generation date
+   - no external image, font, or CDN dependencies
+
+3. Output handling:
+   - default behaviour:
+     - `/export-pdf`: generate HTML and convert to PDF
+     - generic export request (such as "export report"): generate HTML unless PDF is explicitly requested
+     - rationale: HTML export has no browser binary dependency and is the safest default artifact
+     - if PDF is explicitly requested (for example "export report as PDF"), generate HTML and convert to PDF
+     - if the request is ambiguous, ask whether the user wants HTML or PDF
+   - if user provides an output path, use it
+   - otherwise default to current session working directory
+   - default filenames:
+     - HTML: `estate-report.html`
+     - PDF: `estate-report.pdf`
+
+4. For PDF conversion, render HTML to PDF via Edge or Chrome headless:
+   - prefer absolute paths for both `<input-html-path>` and `<output-pdf-path>` to avoid path resolution issues
+   - placeholders are full file paths (including directory and `.html` / `.pdf` filenames)
+   - Edge:
+     - `msedge --headless --disable-gpu --print-to-pdf="<output-pdf-path>" "<input-html-path>"`
+     - example: `msedge --headless --disable-gpu --print-to-pdf="/workspace/estate-report.pdf" "/workspace/estate-report.html"`
+   - Chrome:
+     - `google-chrome --headless --disable-gpu --print-to-pdf="<output-pdf-path>" "<input-html-path>"`
+     - example: `google-chrome --headless --disable-gpu --print-to-pdf="/workspace/estate-report.pdf" "/workspace/estate-report.html"`
+
+5. If browser binaries are unavailable, or conversion fails (for example browser not found, write permission denied, or insufficient disk space), return the generated HTML and clearly state that PDF conversion could not be completed in the current environment.
+   - include the HTML output path so the user can run conversion manually
+   - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
+   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+   - failure response format:
+     - `PDF export status: Failed`
+     - `Reason: {error_detail}`
+     - `HTML output: {absolute_html_path}`
+     - `Suggested manual command: {edge_or_chrome_command}`
+
 # Guardrails
 
 - Keep findings evidence-based.
@@ -515,6 +564,13 @@ Use this skill when the user asks to:
 - Never proceed to analysis if tenant or subscription scope cannot be confidently validated.
 - If returned resources appear to belong to a different tenant or subscription than requested, stop and report the issue.
 - Always prioritise correctness of scope over completeness of output.
+
+## Report export guardrails
+
+- Keep exported HTML self-contained (inline SVG/CSS only; no external image dependencies).
+- Preserve section order from `references/output-template.md` in both HTML and PDF outputs.
+- Apply GREEN / AMBER / RED badges exactly for downgrade readiness states where present.
+- Include generation date in footer and keep `Confidential` watermark/footer text in exported output.
 
 ## Tool reliability guardrails
 
