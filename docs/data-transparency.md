@@ -23,7 +23,7 @@ This document provides full transparency on the data collected, accessed, and re
 | `microsoft.azurearcdata/sqlserverinstances/databases` | name, sizeMB, recoveryMode, state, isReadOnly, isEncrypted, compatibilityLevel, collationName, backupInformation, databaseOptions, databaseCreationDate | Database inventory, backup compliance, encryption status |
 | `microsoft.hybridcompute/machines` | name, location, osName, osVersion, osSku, status, detectedProperties (cores, RAM, hypervisor, processor) | Host platform analysis, sizing assessment |
 
-> **Migration assessment note:** When `assessment.enabled = true` but `assessmentUploadTime = null`, assessment output is treated as **sync-pending** (not "no assessment"). This indicates the extension has likely collected results in the telemetry plane, but ARM summary fields (for example `skuRecommendationResults`) are not yet synced. Users should check the Azure portal assessment blade or trigger **Run Assessment** to refresh sync.
+> **Migration assessment note:** When `assessment.enabled = true` but `assessmentUploadTime = null`, assessment output is treated as **sync-pending** (not "no assessment"). This indicates the extension has likely collected results in the telemetry plane, but ARM summary fields (e.g., `skuRecommendationResults`) are not yet synced. Users should check the Azure portal assessment blade or trigger **Run Assessment** to refresh sync.
 
 ### From Arc Run Command (remote execution)
 
