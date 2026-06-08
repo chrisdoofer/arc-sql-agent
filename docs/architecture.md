@@ -48,7 +48,7 @@ It connects directly to an Azure tenant, queries live infrastructure data via Az
 | Component | Role |
 |-----------|------|
 | **sql-estate-architect** (agent) | Thin persona wrapper. Delegates all analysis work to the skill. Enforces output ordering and evidence-based guardrails. |
-| **arc-sql-estate-analysis** (skill) | Core analysis engine. Defines the 5-phase workflow: scope determination → validation → data acquisition → Enterprise downgrade audit → analysis and reporting. |
+| **arc-sql-estate-analysis** (skill) | Core analysis engine. Defines the 6-phase workflow: scope determination → validation → licensing declaration → data acquisition → Enterprise downgrade audit → analysis and reporting. |
 | **output-template.md** (reference) | Canonical output structure. All reports must follow this section order. |
 | **Azure Resource Graph** | Primary data source for inventory (SQL instances, databases, machines). Queried via MCP tools and Azure CLI. |
 | **Azure CLI** | Fallback data source when MCP scope validation fails. Also used for Arc Run Command execution. |
@@ -76,7 +76,14 @@ User prompt (tenant ID)
           │
           ▼
 ┌─────────────────────┐
-│ Phase 3: Data       │──▶ SQL instances (type, version, edition, licensing)
+│ Phase 3: Licensing  │──▶ Ask whether SQL Server Software Assurance is active
+│ Declaration         │──▶ If Yes, collect Standard and Enterprise SA-covered cores
+│                     │──▶ If No/Unsure, continue but mark AHB as not confirmed
+└─────────┬───────────┘
+          │
+          ▼
+┌─────────────────────┐
+│ Phase 4: Data       │──▶ SQL instances (type, version, edition, licensing)
 │ Acquisition         │──▶ Databases (size, recovery, backup, state)
 │                     │──▶ Host machines (OS, cores, RAM, hypervisor)
 │                     │──▶ Migration assessments (MI/VM readiness)
@@ -84,14 +91,14 @@ User prompt (tenant ID)
           │
           ▼
 ┌─────────────────────┐
-│ Phase 4: Enterprise │──▶ Identify Enterprise instances with user databases
+│ Phase 5: Enterprise │──▶ Identify Enterprise instances with user databases
 │ Downgrade Audit     │──▶ Execute DMV + runtime checks via Arc Run Command
 │                     │──▶ Capture structured persisted/runtime results
 └─────────┬───────────┘
           │
           ▼
 ┌─────────────────────┐
-│ Phase 5: Analysis   │──▶ Synthesise findings into structured report
+│ Phase 6: Analysis   │──▶ Synthesise findings into structured report
 │ & Reporting         │──▶ Apply confidence levels and classifications
 │                     │──▶ Produce customer-ready output
 └─────────────────────┘
