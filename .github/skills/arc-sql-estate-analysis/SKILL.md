@@ -268,6 +268,32 @@ Use this skill when the user asks to:
 
 - You MUST consider execution reliability when using Arc Run Command or equivalent execution methods.
 
+- Run command quota management (CRITICAL — understand before any execution):
+  - Azure Arc enforces a maximum of 25 run commands per machine.
+  - Deletions are extremely slow (minutes per command, processed sequentially by the Arc agent) and are NOT suitable as a pre-execution cleanup strategy.
+  - DO NOT rely on `az connectedmachine run-command delete` as a fast way to free quota — deletions queue behind each other and may not propagate for 10+ minutes.
+
+- Preferred execution strategy — REUSABLE COMMAND SLOTS:
+  - Use a fixed naming convention with a small number of reusable command names per machine.
+  - Naming pattern: `estate-audit-{machineName}-{slotNumber}` (e.g. `estate-audit-ArcBox-SQL-01`)
+  - On FIRST execution against a machine:
+    1. List existing run commands with `az connectedmachine run-command list`
+    2. Check whether reusable slots already exist from a prior session
+    3. If slots exist: UPDATE them with the new script using `az connectedmachine run-command update --set "source.script=<new script>"`
+    4. If slots do not exist and quota allows: CREATE new commands using the slot naming convention
+  - On SUBSEQUENT executions within the same session:
+    - Always UPDATE existing slots rather than creating new commands
+    - Process checks sequentially: update slot → wait for completion → read output → update slot with next script
+  - This approach avoids the 25-command limit entirely by reusing the same named resources.
+  - Maximum slots needed per machine: 1 (sequential reuse) or up to 5 (parallel batch, but prefer sequential for reliability)
+
+- Fallback: quota cleanup (use only when reusable slots cannot be created):
+  - If the machine is already at 25/25 and no reusable slots exist from a prior session:
+    1. Submit batch deletions via REST API: `az rest --method DELETE --url "https://management.azure.com/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.HybridCompute/machines/{machine}/runCommands/{name}?api-version=2024-07-10"`
+    2. Allow 5–10 minutes for propagation before re-checking capacity
+    3. If quota cannot be freed within a reasonable time, report this as a pre-execution blocker
+    4. Log the number of stale commands identified and the deletion approach used
+
 - Execution sequencing:
   - Prefer sequential execution per machine.
   - Avoid creating multiple Run Command executions concurrently on the same machine, as this may result in execution conflicts (for example HCRP500 errors).
