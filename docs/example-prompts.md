@@ -11,3 +11,12 @@ Assess this Arc-enabled SQL Server estate and produce a customer-ready summary w
 
 ## Prompt 4 - branded PDF export
 Assess this Arc-enabled SQL Server estate, generate the standard report, and then run `/export-pdf` to save a branded PDF to the working directory.
+
+## Prompt 5 - include Azure Migrate utilisation and dependency data
+Analyse this Arc-enabled SQL estate. Check if there's an Azure Migrate project in the tenant and include utilisation baselines and application dependency mapping in the analysis.
+
+## Prompt 6 - migration sequencing with dependency analysis
+Assess this SQL Server estate for Azure migration. I have Azure Migrate deployed with dependency analysis — please use that data to recommend migration wave sequencing based on application dependencies.
+
+## Prompt 7 - right-sizing validation with Azure Migrate
+Review this Arc-enabled SQL estate and validate SKU right-sizing recommendations using Azure Migrate performance data. I want to see actual CPU and memory utilisation alongside the sizing recommendations.

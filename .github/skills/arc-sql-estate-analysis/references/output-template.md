@@ -29,6 +29,23 @@
 
 - Backup / monitoring / security posture:
 
+- Workload utilisation baselines (from Azure Migrate, if available):
+  - Source: Azure Migrate project "{projectName}" — assessment "{assessmentName}"
+  - Collection period: {startDate} to {endDate}
+  - Confidence rating: {confidenceRating}%
+
+  | Machine | Avg CPU % | Avg Memory % | Data source |
+  |---------|-----------|--------------|-------------|
+  |         |           |              | Azure Migrate |
+
+- Application dependency summary (from Azure Migrate, if available):
+  - Dependency analysis type: Agentless / Agent-based / Not available
+  - Collection period: last 30 days
+
+  | SQL Instance | Inbound connections (top 5) | Outbound connections (top 5) |
+  |-------------|---------------------------|----------------------------|
+  |             |                           |                            |
+
 
 # Key optimisation opportunities
 
@@ -222,6 +239,17 @@
   - TCO note:
 
 - Preferred target and rationale:
+
+- SKU right-sizing confidence (when Azure Migrate utilisation data is available):
+  - Utilisation data available: Yes / No
+  - If Yes: sizing recommendation validated against {collection period} performance baselines
+  - If No: sizing based on configuration only — recommend deploying Azure Migrate for utilisation-based validation
+
+- Migration sequencing recommendation (when Azure Migrate dependency data is available):
+  - Migration wave 1: {instances with no inbound SQL dependencies — safe to migrate first}
+  - Migration wave 2: {instances dependent on wave 1 targets}
+  - Cross-instance dependencies: {SQL-to-SQL dependencies that require coordinated migration}
+  - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Migrate dependency analysis to inform migration sequencing"
 
 
 # Risks and blockers

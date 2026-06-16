@@ -16,6 +16,8 @@ Always:
 - validate tenant and subscription scope before analysis
 - if validation fails, stop and report a scope validation error; do not analyse unverified scope
 - offer fallback input via Excel, JSON, or CSV when scope cannot be validated
+- during initial data gathering, check for Azure Migrate projects across the tenant and offer to include utilisation and dependency data if a project is found
+- when Azure Migrate data is available, use it to enrich utilisation baselines, SKU right-sizing confidence, and application dependency mapping for migration sequencing
 - produce the output in this order:
   1. Estate summary
   2. Key optimisation opportunities

@@ -45,6 +45,24 @@ Use this skill when the user asks to:
    - if a named workload subscription is mentioned, use that explicitly
    - confirm selected subscription IDs or names before analysis
 
+6. After subscription scope is confirmed, query Resource Graph for Azure Migrate projects across the confirmed scope:
+   ```
+   resources
+   | where type == "microsoft.migrate/migrateprojects"
+   | project id, name, resourceGroup, subscriptionId, location
+   ```
+
+7. If one or more Azure Migrate projects are found:
+   - present the list to the user via `ask_user`
+   - prompt: "I found the following Azure Migrate project(s) in your tenant. Would you like me to include utilisation and dependency data from one of these in the analysis?"
+   - choices: list of project names (with subscription and resource group context) + "Skip — don't use Azure Migrate data"
+   - if the user selects a project, store the project resource ID for use in Phase 4 data acquisition
+
+8. If no Azure Migrate projects are found:
+   - note internally that Azure Migrate data is unavailable
+   - continue with the existing analysis flow
+   - surface the absence in "Data gaps / follow-up questions" with guidance: "No Azure Migrate project detected in scope — deploying an Azure Migrate appliance with dependency analysis would provide workload utilisation baselines and application dependency mapping"
+
 ## Phase 2 - Validate live Azure scope before analysis
 
 1. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
@@ -169,6 +187,82 @@ Use this skill when the user asks to:
    - infer schema from the uploaded file
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
+
+7. Azure Migrate utilisation data extraction (when an Azure Migrate project was selected in Phase 1):
+
+   a. List assessments in the selected project:
+      ```
+      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/assessments?api-version=2023-05-01
+      ```
+      - if the API version is not supported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
+      - prefer Azure SQL assessment types where available; fall back to Azure VM assessments for utilisation data
+
+   b. For each relevant assessment, retrieve assessed machines:
+      ```
+      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/assessments/{assessment}/assessedMachines?api-version=2023-05-01
+      ```
+
+   c. Extract per-machine utilisation metrics:
+      - `percentageCpuUtilization` — average CPU usage over collection period
+      - `percentageMemoryUtilization` — average memory usage
+      - `confidenceRatingInPercentage` — data quality indicator
+      - disk I/O and network throughput where available
+      - note the collection period (start/end dates) for data freshness disclosure
+
+   d. Correlate Azure Migrate machines to Arc-enabled SQL machines:
+      - match by machine name (primary, case-insensitive, strip domain suffix if needed)
+      - fall back to IP address matching if name match fails
+      - fall back to FQDN matching if IP match fails
+      - if automatic correlation confidence is below 80% (e.g. name mismatch, IP mismatch), surface the attempted match for user confirmation rather than assuming
+      - surface unmatched machines in "Data gaps / follow-up questions" with both the Arc machine name and Migrate machine name for manual reconciliation
+
+8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
+
+   a. Determine dependency analysis mode:
+      - check the Azure Migrate project configuration for dependency analysis type (agentless or agent-based)
+      - agentless dependency data is available directly from the Migrate project API
+      - agent-based dependency data requires querying a Log Analytics workspace
+
+   b. Path A — Agentless dependency analysis (preferred):
+      - query the Azure Migrate project for dependency data:
+        ```
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/machines/{machine}/dependencies?api-version=2023-05-01
+        ```
+      - extract inbound and outbound connections per machine:
+        - source process, source port
+        - destination IP, destination port, destination process
+        - connection frequency / byte count
+
+   c. Path B — Agent-based dependency analysis (fallback):
+      - identify the Log Analytics workspace associated with the Migrate project
+      - the identity running the analysis requires **Log Analytics Reader** on the workspace
+      - query the `VMConnection` table via Azure Monitor Logs API:
+        ```kusto
+        VMConnection
+        | where TimeGenerated > ago(30d)
+        | where Computer in ({list of Arc machine names})
+        | summarize
+            ConnectionCount = count(),
+            TotalBytesSent = sum(BytesSent),
+            TotalBytesReceived = sum(BytesReceived)
+          by SourceComputer, DestinationIp, DestinationPort, ProcessName
+        | order by ConnectionCount desc
+        ```
+      - supplement with `ServiceMapComputer_CL` for machine identity resolution:
+        ```kusto
+        ServiceMapComputer_CL
+        | summarize arg_max(TimeGenerated, *) by Computer
+        | project Computer, DisplayName_s, Ipv4Addresses_s, OperatingSystemFullName_s
+        ```
+
+   d. Build a dependency map per Arc-enabled SQL machine:
+      - which other machines/services connect to each SQL instance (inbound on port 1433 or custom SQL ports)
+      - which external services each SQL machine connects to (outbound)
+      - flag any SQL-to-SQL dependencies (important for migration sequencing)
+
+   e. If dependency analysis is not enabled in the Azure Migrate project:
+      - note that dependency data is unavailable
+      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate dependency analysis is not enabled — enabling agentless or agent-based dependency analysis would provide application dependency mapping for migration sequencing"
 
 
 ## Phase 5 - Enterprise downgrade audit
@@ -496,9 +590,26 @@ Use this skill when the user asks to:
      - provide concise remediation steps tied to the evidenced blocker
      - if blocker detail is not available, state that clearly and add it to Data gaps / follow-up questions instead of inferring a reason
 
-8. Separate confirmed findings from assumptions, unknowns, or missing fields.
+8. When Azure Migrate utilisation data is available:
+   - include workload utilisation baselines in Estate summary with source attribution ("Azure Migrate project: {name}")
+   - surface the collection period and confidence rating alongside utilisation figures
+   - use utilisation data to validate or refine SKU right-sizing recommendations:
+     - if average CPU utilisation is below 30%, flag as over-provisioned and recommend a smaller SKU
+     - if average CPU utilisation is above 80%, flag as potentially under-provisioned
+   - increase confidence rating on sizing recommendations from Low → Medium or High when utilisation data supports the recommendation
+   - if utilisation data is available for some machines but not others, clearly distinguish which recommendations are utilisation-validated and which are configuration-based only
 
-9. Produce the final answer using the structure in `references/output-template.md`.
+9. When Azure Migrate dependency data is available:
+   - include an application dependency summary in Estate summary showing key inbound and outbound connections per SQL instance
+   - use dependency data to inform migration sequencing in Azure target recommendations:
+     - identify SQL instances with no inbound SQL dependencies as candidates for early migration waves
+     - identify SQL instances with cross-instance dependencies that must be migrated together or in sequence
+   - surface any unexpected dependencies in Risks and blockers (e.g. SQL instance connecting to external non-Azure endpoints, undocumented application connections)
+   - flag SQL-to-SQL dependencies explicitly — these affect migration wave planning and downtime windows
+
+10. Separate confirmed findings from assumptions, unknowns, or missing fields.
+
+11. Produce the final answer using the structure in `references/output-template.md`.
 
 ## Phase 7 - Optional report export (HTML/PDF)
 
@@ -640,6 +751,37 @@ Use this skill when the user asks to:
   - continue analysis using ARM-synced fields and sync-pending guidance only
 
 - Do not claim that "Run Assessment" can be automated through a documented public API unless explicit public documentation is provided in the current session evidence.
+
+## Azure Migrate integration guardrails
+
+- Azure Migrate integration is additive — if no Azure Migrate project exists or the user skips project selection, the analysis continues without error using existing data sources. Do not treat the absence of Azure Migrate data as a blocker.
+
+- Always disclose the data source when presenting utilisation or dependency findings. Clearly attribute data to "Azure Migrate project: {name}" with the collection period and confidence rating.
+
+- Do not assume that Azure Migrate discovered machines map 1:1 to Arc-enabled SQL machines. Machine correlation must be validated:
+  - match by machine name first (case-insensitive, strip domain suffix if needed)
+  - fall back to IP address, then FQDN
+  - if automatic correlation confidence is below 80%, surface the attempted match for user confirmation rather than assuming a match
+  - surface unmatched machines from either side in "Data gaps / follow-up questions"
+
+- Do not increase recommendation confidence based on Azure Migrate data unless the machine correlation has been validated and the utilisation data covers a meaningful collection period (at least 7 days).
+
+- Handle partial Azure Migrate coverage explicitly:
+  - if utilisation data is available for some Arc machines but not others, clearly distinguish which sizing recommendations are utilisation-validated versus configuration-based only
+  - do not generalise utilisation patterns from covered machines to uncovered machines
+
+- Azure Migrate API version compatibility:
+  - attempt the latest stable API version (`2023-05-01`) first
+  - if the response indicates version unsupported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
+  - if all versions fail, surface the API error and continue without Migrate data
+
+- For agent-based dependency analysis, the identity running the analysis requires **Log Analytics Reader** on the workspace receiving dependency data. If the query fails due to permissions, surface this as a pre-requisite gap, not an analysis failure.
+
+- Limit dependency data queries to the most relevant connections:
+  - use `summarize` and `top` operators in KQL to limit to top connections per machine by count
+  - do not attempt to retrieve exhaustive connection logs for large estates
+
+- Do not infer application ownership or business criticality from dependency data alone. Dependency data shows network connections, not business relationships. Surface raw dependency findings and let the user interpret business impact.
 
 # Output requirements
 
