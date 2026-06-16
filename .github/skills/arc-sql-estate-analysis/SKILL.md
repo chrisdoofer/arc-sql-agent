@@ -538,10 +538,10 @@ Use this skill when the user asks to:
 
 2. Flag end-of-support or end-of-life exposure.
 
-3. Identify optimisation opportunities, including:
-   - edition optimisation (e.g. Enterprise → Standard downgrade)
-   - rightsizing opportunities
-   - operational improvements (e.g. backup, monitoring, security)
+3. Identify optimisation opportunities, always framed as steps towards Azure migration (not standalone on-premises cost reduction):
+   - edition optimisation (e.g. Enterprise → Standard downgrade) as a pre-migration step to reduce Azure licensing costs or unlock Azure Hybrid Benefit eligibility
+   - rightsizing opportunities that align current workloads with target Azure SKUs
+   - operational improvements (e.g. backup, monitoring, security) that prepare the estate for cloud migration readiness
    - Do not use indirect signals (e.g. database properties such as isMemoryOptimizationEnabled) as proof of Enterprise feature usage.
    - Treat such signals as indicative only and require DMV confirmation for downgrade decisions.
    - For Enterprise → Standard downgrade candidates, present:
@@ -566,14 +566,14 @@ Use this skill when the user asks to:
      - treat any uncovered portion as licence-included / PAYG exposure unless other explicit evidence exists
    - If multiple signals are inconsistent or incomplete, mark licensing as Unknown or Mixed, use cautious wording (for example "appears", "not confirmed"), and surface this explicitly as a data gap
 
-5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO), including:
-   - combining licensing optimisation (e.g. edition downgrade)
+5. Identify combined optimisation opportunities that reduce total cost of ownership (TCO) on the path to Azure, including:
+   - combining licensing optimisation (e.g. edition downgrade) with Azure migration planning — position edition changes as enabling lower Azure target costs, not as on-premises savings in isolation
    - with Azure cost optimisation (e.g. PAYG via Arc, Azure Hybrid Benefit, or lower-cost Azure SKUs)
-   - prioritising changes that can be applied together for maximum impact
+   - prioritising changes that can be applied together for maximum impact on Azure migration readiness and target cost
 
 6. Classify recommendations into:
-   - Quick wins = low effort, immediate cost or risk reduction
-   - Strategic moves = higher effort changes that provide medium- to long-term optimisation or Azure migration value
+   - Quick wins = low effort steps that improve Azure migration readiness or reduce target Azure costs
+   - Strategic moves = higher effort changes that provide medium- to long-term Azure migration value or optimise Azure landing costs
 
 7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
@@ -661,6 +661,7 @@ Use this skill when the user asks to:
 
 - Keep findings evidence-based.
 - Do not claim utilisation, savings, or migration suitability unless the source data supports it.
+- Always frame optimisation recommendations as steps towards Azure migration. Do not present on-premises licensing optimisation (e.g. edition downgrade, PAYG conversion) as a standalone cost-saving exercise — every recommendation must connect to how it improves Azure migration readiness, reduces target Azure costs, or enables Azure Hybrid Benefit eligibility.
 - If required fields are missing, state that plainly under Data gaps / follow-up questions.
 - Do not infer Azure SQL Managed Instance blockers or remediation without explicit readiness evidence.
 - Never recommend Enterprise → Standard downgrade with Medium or High confidence unless the Enterprise downgrade audit has executed successfully or equivalent evidence is explicitly available.

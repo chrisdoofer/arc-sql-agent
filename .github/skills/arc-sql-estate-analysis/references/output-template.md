@@ -55,7 +55,7 @@
   - Runtime validation results summary:
   - Target edition support interpretation:
   - SA / AHB interpretation:
-  - TCO note:
+  - TCO note: {always frame as impact on Azure migration cost — e.g. "reduces target Azure licensing by X" or "enables AHB eligibility for Azure target"}
   - Downgrade safety status:
 
 - Opportunity 2:
@@ -225,18 +225,18 @@
 - Candidate workloads for Azure SQL Managed Instance:
   - Readiness status:
   - Licensing / AHB note:
-  - TCO note:
+  - TCO note: {frame as Azure target cost impact, not on-prem savings}
   - If Not Ready, blocker details:
   - Why it is blocked:
   - Remediation:
 
 - Candidate workloads for SQL Server on Azure Virtual Machines:
   - Licensing / AHB note:
-  - TCO note:
+  - TCO note: {frame as Azure target cost impact, not on-prem savings}
 
 - Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
   - Licensing / AHB note:
-  - TCO note:
+  - TCO note: {frame as transition step towards Azure migration, not standalone on-prem optimisation}
 
 - Preferred target and rationale:
 
