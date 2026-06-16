@@ -218,14 +218,13 @@ Use this skill when the user asks to:
 
 8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
 
-   a. Determine dependency analysis mode and data access path:
-      - check the Azure Migrate project configuration for dependency analysis type (agentless or agent-based)
-      - agentless dependency data is NOT accessible via REST API — it is stored in the Azure Migrate service layer and viewable only in the Azure portal dependency visualization
-      - agent-based dependency data may be available in a Log Analytics workspace (`VMConnection` table)
-      - the preferred path for agentless dependency data is the **portal CSV export** (Path A below)
+   a. Determine dependency data access path:
+      - agentless dependency data is NOT accessible via REST API or PowerShell — it is stored in the Azure Migrate service layer and viewable only in the Azure portal dependency visualization
+      - the only supported path for retrieving this data is the **portal CSV export** (see below)
+      - do NOT recommend agent-based dependency analysis as an alternative — deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen
 
-   b. Path A — Agentless dependency CSV export (preferred):
-      - agentless dependency connection data cannot be retrieved programmatically via REST API
+   b. Agentless dependency CSV export:
+      - agentless dependency connection data cannot be retrieved programmatically
       - prompt the user via `ask_user`: "Azure Migrate dependency analysis is enabled but the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
       - provide export instructions:
         1. In the Azure portal, navigate to the Azure Migrate project
@@ -250,39 +249,16 @@ Use this skill when the user asks to:
         - summarise inbound and outbound connections per SQL instance
         - identify SQL-to-SQL dependencies for migration sequencing
 
-   c. Path B — Agent-based dependency analysis (fallback when Log Analytics workspace is configured):
-      - identify the Log Analytics workspace associated with the Migrate project (`customerWorkspaceId` in the assessment project properties)
-      - if `customerWorkspaceId` is null, this path is not available — fall back to Path A
-      - the identity running the analysis requires **Log Analytics Reader** on the workspace
-      - query the `VMConnection` table via Azure Monitor Logs API:
-        ```kusto
-        VMConnection
-        | where TimeGenerated > ago(30d)
-        | where Computer in ({list of Arc machine names})
-        | summarize
-            ConnectionCount = count(),
-            TotalBytesSent = sum(BytesSent),
-            TotalBytesReceived = sum(BytesReceived)
-          by Computer, DestinationIp, DestinationPort, ProcessName, Direction
-        | order by ConnectionCount desc
-        ```
-      - supplement with `ServiceMapComputer_CL` for machine identity resolution:
-        ```kusto
-        ServiceMapComputer_CL
-        | summarize arg_max(TimeGenerated, *) by Computer
-        | project Computer, DisplayName_s, Ipv4Addresses_s, OperatingSystemFullName_s
-        ```
-
-   d. Build a dependency map per Arc-enabled SQL machine:
+   c. Build a dependency map per Arc-enabled SQL machine:
       - which other machines/services connect to each SQL instance (inbound on port 1433 or custom SQL ports)
       - which external services each SQL machine connects to (outbound)
       - flag any SQL-to-SQL dependencies (important for migration sequencing)
 
    e. If dependency analysis is not enabled in the Azure Migrate project:
       - note that dependency data is unavailable
-      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate dependency analysis is not enabled — enabling agentless or agent-based dependency analysis would provide application dependency mapping for migration sequencing"
+      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate agentless dependency analysis is not enabled — enabling it on the Azure Migrate appliance would provide application dependency mapping for migration sequencing"
 
-   f. If the user declines to export or cannot provide the CSV:
+   e. If the user declines to export or cannot provide the CSV:
       - continue the analysis without dependency data
       - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate portal but not exported — export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
 
@@ -797,9 +773,9 @@ Use this skill when the user asks to:
   - if the response indicates version unsupported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
   - if all versions fail, surface the API error and continue without Migrate data
 
-- For agent-based dependency analysis, the identity running the analysis requires **Log Analytics Reader** on the workspace receiving dependency data. If the query fails due to permissions, surface this as a pre-requisite gap, not an analysis failure.
+- Agentless dependency data is NOT accessible via REST API or PowerShell. The data is stored in the Azure Migrate service layer and can only be viewed in the Azure portal or exported as CSV via portal **Manage Dependencies > Export dependencies**. Do not attempt to retrieve agentless dependency data programmatically — prompt the user to export the CSV instead.
 
-- Agentless dependency data is NOT accessible via REST API. The data is stored in the Azure Migrate service layer and can only be viewed in the Azure portal or exported as CSV via portal **Manage Dependencies > Export dependencies**. Do not attempt to retrieve agentless dependency data programmatically — prompt the user to export the CSV instead.
+- Do not recommend agent-based dependency analysis as an alternative to the agentless CSV export. Deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen.
 
 - When parsing an Azure Migrate dependency CSV export:
   - validate that the CSV contains the expected columns: `Timeslot`, `Source server name`, `Source application`, `Source process`, `Destination server name`, `Destination IP`, `Destination application`, `Destination process`, `Destination port`

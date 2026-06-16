@@ -39,7 +39,7 @@
   |         |           |              | Azure Migrate |
 
 - Application dependency summary (from Azure Migrate, if available):
-  - Dependency analysis type: Agentless / Agent-based / Not available
+  - Dependency analysis type: Agentless / Not available
   - Collection period: last 30 days
 
   | SQL Instance | Inbound connections (top 5) | Outbound connections (top 5) |
