@@ -20,3 +20,6 @@ Assess this SQL Server estate for Azure migration. I have Azure Migrate deployed
 
 ## Prompt 7 - right-sizing validation with Azure Migrate
 Review this Arc-enabled SQL estate and validate SKU right-sizing recommendations using Azure Migrate performance data. I want to see actual CPU and memory utilisation alongside the sizing recommendations.
+
+## Prompt 8 - include dependency CSV export from Azure Migrate
+Analyse this Arc-enabled SQL estate. I've exported the dependency data from Azure Migrate as a CSV — here it is. Please include application dependency mapping in the analysis and recommend migration wave sequencing.

@@ -218,23 +218,41 @@ Use this skill when the user asks to:
 
 8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
 
-   a. Determine dependency analysis mode:
+   a. Determine dependency analysis mode and data access path:
       - check the Azure Migrate project configuration for dependency analysis type (agentless or agent-based)
-      - agentless dependency data is available directly from the Migrate project API
-      - agent-based dependency data requires querying a Log Analytics workspace
+      - agentless dependency data is NOT accessible via REST API — it is stored in the Azure Migrate service layer and viewable only in the Azure portal dependency visualization
+      - agent-based dependency data may be available in a Log Analytics workspace (`VMConnection` table)
+      - the preferred path for agentless dependency data is the **portal CSV export** (Path A below)
 
-   b. Path A — Agentless dependency analysis (preferred):
-      - query the Azure Migrate project for dependency data:
-        ```
-        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/machines/{machine}/dependencies?api-version=2023-05-01
-        ```
-      - extract inbound and outbound connections per machine:
-        - source process, source port
-        - destination IP, destination port, destination process
-        - connection frequency / byte count
+   b. Path A — Agentless dependency CSV export (preferred):
+      - agentless dependency connection data cannot be retrieved programmatically via REST API
+      - prompt the user via `ask_user`: "Azure Migrate dependency analysis is enabled but the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
+      - provide export instructions:
+        1. In the Azure portal, navigate to the Azure Migrate project
+        2. Go to **All inventory** or **Infrastructure inventory** view
+        3. Select **Manage Dependencies** dropdown → **Export dependencies**
+        4. Select the appliance(s) and a time interval (recommend 30 days)
+        5. Set process type to **Resolvable** (default) for clearest results
+        6. Select **Generate**, then **Download** the CSV when ready
+      - the exported CSV contains one row per observed dependency with these fields:
+        - `Timeslot` — 6-hour window when the dependency was observed
+        - `Source server name`
+        - `Source application`
+        - `Source process`
+        - `Destination server name`
+        - `Destination IP`
+        - `Destination application`
+        - `Destination process`
+        - `Destination port`
+      - when the user provides the CSV:
+        - parse and correlate source/destination server names to Arc-enabled SQL machines
+        - filter for SQL-relevant connections (destination port 1433, or connections where source/destination matches an Arc SQL machine name)
+        - summarise inbound and outbound connections per SQL instance
+        - identify SQL-to-SQL dependencies for migration sequencing
 
-   c. Path B — Agent-based dependency analysis (fallback):
-      - identify the Log Analytics workspace associated with the Migrate project
+   c. Path B — Agent-based dependency analysis (fallback when Log Analytics workspace is configured):
+      - identify the Log Analytics workspace associated with the Migrate project (`customerWorkspaceId` in the assessment project properties)
+      - if `customerWorkspaceId` is null, this path is not available — fall back to Path A
       - the identity running the analysis requires **Log Analytics Reader** on the workspace
       - query the `VMConnection` table via Azure Monitor Logs API:
         ```kusto
@@ -245,7 +263,7 @@ Use this skill when the user asks to:
             ConnectionCount = count(),
             TotalBytesSent = sum(BytesSent),
             TotalBytesReceived = sum(BytesReceived)
-          by SourceComputer, DestinationIp, DestinationPort, ProcessName
+          by Computer, DestinationIp, DestinationPort, ProcessName, Direction
         | order by ConnectionCount desc
         ```
       - supplement with `ServiceMapComputer_CL` for machine identity resolution:
@@ -263,6 +281,10 @@ Use this skill when the user asks to:
    e. If dependency analysis is not enabled in the Azure Migrate project:
       - note that dependency data is unavailable
       - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate dependency analysis is not enabled — enabling agentless or agent-based dependency analysis would provide application dependency mapping for migration sequencing"
+
+   f. If the user declines to export or cannot provide the CSV:
+      - continue the analysis without dependency data
+      - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate portal but not exported — export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
 
 
 ## Phase 5 - Enterprise downgrade audit
@@ -776,6 +798,14 @@ Use this skill when the user asks to:
   - if all versions fail, surface the API error and continue without Migrate data
 
 - For agent-based dependency analysis, the identity running the analysis requires **Log Analytics Reader** on the workspace receiving dependency data. If the query fails due to permissions, surface this as a pre-requisite gap, not an analysis failure.
+
+- Agentless dependency data is NOT accessible via REST API. The data is stored in the Azure Migrate service layer and can only be viewed in the Azure portal or exported as CSV via portal **Manage Dependencies > Export dependencies**. Do not attempt to retrieve agentless dependency data programmatically — prompt the user to export the CSV instead.
+
+- When parsing an Azure Migrate dependency CSV export:
+  - validate that the CSV contains the expected columns: `Timeslot`, `Source server name`, `Source application`, `Source process`, `Destination server name`, `Destination IP`, `Destination application`, `Destination process`, `Destination port`
+  - correlate source/destination server names to Arc-enabled SQL machines using the same machine correlation strategy (name → IP → FQDN)
+  - filter for SQL-relevant connections: destination port 1433 (default SQL port), or connections where source or destination server name matches an Arc SQL machine
+  - summarise by connection frequency — prioritise high-frequency connections over one-off observations
 
 - Limit dependency data queries to the most relevant connections:
   - use `summarize` and `top` operators in KQL to limit to top connections per machine by count
