@@ -111,38 +111,57 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
          ▼                      │
 ┌──────────────────────────────────────┐
 │ FOR EACH HOST (sequential):           │
-│ - Per-database persisted DMV check    │
-│ - Per-instance runtime checks         │
 │                                      │
 │  ┌────────────────────────────────┐  │
-│  │ Arc Run Command:               │  │
-│  │ Invoke-Sqlcmd executes:        │  │
-│  │ 1) DMV query per user DB       │  │
-│  │ 2) Runtime checks per instance │  │
-│  │    - Always On AG              │  │
-│  │    - Resource Governor         │  │
-│  │    - Partitioned tables        │  │
-│  │    - ONLINE=ON job steps       │  │
+│  │ USER APPROVAL (ask_user)       │  │
+│  │ Before each write operation:   │  │
+│  │ a) Extension install (if required)│  │
+│  │ b) Run command create/update   │  │
+│  │ c) Run command delete (quota)  │  │
+│  │                                │  │
+│  │ Choices: Approve /             │  │
+│  │          Skip this step /      │  │
+│  │          Cancel analysis       │  │
 │  └───────────────┬────────────────┘  │
-│                  │                    │
-│         ┌────────┴────────┐          │
-│         │    Result?      │          │
-│         └────────┬────────┘          │
-│     ┌────────────┼────────────┐      │
-│     ▼            ▼            ▼      │
-│  ┌────────┐ ┌─────────┐ ┌───────┐   │
-│  │Features│ │No rows  │ │Failed │   │
-│  │returned│ │(clean)  │ │       │   │
-│  └───┬────┘ └────┬────┘ └───┬───┘   │
-│      │           │           │       │
-│      ▼           ▼           ▼       │
-│  Record:     Record:     Record:     │
-│  featureName featureName featureName │
-│  = <name>   = null      = null       │
-│  status     status      status       │
-│  = Succeeded= Succeeded = Failed     │
-│  error      error       error        │
-│  = null     = null      = <message>  │
+│         ┌────────┴──────────┐        │
+│         │   Approved?       │        │
+│         └────────┬──────────┘        │
+│      Yes │       │ Skip/Cancel       │
+│          ▼       ▼                   │
+│  ┌─────────────────────────────┐     │
+│  │ Arc Run Command (Approved): │     │
+│  │ Invoke-Sqlcmd executes:     │     │
+│  │ 1) DMV query per user DB    │     │
+│  │ 2) Runtime checks per       │     │
+│  │    instance:                │     │
+│  │    - Always On AG           │     │
+│  │    - Resource Governor      │     │
+│  │    - Partitioned tables     │     │
+│  │    - ONLINE=ON job steps    │     │
+│  └──────────────┬──────────────┘     │
+│                 │                     │
+│        ┌────────┴────────┐           │
+│        │    Result?      │           │
+│        └────────┬────────┘           │
+│    ┌────────────┼────────────┐       │
+│    ▼            ▼            ▼       │
+│ ┌────────┐ ┌─────────┐ ┌───────┐    │
+│ │Features│ │No rows  │ │Failed │    │
+│ │returned│ │(clean)  │ │       │    │
+│ └───┬────┘ └────┬────┘ └───┬───┘    │
+│     │           │           │        │
+│     ▼           ▼           ▼        │
+│ Record:     Record:     Record:      │
+│ featureName featureName featureName  │
+│ = <name>   = null      = null        │
+│ status     status      status        │
+│ = Succeeded= Succeeded = Failed      │
+│ error      error       error         │
+│ = null     = null      = <message>   │
+│                                      │
+│ If Skipped: executionStatus=Skipped  │
+│ note gap; confidence → Low           │
+│ If Cancelled: stop; present findings │
 │                                      │
 └──────────────────┬───────────────────┘
                    │
@@ -178,6 +197,9 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 | Scope validation | Do returned resources match requested tenant? | Fallback to CLI |
 | CLI fallback | Do CLI results match requested tenant? | **STOP** — report error, offer file upload |
 | Enterprise detection | Any Enterprise Engine instances? | Skip downgrade audit |
+| User approval — extension install | Did user approve extension installation? | Skip extension install; note gap; audit cannot proceed for this machine |
+| User approval — run command | Did user approve run command create/update? | Skip execution; set executionStatus=Skipped; confidence → Low; note downstream gap |
+| User approval — run command delete | Did user approve run command deletion? | Skip deletion; report quota blocker; do not proceed with run command on this machine |
 | Run Command execution | Did execution succeed? | Record as Failed, confidence = Low |
 | Combined persisted + runtime results | Are persisted and runtime checks both clean? | GREEN if both clean; otherwise AMBER/RED based on blockers/completeness |
 
