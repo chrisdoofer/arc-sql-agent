@@ -267,7 +267,30 @@ Use this skill when the user asks to:
 
 1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
 
-2. Use a real execution path after tenant/subscription scope has been validated:
+2. Before executing ANY write operation in this phase (extension installation, run command creation, run command update, or run command deletion), you MUST obtain explicit user approval via `ask_user`:
+
+   a. **Extension installation check** — before installing or upgrading the Arc Run Command extension (`Microsoft.Cplat.Core.RunCommandHandlerWindows`) on any machine:
+      - Present: "The Arc Run Command extension needs to be installed on {machineName} to execute the Enterprise downgrade audit. This will install the 'Microsoft.Cplat.Core.RunCommandHandlerWindows' extension on this machine in subscription {subscriptionId}. Shall I proceed?"
+      - Choices: `["Approve", "Skip this step", "Cancel analysis"]`
+      - If Approved: proceed with installation
+      - If Skipped: note that the audit could not be executed for this machine due to missing extension; surface in Data gaps / follow-up questions; continue with remaining machines
+      - If Cancelled: stop the analysis gracefully and present any findings gathered so far
+
+   b. **Run command execution approval** — before creating or updating a run command slot to execute an audit script on any machine:
+      - Present: "I'd like to execute the Enterprise downgrade audit on {machineName} (subscription: {subscriptionId}). This will {create/update} an Arc Run Command resource named '{slotName}' and run a PowerShell script that queries SQL Server diagnostic views. Shall I proceed?"
+      - Choices: `["Approve", "Skip this step", "Cancel analysis"]`
+      - If Approved: proceed with the run command create or update
+      - If Skipped: note that the audit could not be executed for this machine; set `executionStatus = Skipped` in the output record; surface downstream impact (downgrade confidence falls to Low for this machine); continue with remaining machines
+      - If Cancelled: stop the analysis gracefully and present any findings gathered so far
+
+   c. **Run command deletion approval** — before deleting any run command resource (quota cleanup only):
+      - Present: "To free run command quota on {machineName} (subscription: {subscriptionId}), I need to delete {count} existing run command resource(s): {names}. Shall I proceed?"
+      - Choices: `["Approve", "Skip this step", "Cancel analysis"]`
+      - If Approved: proceed with deletion
+      - If Skipped: note that quota could not be freed; report as a pre-execution blocker; do not proceed with run command execution for this machine
+      - If Cancelled: stop the analysis gracefully and present any findings gathered so far
+
+3. Use a real execution path after tenant/subscription scope has been validated:
    - identify target Arc-enabled SQL instances from the validated scope dataset
    - for each target instance, enumerate relevant user databases (`database_id > 4`) that are online; include read-only databases because they can still return persisted feature evidence
    - execute the downgrade DMV across ALL user databases on each machine in a SINGLE consolidated script execution via Arc Run Command
@@ -278,7 +301,7 @@ Use this skill when the user asks to:
    - this reduces round-trips from N (one per database) to 1 per machine
    - see "Consolidated script patterns" under Execution reliability considerations for the reference implementation
 
-3. Capture results in a structured per-database output record using this minimum schema:
+4. Capture results in a structured per-database output record using this minimum schema:
    - machineName
    - instanceName
    - databaseName
@@ -288,7 +311,7 @@ Use this skill when the user asks to:
    - field names are mandatory and must use this exact camelCase naming
    - downstream processing depends on exact key matches; do not rename or reformat these keys
 
-4. Populate structured output as follows:
+5. Populate structured output as follows:
    - audit succeeded with findings:
      - emit one record per returned feature row
      - set `featureName` to the returned DMV value
@@ -305,11 +328,11 @@ Use this skill when the user asks to:
      - set `executionStatus = Failed`
      - capture the failure reason in `errorMessage`
 
-5. Treat this step as a REQUIRED data acquisition step:
+6. Treat this step as a REQUIRED data acquisition step:
    - do not skip execution due to partial data availability
    - do not proceed as if the audit was completed unless results are actually obtained
 
-6. Handle results as follows:
+7. Handle results as follows:
    - If rows are returned:
      - surface the feature names clearly
      - treat them as potential downgrade blockers until interpreted against target Standard edition support for the chosen downgrade target version (default SQL Server 2022 Standard unless another target is specified)
@@ -321,13 +344,13 @@ Use this skill when the user asks to:
      - do not claim that no Enterprise features are in use
      - downgrade confidence for any Enterprise → Standard recommendation must be Low
 
-7. The downgrade recommendation MUST distinguish between:
+8. The downgrade recommendation MUST distinguish between:
    - persisted feature evidence
    - target edition support interpretation
    - runtime / operational feature usage results
    - remaining business-impact validation required
 
-8. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
+9. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
    - treat the DMV audit as persisted feature validation only
    - execute ALL runtime checks on each machine in a SINGLE consolidated script execution (not one query per round-trip)
    - the consolidated runtime script MUST execute the following queries and return structured JSON output:
@@ -382,7 +405,7 @@ Use this skill when the user asks to:
      - SQL Server 2022 Standard supports compression
      - for older downgrade targets, validate compression support explicitly against target version
 
-9. You MUST classify each Enterprise → Standard downgrade readiness using the following classification model:
+10. You MUST classify each Enterprise → Standard downgrade readiness using the following classification model:
    - GREEN = ready to downgrade:
      - DMV audit executed successfully with no persisted features detected
      - Runtime validation completed with no blockers identified
@@ -395,16 +418,16 @@ Use this skill when the user asks to:
      - DMV audit execution failed or could not be completed, OR
      - Confirmed runtime blockers identified
 
-10. The classification MUST be surfaced in:
+11. The classification MUST be surfaced in:
    - Executive Summary (include classification status for any downgrade opportunities)
    - Key optimisation opportunities (for Enterprise → Standard recommendations)
    - Enterprise downgrade audit section (detailed classification)
 
-11. You MUST NOT:
+12. You MUST NOT:
    - claim "no Enterprise features in use" without DMV evidence
    - provide Medium or High confidence downgrade recommendations without successful audit execution or equivalent evidence
 
-12. Execution reliability considerations:
+13. Execution reliability considerations:
 
 - You MUST consider execution reliability when using Arc Run Command or equivalent execution methods.
 
@@ -675,6 +698,23 @@ Use this skill when the user asks to:
   - Medium = reasonable inference with some gaps
   - Low = limited data or assumptions required
  
+## Change approval guardrails
+
+- Never modify customer Azure resources without explicit user approval via `ask_user`.
+- Present the action, target resource, and subscription before requesting approval.
+- Use choices: `["Approve", "Skip this step", "Cancel analysis"]` for all approval prompts.
+- If the user selects **Approve**: proceed with the action.
+- If the user selects **Skip this step**: note the skipped action in output; surface any downstream impact (e.g. "Enterprise downgrade audit could not be executed because run command execution was declined"); continue with available data.
+- If the user selects **Cancel analysis**: stop gracefully and present any findings gathered so far.
+- Read-only operations (Resource Graph queries, ARM GET requests, `az account list`, `az account show`) do NOT require approval and must not be unnecessarily gated.
+- The following categories of action MUST be preceded by an approval prompt:
+  - Extension installation or upgrade on Arc-enabled machines
+  - Arc Run Command resource creation
+  - Arc Run Command resource update (this triggers execution)
+  - Arc Run Command resource deletion
+  - Any ARM PUT, POST, PATCH, or DELETE that modifies resources in the customer's subscription
+  - Any `az rest --method PUT/POST/PATCH/DELETE` call that modifies state
+
 ## Enterprise downgrade audit guardrails
 
 - Never recommend an Enterprise → Standard downgrade based solely on inventory heuristics when audit data is absent.
