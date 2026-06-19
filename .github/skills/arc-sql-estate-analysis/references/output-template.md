@@ -183,7 +183,7 @@
 
 # SQL on Azure VM best practices alignment
 
-- Execution mode (select one): [Resource Graph only | Resource Graph + Log Analytics BPA | Full scan with Arc Run Command fallback]
+- Execution depth (select one): [Tier 1 only (Resource Graph) | Tier 1+2 (Resource Graph + Log Analytics BPA) | Tier 1+2+3 (full scan with Arc Run Command fallback)]
 - Machines scanned:
 - Total checks executed:
 - Pass: | Fail: | Warning: | Not assessed:

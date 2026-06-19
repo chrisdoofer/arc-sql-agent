@@ -1022,7 +1022,7 @@ Use this skill when the user asks to:
 # Output requirements
 
 Always produce the sections below in order:
-The detailed report structure below expands the core customer-facing sections into explicit audit and planning blocks.
+The detailed report structure below is the canonical section order and expands core customer-facing sections into explicit audit and planning blocks.
 
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
