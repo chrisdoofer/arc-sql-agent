@@ -45,12 +45,7 @@ Use this skill when the user asks to:
    - if a named workload subscription is mentioned, use that explicitly
    - confirm selected subscription IDs or names before analysis
 
-6. After subscription scope is confirmed, query Resource Graph for Azure Migrate projects across the confirmed scope:
-   ```
-   resources
-   | where type == "microsoft.migrate/migrateprojects"
-   | project id, name, resourceGroup, subscriptionId, location
-   ```
+6. Azure Migrate project discovery is performed as part of the consolidated estate query in Phase 4 (the `microsoft.migrate/migrateprojects` type is included in that query). There is no need to run a separate project discovery query at this point. Once the consolidated query result is available in Phase 4, extract Migrate project rows from it and proceed as follows:
 
 7. If one or more Azure Migrate projects are found:
    - present the list to the user via `ask_user`
@@ -66,6 +61,13 @@ Use this skill when the user asks to:
 ## Phase 2 - Validate live Azure scope before analysis
 
 1. Before running full estate analysis, perform a lightweight validation query against the selected tenant / subscription scope:
+
+   ```kql
+   resources
+   | where type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.azurearcdata/sqlserverinstances'
+   | summarize count() by type, subscriptionId
+   ```
+
    - confirm that Arc-enabled SQL Server resources or Arc-enabled machines are visible in the chosen scope
    - verify returned tenant and subscription identifiers match the requested scope
    - if returned resources do not belong to the requested tenant / subscription scope, treat the result as invalid and do not continue with analysis
@@ -156,11 +158,49 @@ Use this skill when the user asks to:
      - primary (MCP)
      - fallback (CLI or alternate method)
 
-4. If live Azure scope is validated, collect Arc-enabled SQL estate data from the confirmed tenant / subscription scope:
-   - SQL Server instances
-   - databases
-   - Arc-enabled host machines
-   - any available assessment / readiness / backup / security metadata
+4. If live Azure scope is validated, collect all Arc-enabled SQL estate data using a **single consolidated Azure Resource Graph query**. This retrieves SQL instances, databases, Arc-enabled machines, and Azure Migrate projects in one round-trip:
+
+   ```kql
+   resources
+   | where type =~ 'microsoft.azurearcdata/sqlserverinstances'
+       or type =~ 'microsoft.azurearcdata/sqlserverinstances/databases'
+       or type =~ 'microsoft.hybridcompute/machines'
+       or type =~ 'microsoft.migrate/migrateprojects'
+   | where subscriptionId in ({subscriptionIds})
+   | project id, name, type, resourceGroup, subscriptionId, location, properties, tags
+   ```
+
+   Execute using the Azure CLI template (see `references/command-templates.md` — Template 5: Consolidated Estate ARG Query):
+
+   ```powershell
+   az graph query -q "resources | where (type =~ 'microsoft.azurearcdata/sqlserverinstances' or type =~ 'microsoft.azurearcdata/sqlserverinstances/databases' or type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.migrate/migrateprojects') | where subscriptionId in ('{sub1}','{sub2}') | project id, name, type, resourceGroup, subscriptionId, location, properties, tags" --subscriptions {subscriptionIds} --first 1000 -o json
+   ```
+
+   **Data available in Resource Graph (use the consolidated query — no separate ARM calls needed):**
+   - SQL instance properties: `version`, `edition`, `vCores`, `licenseType`, `status`, `backupPolicy`, `monitoring`, `azureDefenderStatus`, `alwaysOnRole`, `tcpStaticPorts`
+   - Assessment / migration data: `properties.migration` including `assessment.enabled`, `assessmentUploadTime`, `skuRecommendationResults`, `serverAssessments`
+   - Database properties: `state`, `sizeMB`, `compatibilityLevel`, `recoveryMode`, `backupInformation`, `collationName`, `databaseOptions`
+   - Machine properties: `osSku`, `osName`, `status`, `detectedProperties` (coreCount, memory, processorNames)
+   - Azure Migrate project identifiers: `id`, `name`, `resourceGroup`, `subscriptionId`, `location`
+
+   **NOT available in Resource Graph (separate API calls are required and justified):**
+   - Azure Migrate project utilisation data — requires Migrate API endpoints
+   - Assessed machine metrics from Azure Migrate (CPU/memory baselines, confidence scores)
+   - Agentless dependency analysis data — portal CSV export only (see Phase 4 step 8)
+
+   **Post-query local processing (perform locally — no additional network calls):**
+   1. Filter results by `type` field to separate: SQL instances, databases, machines, and Migrate projects
+   2. Group databases by parent instance using the resource ID hierarchy (instance resource ID is the parent segment of each database resource ID)
+   3. Correlate machines to SQL instances by matching `properties.containerResourceId` in the instance to the machine `id`, or by matching instance machine name to `name` in machines
+   4. Extract assessment and migration data from `properties.migration` on each SQL instance resource
+   5. Identify any Azure Migrate projects returned and present for user selection (see Phase 1 step 6 — project discovery can be satisfied by this query; no separate project discovery query is needed)
+
+   **Pagination for large estates (1000+ resources):**
+   - Resource Graph returns a maximum of 1,000 rows per query by default
+   - Always include `--first 1000` in the CLI command
+   - Check the response for a `skip_token` field; if present, issue a follow-up query using `--skip-token {skipToken}` to retrieve the next page
+   - Repeat until no `skip_token` is returned
+   - Even with pagination this approach reduces network round-trips from N individual calls to 1–2 paged queries
 
 5. Migration assessment data handling:
    - Assessment results are stored in a **telemetry data plane** (accessed via the `getTelemetry` action), not directly in ARM resource properties
