@@ -128,27 +128,53 @@ $results += Test-ContentContains -Content $reportContent -Pattern '(?:Pass|Fail|
 $results += Test-ContentContains -Content $reportContent -Pattern '(?:Software Assurance|SA)' -Name "Licensing: SA referenced" -Category "Licensing" -Regex
 $results += Test-ContentContains -Content $reportContent -Pattern '(?:Hybrid Benefit|AHB)' -Name "Licensing: Azure Hybrid Benefit mentioned" -Category "Licensing" -Regex
 
-# --- Section 8: Issue Regression Tests ---
+# --- Section 8: Issue Regression Tests (PASSING — previously fixed) ---
 # Issue #71: Agent must prompt for dependency CSV export (not silently skip)
 # The report should contain explicit language about the dependency export prompt being offered
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:export.+dependenc|dependency.+CSV|dependency.+export|Manage Dependencies)' -Name "#71: Dependency CSV export prompt evidence" -Category "Regressions" -Regex
+$results += Test-ContentContains -Content $reportContent -Pattern '(?:export.+dependenc|dependency.+CSV|dependency.+export|Manage Dependencies)' -Name "#71: Dependency CSV export prompt evidence" -Category "Regressions (fixed)" -Regex
 
 # Issue #72: BPA parsing must return actual check IDs (not vague "data available" language)
 # If BPA parsed correctly, we should see specific check ID prefixes in the output
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:STOR-|INST-|SEC-|HADR-|OPS-)' -Name "#72: BPA check IDs present (parsed successfully)" -Category "Regressions" -Regex
+$results += Test-ContentContains -Content $reportContent -Pattern '(?:STOR-|INST-|SEC-|HADR-|OPS-)' -Name "#72: BPA check IDs present (parsed successfully)" -Category "Regressions (fixed)" -Regex
 
 # Issue #72 (secondary): BPA should not contain failure/retry language indicating parsing broke
 $bpaParseFailure = $reportContent -match '(?:could not parse|parsing failed|empty.*BPA|BPA.*unavailable)'
-$results += Test-Assertion -Name "#72: No BPA parsing failure language" -Category "Regressions" -Passed (-not $bpaParseFailure) -Detail $(if ($bpaParseFailure) { "Report contains BPA parsing failure indicators" } else { "" })
+$results += Test-Assertion -Name "#72: No BPA parsing failure language" -Category "Regressions (fixed)" -Passed (-not $bpaParseFailure) -Detail $(if ($bpaParseFailure) { "Report contains BPA parsing failure indicators" } else { "" })
 
-# Issue #73: ARCBOX-SQL2016 must appear in the Azure Migrate utilisation section
-# Extract the section between "Azure Migrate" / "utilisation" and the next major heading
-$migrateSection = ""
-if ($reportContent -match '(?si)(Azure Migrate|[Uu]tilisation.*baseline)(.+?)(Risks and blockers|Data gaps|Enterprise downgrade)') {
-    $migrateSection = $Matches[0]
+# --- Section 9: TDD — Open Issues (EXPECTED TO FAIL until fix lands) ---
+# These assertions define the DESIRED state after each fix is merged.
+# They SHOULD FAIL today. When they pass, the issue is resolved.
+
+# Issue #71 (strict): The dependency prompt must result in user-response language
+# Current bug: prompt doesn't fire at all — report just says "not enabled" generically
+# After fix: report should show "user declined CSV export" or "no CSV provided" (evidence prompt fired)
+$depPromptFired = $reportContent -match '(?i)(user declined|no CSV provided|CSV not provided|user chose not to export|declined to export|not exported)'
+$results += Test-Assertion -Name "#71-TDD: Dependency prompt user-response recorded" -Category "TDD (open issues)" -Passed $depPromptFired -Detail $(if (-not $depPromptFired) { "No evidence the dependency CSV prompt fired and user response was recorded. Expected: 'user declined' / 'no CSV provided' language." } else { "" })
+
+# Issue #72 (strict): BPA must produce BOTH machines' findings with severity ratings
+# Current bug: parsing is fragile, sometimes only gets one machine or loses severity
+# After fix: both ArcBox-SQL and ARCBOX-SQL2016 should have BPA check rows with severity
+$bpaSection = ""
+if ($reportContent -match '(?si)(best.practice|BPA alignment)(.+?)(Quick wins|Strategic moves)') {
+    $bpaSection = $Matches[0]
 }
-$sql2016InMigrate = $migrateSection -match 'ARCBOX.SQL2016'
-$results += Test-Assertion -Name "#73: ARCBOX-SQL2016 in Migrate utilisation data" -Category "Regressions" -Passed $sql2016InMigrate -Detail $(if (-not $sql2016InMigrate) { "ARCBOX-SQL2016 not found in Azure Migrate utilisation section — likely still missing from assessed machines API" } else { "" })
+$bpaBothMachines = ($bpaSection -match '(?i)ArcBox-SQL') -and ($bpaSection -match '(?i)ARCBOX.SQL2016')
+$results += Test-Assertion -Name "#72-TDD: BPA findings for BOTH machines" -Category "TDD (open issues)" -Passed $bpaBothMachines -Detail $(if (-not $bpaBothMachines) { "BPA section does not contain findings for both ArcBox-SQL AND ARCBOX-SQL2016. Parsing may have failed for one machine." } else { "" })
+
+# Issue #72 (strict): BPA severity must be paired with check IDs (structured output, not free text)
+# After fix: each check should have a severity in the same table row
+$bpaSeverityPaired = [regex]::Matches($bpaSection, '(?i)(STOR|INST|SEC|HADR|OPS)-\d+.{0,200}?(Critical|High|Medium|Low|Informational)')
+$results += Test-Assertion -Name "#72-TDD: BPA check IDs paired with severity (5+ checks)" -Category "TDD (open issues)" -Passed ($bpaSeverityPaired.Count -ge 5) -Detail $(if ($bpaSeverityPaired.Count -lt 5) { "Only $($bpaSeverityPaired.Count) check-severity pairs found (need 5+). BPA parsing may not be producing structured output." } else { "" })
+
+# Issue #73 (strict): ARCBOX-SQL2016 must have actual utilisation METRICS (CPU/memory %)
+# Current bug: report says "ARCBOX-SQL2016 not assessed" — machine missing from API response
+# After fix: should show actual percentage values like "ARCBOX-SQL2016... XX% CPU... XX% memory"
+$sql2016Metrics = $reportContent -match '(?i)ARCBOX.SQL2016.{0,200}?\d+\s*%'
+$results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 has utilisation metrics (CPU/mem %)" -Category "TDD (open issues)" -Passed $sql2016Metrics -Detail $(if (-not $sql2016Metrics) { "ARCBOX-SQL2016 has no utilisation percentages. Expected: CPU% and memory% from Azure Migrate assessed machines." } else { "" })
+
+# Issue #73: ARCBOX-SQL2016 must NOT contain "not assessed" language in Migrate section
+$sql2016NotAssessed = $reportContent -match '(?i)ARCBOX.SQL2016.{0,100}?not assessed'
+$results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 NOT marked 'not assessed'" -Category "TDD (open issues)" -Passed (-not $sql2016NotAssessed) -Detail $(if ($sql2016NotAssessed) { "ARCBOX-SQL2016 still marked 'not assessed' in Migrate section. Fix #73 should include this machine in assessed machines API call." } else { "" })
 
 # --- Section 9: Branding/Formatting ---
 $results += Test-ContentContains -Content $reportContent -Pattern "Microsoft" -Name "Branding: Microsoft wordmark" -Category "Formatting"
