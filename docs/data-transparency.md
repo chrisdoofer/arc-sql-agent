@@ -7,9 +7,10 @@ This document provides full transparency on the data collected, accessed, and re
 ## Principles
 
 1. **Read-only by default** — All inventory data is collected via read-only Azure Resource Graph queries. No modifications are made to any Azure resources, SQL Server configurations, or databases.
-2. **Minimal remote execution** — The only write-like operation is creating temporary Arc Run Command resources to execute a single read-only DMV query. These are cleaned up after use.
-3. **No data exfiltration** — All data remains within the Azure control plane and the operator's local session. No data is sent to third-party services.
-4. **No direct SQL connectivity** — The operator never connects directly to SQL Server. All remote queries are mediated through the Arc agent's secure channel.
+2. **Explicit user approval for write operations** — Any operation that modifies Azure resources (creating, updating, or deleting Arc Run Command resources, or installing extensions) requires explicit user approval via `ask_user` before it is executed. If the user declines, the operation is skipped and any downstream impact is noted in the output.
+3. **Minimal remote execution** — The only write-like operations are creating temporary Arc Run Command resources to execute read-only DMV queries, and deleting those resources after use. Both actions require prior user approval.
+4. **No data exfiltration** — All data remains within the Azure control plane and the operator's local session. No data is sent to third-party services.
+5. **No direct SQL connectivity** — The operator never connects directly to SQL Server. All remote queries are mediated through the Arc agent's secure channel.
 
 ---
 
@@ -75,13 +76,16 @@ The following data is explicitly **not** accessed or collected:
 ## Arc Run Command Lifecycle
 
 ```
-1. CREATE run command    → Temporary ARM resource created
+0. USER APPROVAL    → ask_user confirmation required; choices: Approve / Skip this step / Cancel analysis
+1. CREATE run command    → Temporary ARM resource created (only if Approved)
 2. EXECUTE on host      → PowerShell script runs locally on Arc machine
 3. READ results         → Output retrieved via ARM API
-4. DELETE run command    → Temporary resource cleaned up
+4. DELETE run command    → Temporary resource cleaned up (requires separate user approval)
 ```
 
 The Run Command resource exists only for the duration of execution and result retrieval. The executed script is a single `Invoke-Sqlcmd` call with no file system access, no network calls, and no side effects.
+
+If the user declines any approval step, that operation is skipped, the gap is noted in the output, and the analysis continues with the data available.
 
 ---
 
@@ -90,6 +94,7 @@ The Run Command resource exists only for the duration of execution and result re
 | Concern | Mitigation |
 |---------|-----------|
 | Scope isolation | Tenant and subscription scope is validated before any data collection. Cross-tenant results are rejected. |
+| Explicit write approval | All ARM write operations (extension install, run command create/update/delete) require explicit `ask_user` approval before execution. Declined operations are skipped gracefully. |
 | Privilege escalation | Only standard read permissions are used. Run Command requires explicit RBAC grant (`Microsoft.HybridCompute/machines/runcommands/write`). |
 | SQL Server impact | The DMV query is metadata-only, non-blocking, and has zero performance impact. |
 | Data in transit | All communication uses HTTPS 443 via Azure ARM APIs and the Arc agent secure channel. |
