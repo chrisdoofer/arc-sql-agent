@@ -181,6 +181,50 @@
   - Remaining risks and unknowns
 
 
+# SQL on Azure VM best practices alignment
+
+- Execution mode: Resource Graph only / Resource Graph + Log Analytics BPA / Full scan with Arc Run Command fallback
+- Machines scanned:
+- Total checks executed:
+- Pass: | Fail: | Warning: | Not assessed:
+
+## Summary by category
+
+| Category | Pass | Fail | Warning | Not assessed |
+|----------|------|------|---------|--------------|
+| Storage | | | | |
+| Instance configuration | | | | |
+| Security | | | | |
+| HADR | | | | |
+| Operations | | | | |
+
+## Detailed findings
+
+### Critical and High severity findings
+
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
+|         |          |          |       |        |          |               |                |             |
+
+### Medium and Low severity findings
+
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
+|         |          |          |       |        |          |               |                |             |
+
+### Informational
+
+| Machine | Instance | Check ID | Check | Status | Severity | Detail |
+|---------|----------|----------|-------|--------|----------|--------|
+|         |          |          |       |        |          |        |
+
+## Pre-migration remediation checklist
+
+1. {Machine} — {Critical/High remediation action}
+2. {Machine} — {next remediation action}
+3. {Machine} — {next remediation action}
+
+
 # Quick wins
 
 - Quick win 1:
