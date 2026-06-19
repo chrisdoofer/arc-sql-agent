@@ -219,9 +219,92 @@ az rest --body '{"properties":{"source":{"script":"SELECT * FROM sys.databases W
 
 ## Resource Graph Query Templates
 
-While this file focuses on Arc Run Command execution, the skill also relies on Azure Resource Graph queries for estate inventory. Key queries are documented inline in SKILL.md Phase 3 and Phase 4.
+While this file focuses on Arc Run Command execution, the skill also relies on Azure Resource Graph queries for estate inventory. Key queries are documented here and referenced from SKILL.md Phase 2 and Phase 4.
 
-**Example — Enumerate Arc-enabled SQL instances:**
+### 5. Consolidated Estate ARG Query
+
+**Purpose:** Retrieve all estate data — SQL instances, databases, Arc-enabled machines, and Azure Migrate projects — in a single Resource Graph round-trip. This replaces multiple individual queries and individual ARM GET calls.
+
+**Usage:** Execute once after scope validation (Phase 2). Post-process results locally to separate and correlate resource types. Do not make individual ARM GET calls for data that is already returned by this query.
+
+```powershell
+az graph query -q "resources | where (type =~ 'microsoft.azurearcdata/sqlserverinstances' or type =~ 'microsoft.azurearcdata/sqlserverinstances/databases' or type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.migrate/migrateprojects') | where subscriptionId in ('{sub1}','{sub2}') | project id, name, type, resourceGroup, subscriptionId, location, properties, tags" --subscriptions {subscriptionIds} --first 1000 -o json
+```
+
+**Placeholders:**
+- `'{sub1}','{sub2}'` — subscription IDs as a comma-separated quoted list inside the KQL `in()` operator
+- `{subscriptionIds}` — subscription IDs as a space-separated list for the `--subscriptions` parameter
+- Replace both placeholders with the confirmed subscription IDs from Phase 1
+
+**KQL equivalent (for MCP tools or portal query):**
+```kql
+resources
+| where type =~ 'microsoft.azurearcdata/sqlserverinstances'
+    or type =~ 'microsoft.azurearcdata/sqlserverinstances/databases'
+    or type =~ 'microsoft.hybridcompute/machines'
+    or type =~ 'microsoft.migrate/migrateprojects'
+| where subscriptionId in ({subscriptionIds})
+| project id, name, type, resourceGroup, subscriptionId, location, properties, tags
+```
+
+**Data returned (all available in Resource Graph — no additional ARM calls needed):**
+
+| Resource type | Key properties returned |
+|---|---|
+| `microsoft.azurearcdata/sqlserverinstances` | `version`, `edition`, `vCores`, `licenseType`, `status`, `backupPolicy`, `monitoring`, `azureDefenderStatus`, `alwaysOnRole`, `tcpStaticPorts`, `migration` (includes `assessment.enabled`, `assessmentUploadTime`, `skuRecommendationResults`, `serverAssessments`) |
+| `microsoft.azurearcdata/sqlserverinstances/databases` | `state`, `sizeMB`, `compatibilityLevel`, `recoveryMode`, `backupInformation`, `collationName`, `databaseOptions` |
+| `microsoft.hybridcompute/machines` | `osSku`, `osName`, `status`, `detectedProperties` (coreCount, memory, processorNames) |
+| `microsoft.migrate/migrateprojects` | `id`, `name`, `resourceGroup`, `subscriptionId`, `location` |
+
+**Data NOT in Resource Graph (requires separate justified API calls):**
+- Azure Migrate assessed machine utilisation metrics (CPU/memory baselines, confidence scores) — Migrate API
+- Agentless dependency data — portal CSV export only
+
+**Post-query local processing:**
+1. Split rows by `type` field into four groups: instances, databases, machines, Migrate projects
+2. Group databases by parent instance using the resource ID hierarchy (database `id` contains the parent instance `id` as a prefix)
+3. Correlate machines to instances: match instance `properties.containerResourceId` to machine `id`, or match on machine `name`
+4. Extract assessment data from each instance's `properties.migration` field
+5. Present any Migrate projects to the user for selection (Phase 1 step 7)
+
+**Pagination for large estates:**
+- Resource Graph returns a maximum of 1,000 rows per request
+- Always pass `--first 1000` to the CLI command
+- If the response contains a `skip_token` field, retrieve the next page:
+
+```powershell
+az graph query -q "{same query}" --subscriptions {subscriptionIds} --first 1000 --skip-token "{skipToken}" -o json
+```
+
+- Repeat until the response contains no `skip_token`
+- Concatenate all pages before processing
+
+**Expected output:** JSON array where each element has `id`, `name`, `type`, `resourceGroup`, `subscriptionId`, `location`, `properties`, `tags`.
+
+---
+
+### 6. Scope Validation Query
+
+**Purpose:** Lightweight pre-check to confirm Arc resources are visible in the selected scope before issuing the full consolidated query. Used in Phase 2.
+
+```kql
+resources
+| where type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.azurearcdata/sqlserverinstances'
+| summarize count() by type, subscriptionId
+```
+
+**Azure CLI equivalent:**
+```powershell
+az graph query -q "resources | where type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.azurearcdata/sqlserverinstances' | summarize count() by type, subscriptionId" --subscriptions {subscriptionIds} -o json
+```
+
+**Expected output:** Summary count of resource types per subscription. Use to confirm scope before issuing the full consolidated query.
+
+---
+
+**Legacy example — Enumerate Arc-enabled SQL instances with join (superseded):**
+
+> **Note:** The following join-based query is superseded by Template 5 (Consolidated Estate ARG Query) above. It is retained here for reference only. Do not use it for new analysis — use the consolidated query instead.
 
 ```
 resources
@@ -246,6 +329,8 @@ These queries are executed directly via Azure CLI or GitHub Copilot MCP tools an
 2. **For all script submissions:** Use Template 2 (Create/Update via REST) with encoding
 3. **After submission:** Use Template 3 (Poll) to check status and retrieve results
 4. **Only when quota exhausted:** Use Template 4 (Delete) for cleanup, but prefer updating slots
+5. **For all estate inventory queries:** Use Template 5 (Consolidated Estate ARG Query) — one call for all resource types
+6. **Before the full estate query:** Use Template 6 (Scope Validation Query) as a lightweight pre-check in Phase 2
 
 ### Placeholder naming conventions:
 
