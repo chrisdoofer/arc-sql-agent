@@ -336,35 +336,35 @@ Use this skill when the user asks to:
            $workspaceGuid = az monitor log-analytics workspace show --subscription "<subscriptionId>" --resource-group "<resourceGroup>" --workspace-name "<workspaceName>" --query "customerId" -o tsv
            ```
         2. Pre-filter to the target machine names and relevant BPA check IDs before parsing `RawData`; this avoids volume explosions from verbose rows such as `DbBackupMedia` and keeps the result set focused on Azure SQL VM alignment checks
-           - replace `'<machine1>'`,`'<machine2>'` in the example below with the actual Arc machine names collected earlier in Phase 4; do not leave placeholders in the executed query
+           - replace `'<machine1>', '<machine2>'` in the example below with the actual Arc machine names collected earlier in Phase 4; do not leave placeholders in the executed query
         3. Submit the KQL through `az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query"` with a JSON body file:
            ```powershell
            $queryBody = @{
                query = @"
-           SqlAssessment_CL
-           | where TimeGenerated > ago(30d)
-           | extend parsed = parse_csv(RawData)
-           | extend checkId = tostring(parsed[2]),
-                    checkName = tostring(parsed[3]),
-                    severity = tostring(parsed[6]),
-                    machineDb = tostring(parsed[7]),
-                    message = tostring(parsed[9]),
-                    instanceName = tostring(parsed[11])
-           | extend machineName = tostring(split(machineDb, ':')[0])
-           | where machineName in ('<machine1>','<machine2>')
-           | where checkId in ('NtfsBlockSizeNotFormatted','TempDbSameVolume','TempDBFiles1PerCPU',
-               'TempDBFilesNotLess8','InstantFileInitialization','QueryStoreOn','BackupCompression',
-               'AutoShrink','AutoClose','PercentAutogrows','FilesAutogrowth','MaxServerMemory',
-               'MaxDop','TempDBDataSameSize','DataFilesSameVolume','LogFilesSameVolume',
-               'DbBackupMedia','CostThresholdParallelism','LockPagesInMemory','AdHocWorkload')
-           | summarize findingCount=count(), latestTime=max(TimeGenerated), sampleMessage=any(message)
-               by machineName, instanceName, checkId, checkName, severity
-           | order by machineName asc, checkId asc
-           "@
+SqlAssessment_CL
+| where TimeGenerated > ago(30d)
+| extend parsed = parse_csv(RawData)
+| extend checkId = tostring(parsed[2]),
+         checkName = tostring(parsed[3]),
+         severity = tostring(parsed[6]),
+         machineDb = tostring(parsed[7]),
+         message = tostring(parsed[9]),
+         instanceName = tostring(parsed[11])
+| extend machineName = tostring(split(machineDb, ':')[0])
+| where machineName in ('<machine1>', '<machine2>')
+| where checkId in ('NtfsBlockSizeNotFormatted','TempDbSameVolume','TempDBFiles1PerCPU',
+    'TempDBFilesNotLess8','InstantFileInitialization','QueryStoreOn','BackupCompression',
+    'AutoShrink','AutoClose','PercentAutogrows','FilesAutogrowth','MaxServerMemory',
+    'MaxDop','TempDBDataSameSize','DataFilesSameVolume','LogFilesSameVolume',
+    'DbBackupMedia','CostThresholdParallelism','LockPagesInMemory','AdHocWorkload')
+| summarize findingCount=count(), latestTime=max(TimeGenerated), sampleMessage=any(message)
+    by machineName, instanceName, checkId, checkName, severity
+| order by machineName asc, checkId asc
+"@
            } | ConvertTo-Json -Compress
 
            $queryPath = Join-Path $env:TEMP "la-bpa-query.json"
-           $queryBody | Set-Content $queryPath -NoNewline
+           $queryBody | Set-Content $queryPath
 
            $response = az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query" --body "@$queryPath" --headers "Content-Type=application/json" -o json | ConvertFrom-Json
            ```
