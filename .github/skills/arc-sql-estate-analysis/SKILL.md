@@ -319,18 +319,55 @@ Use this skill when the user asks to:
        - SEC-02 (`databaseOptions.isEncrypted`)
        - HADR-01 (`isHadrEnabled`, `alwaysOnRole`)
      - **Tier 2 (Log Analytics BPA, read-only, preferred for broad coverage):** query SQL Best Practices Assessment results from `SqlAssessment_CL` and map BPA check IDs to Azure SQL VM best-practice categories (Storage, Instance configuration, Security, HADR, Operations)
-       - baseline KQL pattern:
-         ```kql
-         SqlAssessment_CL
-         | where TimeGenerated > ago(30d)
-         | extend parts = split(RawData, ',')
-         | extend checkId = tostring(parts[2]),
-                  checkName = tostring(parts[3]),
-                  machineName = tostring(parts[6]),
-                  passed = tostring(parts[7])
-         | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
-         | project machineName, checkId, checkName, passed, TimeGenerated
-         ```
+       - **Step 1 — Workspace discovery:** resolve the target Log Analytics workspace using this priority order:
+         1. Read `properties.monitoring.logAnalyticsWorkspaceResourceId` from each Arc SQL instance resource (already available in Resource Graph data collected in Phase 4); extract the workspace resource ID from this field
+         2. If the field is absent or null for all instances, enumerate Log Analytics workspaces in scope:
+            ```bash
+            az monitor log-analytics workspace list --subscription <subscriptionId> --query "[].{id:id, name:name, resourceGroup:resourceGroup}" -o json
+            ```
+         3. For each discovered workspace, check whether the `SqlAssessment_CL` table exists:
+            ```bash
+            az monitor log-analytics workspace table show --subscription <subscriptionId> --resource-group <resourceGroup> --workspace-name <workspaceName> --name SqlAssessment_CL --query "name" -o tsv 2>/dev/null
+            ```
+         4. Use the first workspace where the table is confirmed to exist; if multiple workspaces contain the table, query all of them and merge results
+       - **Step 2 — KQL query with progressive time-window widening:** after identifying the workspace(s), query using the following retry sequence — stop at the first window that returns results:
+         - **Window 1 (30 days):**
+           ```kql
+           SqlAssessment_CL
+           | where TimeGenerated > ago(30d)
+           | extend parts = split(RawData, ',')
+           | extend checkId = tostring(parts[2]),
+                    checkName = tostring(parts[3]),
+                    machineName = tostring(parts[6]),
+                    passed = tostring(parts[7])
+           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
+           | project machineName, checkId, checkName, passed, TimeGenerated
+           ```
+         - **Window 2 (90 days, if window 1 returns zero rows):**
+           ```kql
+           SqlAssessment_CL
+           | where TimeGenerated > ago(90d)
+           | extend parts = split(RawData, ',')
+           | extend checkId = tostring(parts[2]),
+                    checkName = tostring(parts[3]),
+                    machineName = tostring(parts[6]),
+                    passed = tostring(parts[7])
+           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
+           | project machineName, checkId, checkName, passed, TimeGenerated
+           ```
+         - **Window 3 (all time, if window 2 returns zero rows):**
+           ```kql
+           SqlAssessment_CL
+           | extend parts = split(RawData, ',')
+           | extend checkId = tostring(parts[2]),
+                    checkName = tostring(parts[3]),
+                    machineName = tostring(parts[6]),
+                    passed = tostring(parts[7])
+           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
+           | project machineName, checkId, checkName, passed, TimeGenerated
+           ```
+         - Only conclude "BPA data unavailable" if window 3 also returns zero rows (i.e. the table exists but is genuinely empty) or if the table was not found in any discovered workspace
+       - **Step 3 — Report data age:** when BPA results are found, record and surface the most recent `TimeGenerated` value (e.g. "BPA results from 2025-05-15") alongside findings so users can assess freshness; if the data is older than 90 days, note this explicitly in the output
        - include mapped BPA coverage for the Azure VM alignment checks, including:
          - STOR-03 (`NtfsBlockSizeNotFormatted`)
          - STOR-02 (`TempDbSameVolume`)
@@ -339,7 +376,7 @@ Use this skill when the user asks to:
          - INST-04/06/07/08/09/10 (`QueryStoreOn`, `BackupCompression`, `AutoShrink`, `AutoClose`, `PercentAutogrows`, `FilesAutogrowth`)
          - OPS and HADR operational checks where BPA evidence exists
      - **Tier 3 (Arc Run Command, fallback only):**
-       - offer only when BPA is unavailable/incomplete (`bestPracticesAssessment = null`, workspace unavailable, or required checks remain unresolved)
+       - offer only when BPA is unavailable/incomplete (`bestPracticesAssessment = null`, no workspace with `SqlAssessment_CL` found after full enumeration, or required checks remain unresolved after exhausting all time windows)
        - after Tier 1/2, prompt:
          - "The Resource Graph scan identified {X} findings from {Y} checks. There are {Z} additional checks (storage layout, SQL config, maintenance jobs) that require live queries via Arc Run Command. Would you like me to run the full scan?"
          - choices: `["Yes — run full scan via Arc Run Command", "No — Resource Graph results are sufficient"]`
