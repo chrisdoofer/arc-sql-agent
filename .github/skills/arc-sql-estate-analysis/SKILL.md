@@ -367,6 +367,7 @@ Use this skill when the user asks to:
      - High = strong best-practice deviation likely requiring remediation
      - Medium/Low = optimisation improvements and quick wins
      - Informational = context-only findings
+   - if the scan is skipped or unavailable, still include the report section and mark it as `Not assessed`
 
 
 ## Phase 5 - Enterprise downgrade audit
@@ -835,6 +836,7 @@ Use this skill when the user asks to:
    - include the HTML output path so the user can run conversion manually
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
    - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section)
    - failure response format:
      - `PDF export status: Failed`
      - `Reason: {error_detail}`
@@ -1020,6 +1022,7 @@ Use this skill when the user asks to:
 # Output requirements
 
 Always produce the sections below in order:
+The detailed report structure below expands the core customer-facing sections into explicit audit and planning blocks.
 
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
