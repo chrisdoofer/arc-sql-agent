@@ -128,6 +128,26 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 │         └────────┬──────────┘        │
 │      Yes │       │ Skip/Cancel       │
 │          ▼       ▼                   │
+│          │       │                   │
+│  ┌───────┴───────────────────────┐   │
+│  │ SCRIPT REVIEW (per script):   │   │
+│  │                               │   │
+│  │ Present full script in a      │   │
+│  │ code block showing:           │   │
+│  │  - Target machine             │   │
+│  │  - Instance name              │   │
+│  │  - Purpose description        │   │
+│  │  - Estimated execution time   │   │
+│  │  - Complete script content    │   │
+│  │                               │   │
+│  │ Batch approval when same      │   │
+│  │ script → multiple machines    │   │
+│  └───────────────┬───────────────┘   │
+│          ┌───────┴───────────┐        │
+│          │  Script approved? │        │
+│          └───────┬───────────┘        │
+│  Approve  │      │ Skip/Modify        │
+│           ▼      ▼                   │
 │  ┌─────────────────────────────┐     │
 │  │ Arc Run Command (Approved): │     │
 │  │ Invoke-Sqlcmd executes:     │     │
@@ -199,6 +219,8 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 | Enterprise detection | Any Enterprise Engine instances? | Skip downgrade audit |
 | User approval — extension install | Did user approve extension installation? | Skip extension install; note gap; audit cannot proceed for this machine |
 | User approval — run command | Did user approve run command create/update? | Skip execution; set executionStatus=Skipped; confidence → Low; note downstream gap |
+| Script review — DMV audit | Did user approve the presented DMV audit script? | Set executionStatus=Skipped; note declined check in output; confidence → Low |
+| Script review — runtime validation | Did user approve the presented runtime validation script? | Set executionStatus=Skipped; note declined check; confidence → Low |
 | User approval — run command delete | Did user approve run command deletion? | Skip deletion; report quota blocker; do not proceed with run command on this machine |
 | Run Command execution | Did execution succeed? | Record as Failed, confidence = Low |
 | Combined persisted + runtime results | Are persisted and runtime checks both clean? | GREEN if both clean; otherwise AMBER/RED based on blockers/completeness |

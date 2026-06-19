@@ -76,7 +76,11 @@ The following data is explicitly **not** accessed or collected:
 ## Arc Run Command Lifecycle
 
 ```
-0. USER APPROVAL    → ask_user confirmation required; choices: Approve / Skip this step / Cancel analysis
+0. SCRIPT REVIEW & APPROVAL  → Full script content presented to user in a markdown code block
+                                (target machine, instance, purpose, estimated time, complete script)
+                                ask_user confirmation required; choices: Approve and execute /
+                                Skip this check / Modify script first
+                                No script is ever submitted without completing this step.
 1. CREATE run command    → Temporary ARM resource created (only if Approved)
 2. EXECUTE on host      → PowerShell script runs locally on Arc machine
 3. READ results         → Output retrieved via ARM API
@@ -84,6 +88,8 @@ The following data is explicitly **not** accessed or collected:
 ```
 
 The Run Command resource exists only for the duration of execution and result retrieval. The executed script is a single `Invoke-Sqlcmd` call with no file system access, no network calls, and no side effects.
+
+The full script content is always shown to the user before submission — no script is ever submitted silently. Batch approval is offered when the same script template runs across multiple machines.
 
 If the user declines any approval step, that operation is skipped, the gap is noted in the output, and the analysis continues with the data available.
 
@@ -94,6 +100,7 @@ If the user declines any approval step, that operation is skipped, the gap is no
 | Concern | Mitigation |
 |---------|-----------|
 | Scope isolation | Tenant and subscription scope is validated before any data collection. Cross-tenant results are rejected. |
+| Script transparency | Every script executed via Arc Run Command is presented to the user in full (as a markdown code block) before submission, along with target machine, instance name, and purpose. No script is ever submitted silently. |
 | Explicit write approval | All ARM write operations (extension install, run command create/update/delete) require explicit `ask_user` approval before execution. Declined operations are skipped gracefully. |
 | Privilege escalation | Only standard read permissions are used. Run Command requires explicit RBAC grant (`Microsoft.HybridCompute/machines/runcommands/write`). |
 | SQL Server impact | The DMV query is metadata-only, non-blocking, and has zero performance impact. |

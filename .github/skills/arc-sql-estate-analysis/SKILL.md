@@ -316,12 +316,43 @@ Use this skill when the user asks to:
       - If Skipped: note that the audit could not be executed for this machine due to missing extension; surface in Data gaps / follow-up questions; continue with remaining machines
       - If Cancelled: stop the analysis gracefully and present any findings gathered so far
 
-   b. **Run command execution approval** — before creating or updating a run command slot to execute an audit script on any machine:
-      - Present: "I'd like to execute the Enterprise downgrade audit on {machineName} (subscription: {subscriptionId}). This will {create/update} an Arc Run Command resource named '{slotName}' and run a PowerShell script that queries SQL Server diagnostic views. Shall I proceed?"
-      - Choices: `["Approve", "Skip this step", "Cancel analysis"]`
-      - If Approved: proceed with the run command create or update
-      - If Skipped: note that the audit could not be executed for this machine; set `executionStatus = Skipped` in the output record; surface downstream impact (downgrade confidence falls to Low for this machine); continue with remaining machines
-      - If Cancelled: stop the analysis gracefully and present any findings gathered so far
+   b. **Run command execution approval** — before creating or updating a run command slot to execute an audit script on any machine, you MUST present the full script content to the user and obtain explicit approval:
+
+      **Step 1 — Present the script for review.** Display the following block in full before requesting approval:
+
+      ```
+      **Target machine:** {machineName}
+      **Instance:** {instanceName}
+      **Purpose:** {brief description of what the script does}
+      **Estimated execution time:** 1–3 minutes
+
+      **Script to execute:**
+      ```powershell
+      {full script content — never summarise or truncate}
+      ```
+
+      Shall I execute this script on {machineName}?
+      ```
+
+      - Show the complete, untruncated script content (Pattern 1 — DMV audit, using the exact reference implementation from "Consolidated script patterns" below).
+      - Briefly describe what each script does (e.g. "This script queries `sys.dm_db_persisted_sku_features` across all user databases to detect persisted Enterprise-only features.").
+      - Never substitute a description in place of the full script content.
+
+      **Step 2 — Request approval via `ask_user`.**
+      - Choices: `["Approve and execute", "Skip this check", "Modify script first"]`
+      - If **Approve and execute**: proceed with the run command create or update using the presented script
+      - If **Skip this check**: note that the audit could not be executed for this machine; set `executionStatus = Skipped` in the output record; surface downstream impact (downgrade confidence falls to Low for this machine); note in Data gaps that the DMV audit was declined by the user; continue with remaining machines
+      - If **Modify script first**: ask the user to supply their modifications, apply them, re-present the updated script in the same format (Step 1), and request approval again before proceeding
+      - If the user declines without selecting a listed choice, treat as "Skip this check"
+
+      **Batch approval — multiple machines with the same script template:**
+      When the same script template (Pattern 1 — DMV audit, or Pattern 2 — runtime validation) will run on more than one machine in the same estate:
+      1. Present the script template once, clearly labelled "Script template (identical for all listed machines)"
+      2. List all target machines and instance names below the script block
+      3. Request approval via `ask_user` with choices: `["Approve for all listed machines", "Approve individually per machine", "Skip all"]`
+      - If **Approve for all listed machines**: proceed with run command submission for each listed machine using the presented template
+      - If **Approve individually per machine**: loop through each machine, presenting the same script block with the specific `{machineName}` and `{instanceName}` substituted, and requesting single-machine approval before each submission
+      - If **Skip all**: set `executionStatus = Skipped` for all listed machines; note in output; downgrade confidence falls to Low for all skipped machines
 
    c. **Run command deletion approval** — before deleting any run command resource (quota cleanup only):
       - Present: "To free run command quota on {machineName} (subscription: {subscriptionId}), I need to delete {count} existing run command resource(s): {names}. Shall I proceed?"
@@ -392,6 +423,11 @@ Use this skill when the user asks to:
 
 9. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
    - treat the DMV audit as persisted feature validation only
+   - **Before submitting the runtime validation script**, apply the same script presentation and approval gate defined in step 2b above:
+     - Present the full consolidated runtime script (Pattern 2 — runtime validation, from "Consolidated script patterns") in a code block to the user
+     - Include: target machine, instance name, purpose ("This script checks for Always On AG configuration, Resource Governor, partitioned tables, and SQL Agent online index operations to identify Enterprise-only runtime feature usage"), and estimated execution time
+     - Apply batch approval when the same script targets multiple machines (same rules as step 2b)
+     - If the user declines, set `executionStatus = Skipped` for all runtime checks on that machine; note in output that runtime validation was declined; downgrade confidence falls to Low; continue analysis with available data
    - execute ALL runtime checks on each machine in a SINGLE consolidated script execution (not one query per round-trip)
    - the consolidated runtime script MUST execute the following queries and return structured JSON output:
      - Always On availability groups:
@@ -768,6 +804,32 @@ Use this skill when the user asks to:
   - Arc Run Command resource deletion
   - Any ARM PUT, POST, PATCH, or DELETE that modifies resources in the customer's subscription
   - Any `az rest --method PUT/POST/PATCH/DELETE` call that modifies state
+
+## Script execution transparency guardrails
+
+- Always present the full script content to the user before executing via Arc Run Command. Never summarise, truncate, or substitute a description in place of the actual script.
+- Use the following presentation format for every script before requesting approval:
+
+  ```
+  **Target machine:** {machineName}
+  **Instance:** {instanceName}
+  **Purpose:** {brief description}
+  **Estimated execution time:** {estimate}
+
+  **Script to execute:**
+  ```powershell
+  {full script content}
+  ```
+
+  Shall I execute this script on {machineName}?
+  ```
+
+- Include target machine, instance name, purpose description, and estimated execution time in every script presentation.
+- Use choices `["Approve and execute", "Skip this check", "Modify script first"]` for script execution approval prompts.
+- Offer batch approval when the same script template targets multiple machines: present the script once, list all target machines, and offer `["Approve for all listed machines", "Approve individually per machine", "Skip all"]`.
+- If the user declines (Skip this check or Skip all), note the skipped check in output, set `executionStatus = Skipped`, and adjust downgrade confidence to Low for any affected machines.
+- If the user selects **Modify script first**, collect their changes, re-present the updated script in full, and request approval again before proceeding.
+- No script may ever be submitted to Arc Run Command without the user first seeing the complete script content and explicitly approving execution.
 
 ## Enterprise downgrade audit guardrails
 
