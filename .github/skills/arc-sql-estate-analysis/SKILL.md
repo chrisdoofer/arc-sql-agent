@@ -330,44 +330,49 @@ Use this skill when the user asks to:
             az monitor log-analytics workspace table show --subscription <subscriptionId> --resource-group <resourceGroup> --workspace-name <workspaceName> --name SqlAssessment_CL --query "name" -o tsv 2>/dev/null
             ```
          4. Use the first workspace where the table is confirmed to exist; if multiple workspaces contain the table, query all of them and merge results
-       - **Step 2 — KQL query with progressive time-window widening:** after identifying the workspace(s), query using the following retry sequence — stop at the first window that returns results:
-         - **Window 1 (30 days):**
-           ```kql
+       - **Step 2 — Execution method (REST API only):** always use the Log Analytics REST API for BPA queries; do **not** use `az monitor log-analytics query`, because CLI execution may return empty computed columns for KQL expressions such as `parse_csv`, `split`, `extend`, `indexof`, and `substring`
+        1. Resolve the workspace GUID (`customerId`) for each target workspace:
+           ```powershell
+           $workspaceGuid = az monitor log-analytics workspace show --subscription "<subscriptionId>" --resource-group "<resourceGroup>" --workspace-name "<workspaceName>" --query "customerId" -o tsv
+           ```
+        2. Pre-filter to the target machine names and relevant BPA check IDs before parsing `RawData`; this avoids volume explosions from verbose rows such as `DbBackupMedia` and keeps the result set focused on Azure SQL VM alignment checks
+        3. Submit the KQL through `az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query"` with a JSON body file:
+           ```powershell
+           $queryBody = @{
+               query = @"
            SqlAssessment_CL
            | where TimeGenerated > ago(30d)
-           | extend parts = split(RawData, ',')
-           | extend checkId = tostring(parts[2]),
-                    checkName = tostring(parts[3]),
-                    machineName = tostring(parts[6]),
-                    passed = tostring(parts[7])
-           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
-           | project machineName, checkId, checkName, passed, TimeGenerated
+           | extend parsed = parse_csv(RawData)
+           | extend checkId = tostring(parsed[2]),
+                    checkName = tostring(parsed[3]),
+                    severity = tostring(parsed[6]),
+                    machineDb = tostring(parsed[7]),
+                    message = tostring(parsed[9]),
+                    instanceName = tostring(parsed[11])
+           | extend machineName = tostring(split(machineDb, ':')[0])
+           | where machineName in ('<machine1>','<machine2>')
+           | where checkId in ('NtfsBlockSizeNotFormatted','TempDbSameVolume','TempDBFiles1PerCPU',
+               'TempDBFilesNotLess8','InstantFileInitialization','QueryStoreOn','BackupCompression',
+               'AutoShrink','AutoClose','PercentAutogrows','FilesAutogrowth','MaxServerMemory',
+               'MaxDop','TempDBDataSameSize','DataFilesSameVolume','LogFilesSameVolume',
+               'DbBackupMedia','CostThresholdParallelism','LockPagesInMemory','AdHocWorkload')
+           | summarize findingCount=count(), latestTime=max(TimeGenerated), anyMessage=any(message)
+               by machineName, instanceName, checkId, checkName, severity
+           | order by machineName asc, checkId asc
+           "@
+           } | ConvertTo-Json -Compress
+
+           $queryPath = Join-Path $env:TEMP "la-bpa-query.json"
+           $queryBody | Set-Content $queryPath -NoNewline
+
+           $response = az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query" --body "@$queryPath" --headers "Content-Type=application/json" -o json | ConvertFrom-Json
            ```
-         - **Window 2 (90 days, if window 1 returns zero rows):**
-           ```kql
-           SqlAssessment_CL
-           | where TimeGenerated > ago(90d)
-           | extend parts = split(RawData, ',')
-           | extend checkId = tostring(parts[2]),
-                    checkName = tostring(parts[3]),
-                    machineName = tostring(parts[6]),
-                    passed = tostring(parts[7])
-           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
-           | project machineName, checkId, checkName, passed, TimeGenerated
-           ```
-         - **Window 3 (all time, if window 2 returns zero rows):**
-           ```kql
-           SqlAssessment_CL
-           | extend parts = split(RawData, ',')
-           | extend checkId = tostring(parts[2]),
-                    checkName = tostring(parts[3]),
-                    machineName = tostring(parts[6]),
-                    passed = tostring(parts[7])
-           | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
-           | project machineName, checkId, checkName, passed, TimeGenerated
-           ```
-         - Only conclude "BPA data unavailable" if window 3 also returns zero rows (i.e. the table exists but is genuinely empty) or if the table was not found in any discovered workspace
-       - **Step 3 — Report data age:** when BPA results are found, record and surface the most recent `TimeGenerated` value (e.g. "BPA results from 2025-05-15") alongside findings so users can assess freshness; if the data is older than 90 days, note this explicitly in the output
+        4. Use `summarize` to deduplicate repeated BPA findings (especially file-level backup media rows) and merge results across all qualifying workspaces when more than one workspace contains `SqlAssessment_CL`
+       - **Step 3 — Data freshness fallback:** if the 30-day query returns no rows for the target machines, widen progressively:
+        1. rerun with `| where TimeGenerated > ago(90d)`
+        2. rerun without a time filter and take the latest available results
+        3. only conclude "BPA data unavailable" when the table does not exist in any discovered workspace, or when the all-time query still returns zero rows
+       - **Step 4 — Report data age:** when BPA results are found, record and surface the most recent `TimeGenerated` value (e.g. "BPA results from 2025-05-15") alongside findings so users can assess freshness; if the data is older than 90 days, note this explicitly in the output
        - include mapped BPA coverage for the Azure VM alignment checks, including:
          - STOR-03 (`NtfsBlockSizeNotFormatted`)
          - STOR-02 (`TempDbSameVolume`)
