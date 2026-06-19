@@ -56,6 +56,7 @@ cd arc-sql-estate-analysis
       references/
         output-template.md           ← Canonical report structure
         branded-report-template.md   ← Branded self-contained HTML template for PDF export
+        command-templates.md         ← PowerShell command templates for Arc Run Command execution
 docs/
   architecture.md                    ← Solution architecture
   prerequisites.md                   ← Setup and RBAC requirements

@@ -431,6 +431,18 @@ Use this skill when the user asks to:
 
 - You MUST consider execution reliability when using Arc Run Command or equivalent execution methods.
 
+- **CRITICAL: Use exact command templates from `references/command-templates.md`**
+  - When executing Arc Run Commands, use the exact command templates defined in `references/command-templates.md`
+  - DO NOT attempt to construct run command submission commands from scratch
+  - DO NOT modify or "improve" the templates — they are pre-validated patterns designed to avoid known failure modes
+  - Template placeholders: `{machineName}`, `{resourceGroup}`, `{subscriptionId}`, `{location}`, `{slotName}`, `{scriptContent}`
+  - The templates eliminate trial-and-error by handling:
+    - Azure CLI argument parsing issues (quoting, special characters)
+    - Command-line length limits (via temp file references)
+    - Variable loss across tool calls (via single PowerShell call patterns)
+    - Encoding requirements for complex SQL queries
+  - Expected outcome: reliable, first-attempt execution success with zero argument parsing or encoding errors
+
 - Run command quota management (CRITICAL — understand before any execution):
   - Azure Arc enforces a maximum of 25 run commands per machine.
   - Deletions are extremely slow (minutes per command, processed sequentially by the Arc agent) and are NOT suitable as a pre-execution cleanup strategy.
@@ -474,13 +486,15 @@ Use this skill when the user asks to:
   - The consolidated scripts auto-detect parameter support at runtime (see below).
 
 - Script execution approach — CONSOLIDATED SCRIPTS WITH ENCODING:
-  - ALWAYS use `powershell -EncodedCommand <base64>` to submit scripts via Arc Run Command.
-  - This avoids all Azure CLI argument parsing issues with SQL queries containing joins, LIKE clauses, percent signs, and nested quotes.
-  - Encoding workflow:
-    1. Build the full PowerShell script as a string variable
-    2. Encode: `$encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($script))`
-    3. Submit: `--script "powershell -EncodedCommand $encoded"` (for create) or `--force-string --set "source.script=powershell -EncodedCommand $encoded"` (for update)
-  - DO NOT attempt to pass complex SQL queries directly via `--script` — they will fail due to CLI argument parsing.
+  - ALWAYS use the exact command templates from `references/command-templates.md` for Arc Run Command submission
+  - Specifically, use Template 2 (Create or Update Run Command via REST API) for all script submissions
+  - ALWAYS use REST API (`az rest --method PUT`) for run command submission — never use `az connectedmachine run-command create/update` directly
+  - ALWAYS encode scripts using `powershell -EncodedCommand <base64>` format
+  - ALWAYS write JSON body to temp file and reference via `@$env:TEMP\filename.json`
+  - This avoids all Azure CLI argument parsing issues with SQL queries containing joins, LIKE clauses, percent signs, and nested quotes
+  - The template combines encoding and submission in a single PowerShell call to avoid variable loss
+  - DO NOT attempt to pass complex SQL queries directly via `--script` — they will fail due to CLI argument parsing
+  - DO NOT split encoding and submission across multiple tool calls — use the single-call template pattern
 
 - Consolidated script patterns:
 
