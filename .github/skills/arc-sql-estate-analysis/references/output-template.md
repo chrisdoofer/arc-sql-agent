@@ -307,7 +307,9 @@
 
 _If Software Assurance status is `Not confirmed` or `Unknown`, add a follow-up asking the user to confirm active Software Assurance coverage and covered Standard / Enterprise core counts._
 
-_If migration assessment shows `assessment.enabled = true` but `assessmentUploadTime = null`, report as: "Assessment collected but ARM sync pending — check Azure portal Migration > Assessments blade for latest results, or trigger 'Run Assessment' to force sync." Do NOT report this as "no assessment data exists"._
+_If migration assessment shows populated `skuRecommendationResults` or `serverAssessments`, use that data even when `assessmentUploadTime = null`, and disclose that the freshness timestamp is unavailable or inconsistent._
+
+_Only if `assessment.enabled = true`, `assessmentUploadTime = null`, and recommendation fields are not populated, report: "Assessment collected but ARM sync pending — check Azure portal Migration > Assessments blade for latest results, or trigger 'Run Assessment' to force sync." Do NOT report this as "no assessment data exists"._
 
 - Missing field or evidence 1:
 - Missing field or evidence 2:

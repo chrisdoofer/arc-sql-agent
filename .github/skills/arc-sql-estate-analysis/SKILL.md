@@ -204,15 +204,15 @@ Use this skill when the user asks to:
 
 5. Migration assessment data handling:
    - Assessment results are stored in a **telemetry data plane** (accessed via the `getTelemetry` action), not directly in ARM resource properties
-   - The ARM property `properties.migration.assessment.skuRecommendationResults` is only populated after the Arc SQL extension syncs a summary to the resource — indicated by `assessmentUploadTime` being non-null
-   - When `assessment.enabled = true` but `assessmentUploadTime = null`:
+   - The ARM properties `properties.migration.assessment.skuRecommendationResults` and `serverAssessments` are synced summaries from that telemetry plane; `assessmentUploadTime` is a freshness indicator, not the extraction gate
+   - When `skuRecommendationResults` or `serverAssessments` contains usable data:
+     - use the populated ARM fields as the data source for MI/VM/DB readiness, SKU recommendations, and cost evidence even if `assessmentUploadTime` is null
+     - if `assessmentUploadTime` is null or appears stale/inconsistent, disclose that the assessment freshness timestamp is unavailable or inconsistent, but do not suppress the populated assessment output
+   - Only when `assessment.enabled = true` and the recommendation fields are not populated:
      - do NOT conclude that no assessment exists
      - report this as: "Assessment collected but not yet synced to ARM — data may be available in the Azure portal"
      - recommend the user trigger a fresh assessment via the portal ("Run Assessment" button) or wait for the next scheduled sync
      - do NOT list this as a "no assessment data" gap — instead surface it as a sync-pending state
-   - When `assessmentUploadTime` is non-null:
-     - use `skuRecommendationResults` and `serverAssessments` from the ARM properties as the data source
-     - this data is programmatically accessible and should be used for MI/VM/DB readiness and SKU recommendations
    - There is currently no documented public API for reading assessment telemetry data directly — the portal uses an internal telemetry endpoint
    - If a user asks whether `getTelemetry` can be called programmatically:
      - you may attempt an ARM action probe (for example via `az rest --method POST`) only after tenant/subscription scope validation
@@ -962,14 +962,17 @@ Use this skill when the user asks to:
 
 - Assessment data is stored in a telemetry data plane (not ARM properties). The ARM resource only contains a synced summary. The portal reads from both sources; programmatic access is limited to the synced summary.
 
-- When `assessment.enabled = true` and `assessmentUploadTime = null`:
+- If `skuRecommendationResults` or `serverAssessments` contains usable data, use it regardless of `assessmentUploadTime`. Treat a null or stale `assessmentUploadTime` as a freshness caveat, not a reason to suppress populated recommendation data.
+
+- When `assessment.enabled = true`, `assessmentUploadTime = null`, and recommendation fields are not populated:
   - treat this as a **sync-pending state**, not a data absence
   - do not report "no assessment data uploaded" as a data gap
   - instead report: "Assessment collected but ARM sync pending — check Azure portal for latest results or trigger 'Run Assessment' to force sync"
 
 - When reporting assessment gaps in output, distinguish between:
   - "Assessment not enabled" (assessment.enabled = false) — genuine gap, recommend enabling
-  - "Assessment enabled, sync pending" (enabled = true, assessmentUploadTime = null) — data likely exists in portal
+  - "Assessment enabled, data available but freshness timestamp missing" (enabled = true, assessmentUploadTime = null, recommendation fields populated) — use the available recommendation data and disclose the missing timestamp
+  - "Assessment enabled, sync pending" (enabled = true, assessmentUploadTime = null, recommendation fields empty) — data likely exists in portal
   - "Assessment synced but incomplete" (assessmentUploadTime set, but fields missing) — partial data, report what is available
 
 - Never infer MI/VM readiness status from the absence of synced ARM data alone. If ARM data is unavailable, state the limitation and direct the user to the portal assessment blade.
