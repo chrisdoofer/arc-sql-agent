@@ -302,6 +302,73 @@ Use this skill when the user asks to:
       - continue the analysis without dependency data
       - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate portal but not exported — export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
 
+9. SQL on Azure VM best practices alignment (optional, additive):
+   - offer this scan during analysis when either:
+     - SQL Server on Azure VM is identified as a candidate target, or
+     - the user explicitly asks for Azure SQL VM best-practices alignment
+   - first prompt via `ask_user`:
+     - "SQL Server on Azure VM has been identified as a candidate target. Would you like me to run an Azure VM best practices alignment scan on the Arc-enabled SQL machines?"
+     - choices: `["Yes — run alignment scan", "Skip — not needed for this analysis"]`
+   - if accepted, use this execution order:
+     - **Tier 1 (Resource Graph, read-only, default):** resolve checks directly from Arc SQL instance/database properties:
+       - INST-01 (`maxServerMemoryMB`)
+       - INST-07 (`databaseOptions.isAutoShrinkOn`)
+       - INST-08 (`databaseOptions.isAutoCloseOn`)
+       - INST-11 (`patchLevel`, `currentVersion`)
+       - SEC-01 (`azureDefenderStatus`)
+       - SEC-02 (`databaseOptions.isEncrypted`)
+       - HADR-01 (`isHadrEnabled`, `alwaysOnRole`)
+     - **Tier 2 (Log Analytics BPA, read-only, preferred for broad coverage):** query SQL Best Practices Assessment results from `SqlAssessment_CL` and map BPA check IDs to Azure SQL VM best-practice categories (Storage, Instance configuration, Security, HADR, Operations)
+       - baseline KQL pattern:
+         ```kql
+         SqlAssessment_CL
+         | where TimeGenerated > ago(30d)
+         | extend parts = split(RawData, ',')
+         | extend checkId = tostring(parts[2]),
+                  checkName = tostring(parts[3]),
+                  machineName = tostring(parts[6]),
+                  passed = tostring(parts[7])
+         | summarize latest = arg_max(TimeGenerated, *) by machineName, checkId
+         | project machineName, checkId, checkName, passed, TimeGenerated
+         ```
+       - include mapped BPA coverage for the Azure VM alignment checks, including:
+         - STOR-03 (`NtfsBlockSizeNotFormatted`)
+         - STOR-02 (`TempDbSameVolume`)
+         - STOR-04 (`TempDBFiles1PerCPU`, `TempDBFilesNotLess8`)
+         - INST-03 (`InstantFileInitialization`)
+         - INST-04/06/07/08/09/10 (`QueryStoreOn`, `BackupCompression`, `AutoShrink`, `AutoClose`, `PercentAutogrows`, `FilesAutogrowth`)
+         - OPS and HADR operational checks where BPA evidence exists
+     - **Tier 3 (Arc Run Command, fallback only):**
+       - offer only when BPA is unavailable/incomplete (`bestPracticesAssessment = null`, workspace unavailable, or required checks remain unresolved)
+       - after Tier 1/2, prompt:
+         - "The Resource Graph scan identified {X} findings from {Y} checks. There are {Z} additional checks (storage layout, SQL config, maintenance jobs) that require live queries via Arc Run Command. Would you like me to run the full scan?"
+         - choices: `["Yes — run full scan via Arc Run Command", "No — Resource Graph results are sufficient"]`
+       - if approved, execute unresolved checks using consolidated scripts (SQL + OS), reusable command slots, and existing approval guardrails
+   - produce one structured JSON result per check using this schema:
+     ```json
+     {
+       "machineName": "ArcBox-SQL",
+       "instanceName": "MSSQLSERVER",
+       "checkId": "STOR-01",
+       "checkName": "Data, log, and tempdb on separate drives",
+       "category": "Storage",
+       "status": "Fail",
+       "currentValue": "Data: E:\\ Log: E:\\ TempDB: E:\\",
+       "expectedValue": "Each file type on a distinct drive",
+       "detail": "Data and log files share drive E:\\",
+       "severity": "High",
+       "remediation": "Separate data and log files onto distinct drives before Azure migration."
+     }
+     ```
+   - allowed status values: `Pass` | `Fail` | `Warning` | `NotAssessed` | `NotApplicable`
+   - allowed severity values: `Critical` | `High` | `Medium` | `Low` | `Informational`
+   - classify findings consistently:
+     - Critical = high migration landing risk (for example severe storage/tempdb or memory misconfiguration)
+     - High = strong best-practice deviation likely requiring remediation
+     - Medium/Low = optimisation improvements and quick wins
+     - Informational = context-only findings
+   - if the scan is skipped or unavailable, still include the report section and mark it as `Not assessed`
+
 
 ## Phase 5 - Enterprise downgrade audit
 
@@ -662,6 +729,11 @@ Use this skill when the user asks to:
      - runtime validation execution results from Arc Run Command checks
      - target edition support interpretation (including compression support for selected target version)
    - GREEN readiness can be used only when persisted and runtime technical checks are completed and clean
+   - For SQL on Azure VM best-practices alignment findings (when executed):
+     - surface Critical/High items as migration-preparation optimisation opportunities
+     - surface Medium items as Quick wins where low-effort remediation is feasible
+     - use alignment outcomes to adjust confidence in SQL Server on Azure VM target recommendations
+     - if many unresolved Fail/Warning checks exist, note that clean Azure VM build-and-migrate may be safer than direct lift-and-shift
 
 4. When interpreting licensing:
    - Treat licensing model, Software Assurance status, and billing mode as separate dimensions (not a single "license type" field)
@@ -763,7 +835,8 @@ Use this skill when the user asks to:
 5. If browser binaries are unavailable, or conversion fails (for example browser not found, write permission denied, or insufficient disk space), return the generated HTML and clearly state that PDF conversion could not be completed in the current environment.
    - include the HTML output path so the user can run conversion manually
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
-   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section)
    - failure response format:
      - `PDF export status: Failed`
      - `Reason: {error_detail}`
@@ -949,11 +1022,15 @@ Use this skill when the user asks to:
 # Output requirements
 
 Always produce the sections below in order:
+The detailed report structure below is the canonical section order and expands core customer-facing sections into explicit audit and planning blocks.
 
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate summary
 3. Key optimisation opportunities
 4. Enterprise downgrade audit
-5. Azure target recommendations
-6. Risks and blockers
-7. Data gaps / follow-up questions
+5. SQL on Azure VM best practices alignment (when executed, or state Not assessed if skipped)
+6. Quick wins
+7. Strategic moves
+8. Azure target recommendations
+9. Risks and blockers
+10. Data gaps / follow-up questions

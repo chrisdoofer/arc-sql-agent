@@ -109,6 +109,20 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     .badge.green { background: var(--badge-green); }
     .badge.amber { background: var(--badge-amber); color: #1f2937; }
     .badge.red { background: var(--badge-red); }
+    .status-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #fff;
+      vertical-align: middle;
+    }
+    .status-badge.pass { background: #107c10; }
+    .status-badge.fail { background: #d13438; }
+    .status-badge.warning { background: #ffb900; color: #1f2937; }
+    .status-badge.notassessed { background: #6b7280; }
     footer {
       position: fixed;
       left: 0;
@@ -150,6 +164,7 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     <section><h2>Estate summary</h2>{{estateSummaryHtml}}</section>
     <section><h2>Key optimisation opportunities</h2>{{keyOptimisationsHtml}}</section>
     <section><h2>Enterprise downgrade audit</h2>{{enterpriseDowngradeAuditHtml}}</section>
+    <section><h2>SQL on Azure VM best practices alignment</h2>{{sqlVmBestPracticesAlignmentHtml}}</section>
     <section><h2>Quick wins</h2>{{quickWinsHtml}}</section>
     <section><h2>Strategic moves</h2>{{strategicMovesHtml}}</section>
     <section><h2>Azure target recommendations</h2>{{azureTargetsHtml}}</section>
@@ -170,3 +185,10 @@ Badge usage for readiness states:
 - GREEN: `<span class="badge green">GREEN</span>`
 - AMBER: `<span class="badge amber">AMBER</span>`
 - RED: `<span class="badge red">RED</span>`
+
+Status badge usage for SQL on Azure VM best-practices checks:
+
+- Pass: `<span class="status-badge pass">Pass</span>`
+- Fail: `<span class="status-badge fail">Fail</span>`
+- Warning: `<span class="status-badge warning">Warning</span>`
+- NotAssessed: `<span class="status-badge notassessed">NotAssessed</span>`
