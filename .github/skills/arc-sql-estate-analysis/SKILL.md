@@ -336,6 +336,7 @@ Use this skill when the user asks to:
            $workspaceGuid = az monitor log-analytics workspace show --subscription "<subscriptionId>" --resource-group "<resourceGroup>" --workspace-name "<workspaceName>" --query "customerId" -o tsv
            ```
         2. Pre-filter to the target machine names and relevant BPA check IDs before parsing `RawData`; this avoids volume explosions from verbose rows such as `DbBackupMedia` and keeps the result set focused on Azure SQL VM alignment checks
+           - replace `'<machine1>'`,`'<machine2>'` in the example below with the actual Arc machine names collected earlier in Phase 4; do not leave placeholders in the executed query
         3. Submit the KQL through `az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query"` with a JSON body file:
            ```powershell
            $queryBody = @{
@@ -356,7 +357,7 @@ Use this skill when the user asks to:
                'AutoShrink','AutoClose','PercentAutogrows','FilesAutogrowth','MaxServerMemory',
                'MaxDop','TempDBDataSameSize','DataFilesSameVolume','LogFilesSameVolume',
                'DbBackupMedia','CostThresholdParallelism','LockPagesInMemory','AdHocWorkload')
-           | summarize findingCount=count(), latestTime=max(TimeGenerated), anyMessage=any(message)
+           | summarize findingCount=count(), latestTime=max(TimeGenerated), sampleMessage=any(message)
                by machineName, instanceName, checkId, checkName, severity
            | order by machineName asc, checkId asc
            "@
@@ -367,7 +368,8 @@ Use this skill when the user asks to:
 
            $response = az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query" --body "@$queryPath" --headers "Content-Type=application/json" -o json | ConvertFrom-Json
            ```
-        4. Use `summarize` to deduplicate repeated BPA findings (especially file-level backup media rows) and merge results across all qualifying workspaces when more than one workspace contains `SqlAssessment_CL`
+        4. Use `summarize` to deduplicate repeated BPA findings (especially file-level backup media rows)
+        5. If more than one workspace contains `SqlAssessment_CL`, repeat the same REST API call for each workspace GUID and merge the returned result sets outside the single API call before mapping findings into the report
        - **Step 3 — Data freshness fallback:** if the 30-day query returns no rows for the target machines, widen progressively:
         1. rerun with `| where TimeGenerated > ago(90d)`
         2. rerun without a time filter and take the latest available results
