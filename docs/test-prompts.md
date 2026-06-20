@@ -221,3 +221,62 @@ Assess an Arc-enabled SQL estate with two Enterprise instances (ArcBox-SQL and A
 - Agent shows only a summary or description instead of the full script
 - Agent proceeds with execution after the user selects Skip or declines
 - Agent does not offer batch approval when multiple machines share the same script template
+
+## Test 15 – Adaptive report formatting by estate size
+
+Assess an Arc-enabled SQL estate and confirm the correct report presentation tier is applied based on instance count.
+
+### 15a — Small estate (≤10 instances)
+Provide an estate dataset with 8 SQL Server instances across 6 machines.
+
+✅ Expected behaviour:
+- Tier 1 format is used (full inline detail)
+- Estate summary contains instance and machine names inline
+- Machine inventory is a flat per-machine list (no action-grouped table)
+- Enterprise downgrade audit contains full per-database DMV detail for all instances inline
+- BPA alignment contains per-machine detail tables (not a heatmap)
+- Azure target recommendations contain per-instance narrative
+- No Appendix section is produced
+
+❌ Failure indicators:
+- Agent applies aggregated distribution format to a small estate
+- Agent generates an Appendix section for a Tier 1 estate
+- Action-grouped migration target table appears in Estate summary for a small estate
+
+### 15b — Medium estate (11–50 instances)
+Provide an estate dataset with 32 SQL Server instances across 22 machines.
+
+✅ Expected behaviour:
+- Tier 2 format is used
+- Estate summary opening states the tier and instance count, e.g. "Estate size: 32 instances across 22 machines — Tier 2 (aggregated) report format applied."
+- Estate summary uses distribution counts (not inline instance names): edition counts, version counts, connectivity status counts
+- Machine inventory is an action-grouped table with four rows (MI Ready, MI Remediation, SQL VM, Further assess)
+- Enterprise downgrade audit opens with summary counts block (GREEN/AMBER/RED totals); GREEN instances listed by name only inline; full DMV detail for GREEN moves to Appendix B; AMBER and RED detail shown inline
+- BPA alignment uses an estate-wide heatmap table (Check ID, Check name, Category, Severity, Machines affected) instead of per-machine tables; per-machine detail moves to Appendix C
+- Azure target recommendations open with an action-grouped summary table; per-instance detail moves to Appendix D
+- Appendix section present with sub-sections A (full machine inventory), B (GREEN DMV details), C (per-machine BPA), D (per-instance TCO)
+
+❌ Failure indicators:
+- Agent lists individual machine names inline in Estate summary scope fields
+- No action-grouped migration target table appears
+- No Appendix section produced for a Tier 2 estate
+- BPA section shows per-machine tables instead of the estate heatmap
+- Enterprise downgrade audit body shows full per-database DMV detail for GREEN instances without redirecting to Appendix
+
+### 15c — Large estate (51+ instances)
+Provide an estate dataset with 65 SQL Server instances across 48 machines with 18 AMBER/RED downgrade findings and 25 failing BPA checks.
+
+✅ Expected behaviour:
+- Tier 3 format is used
+- All Tier 2 rules apply (aggregated distribution, action-grouped tables, heatmaps, Appendix)
+- Enterprise downgrade audit body shows only the top 10 AMBER/RED findings (ordered RED first), with the message "Showing top 10 of 18 AMBER/RED findings — see Appendix B for complete list"
+- BPA heatmap body shows only the top 10 failing checks (ordered by machines-affected count descending), with the message "Showing top 10 of 25 failing checks — see Appendix C for complete list"
+- BPA heatmap machines-affected column includes percentage, e.g. "12/48 (25%)"
+- When HTML export is requested (Phase 7), Appendix sub-sections are wrapped in `<details><summary>…</summary>` for collapsible display; markdown output is not collapsed
+
+❌ Failure indicators:
+- All 18 AMBER/RED downgrade findings displayed inline without top-N truncation
+- All 25 BPA failing checks displayed inline without top-N truncation
+- Percentage column absent from Tier 3 BPA heatmap
+- HTML export does not use collapsible `<details>` wrappers for Appendix content
+- Tier 2 rules not applied (no heatmap, no action-grouped table, no Appendix)

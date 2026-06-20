@@ -10,6 +10,12 @@
 
 # Estate summary
 
+_Estate size determination: count distinct SQL Server instances from the validated dataset. State the tier at the top of this section._
+_**Tier 1 (≤10 instances):** use full inline detail as shown below._
+_**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline instance/machine names with the aggregated distribution block and action-grouped machine inventory table shown in the "Tier 2/3 aggregated format" subsection below. Then continue with the remaining subsections (licensing, backup, utilisation) unchanged._
+
+<!-- Tier 1 inline detail (use for ≤10 instances) -->
+
 - Scope of estate analysed:
 - Key version / edition findings:
 - End-of-support or end-of-life exposure:
@@ -47,6 +53,33 @@
   |             |                           |                            |
 
 
+## Tier 2 / Tier 3 aggregated format (use for 11+ instances instead of inline names above)
+
+_Replace the "Scope of estate analysed" and "Host / platform summary" inline text with the distribution block below. All other subsections (licensing, backup, utilisation, dependencies) remain unchanged._
+
+```
+Estate size: {N} instances — {tier label} report format applied.
+
+SQL instances: {N} across {M} machines
+  Editions:  {N} Enterprise | {N} Standard | {N} Express
+  Versions:  {N}× SQL 2022 | {N}× SQL 2019 | {N}× SQL 2016 (EoS) | {N}× SQL 2014 (EoS)
+  Status:    {N} Connected | {N} Unreachable | {N} Disconnected
+```
+
+### Machine inventory — action-oriented groupings (Tier 2/3)
+
+_Replace any flat per-machine listing with this action-grouped table. Full machine inventory (one row per machine) moves to Appendix A._
+
+| Migration target                    | Machines | Instances | Key characteristic                |
+|-------------------------------------|----------|-----------|-----------------------------------|
+| Azure SQL MI (Ready)                |          |           | No blockers identified            |
+| Azure SQL MI (Remediation needed)   |          |           | Known blockers — see Appendix A   |
+| SQL on Azure VM                     |          |           | MI-blocked, VM-ready              |
+| Requires further assessment         |          |           | Unreachable or no assessment data |
+
+_Full machine inventory (name, OS, version, edition, vCores, status) → Appendix A._
+
+
 # Key optimisation opportunities
 
 - Opportunity 1:
@@ -64,6 +97,27 @@
 
 
 # Enterprise downgrade audit
+
+_**Tier 1 (≤10 instances):** use full inline detail as shown below._
+_**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the summary counts block and compact GREEN listing, then show the structured audit tables for AMBER and RED records only. Full DMV results for GREEN instances move to Appendix B._
+_**Tier 3 additional:** if AMBER/RED findings exceed 10, show top 10 ordered by severity (RED first) and state "Showing top 10 of {total} AMBER/RED findings — see Appendix B for complete list."_
+
+## Tier 2/3 summary block (use for 11+ instances at the top of this section)
+
+```
+Downgrade candidates: {N} Enterprise instances
+  GREEN (ready):    {N}
+  AMBER (pending):  {N}
+  RED (blocked):    {N}
+```
+
+GREEN instances (no blockers — full DMV results in Appendix B):
+- {instanceName} on {machineName}
+- ...
+
+_Then continue with the structured audit tables below for AMBER and RED records only._
+
+---
 
 - Instances / databases audited:
 - Audit method:
@@ -183,6 +237,10 @@
 
 # SQL on Azure VM best practices alignment
 
+_**Tier 1 (≤10 instances):** use full per-machine detail tables as shown in "Detailed findings" below._
+_**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace per-machine detail tables with the estate-wide heatmap table shown below. Keep the pre-migration remediation checklist for Critical and High findings only. Per-machine detail tables move to Appendix C._
+_**Tier 3 additional:** show only the top 10 failing checks in the heatmap (ordered by machines-affected count descending); state "Showing top 10 of {total} failing checks — see Appendix C for complete list." Add a percentage column to the heatmap: `{N}/{total} ({pct}%)`._
+
 - Execution depth (select one): [Tier 1 only (Resource Graph) | Tier 1+2 (Resource Graph + Log Analytics BPA) | Tier 1+2+3 (full scan with Arc Run Command fallback)]
 - Machines scanned:
 - Total checks executed:
@@ -198,7 +256,20 @@
 | HADR | | | | |
 | Operations | | | | |
 
+## Estate-wide findings heatmap (Tier 2/3 — use instead of per-machine detail tables below)
+
+_Sort by severity descending (Critical → High → Medium → Low → Informational), then by machines-affected count descending within each severity band._
+_Tier 3: add `({pct}%)` to the machines-affected column and truncate to top 10 with a "see Appendix C" note._
+
+| Check ID | Check name | Category | Severity | Machines affected |
+|----------|------------|----------|----------|-------------------|
+|          |            |          |          |                   |
+
+_Per-machine BPA detail tables → Appendix C._
+
 ## Detailed findings
+
+_Use this section for Tier 1 (≤10 instances). For Tier 2/3, move per-machine detail to Appendix C and use the heatmap above instead._
 
 ### Critical and High severity findings
 
@@ -266,6 +337,22 @@
 
 # Azure target recommendations
 
+_**Tier 1 (≤10 instances):** use full per-instance narrative as shown below._
+_**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action-grouped summary table, then follow with migration sequencing and SKU right-sizing at a group level. Per-instance TCO and licensing notes move to Appendix D._
+
+## Action-grouped summary (Tier 2/3 — use instead of per-instance narrative below)
+
+| Migration target  | Instances | Recommended action             | Confidence |
+|-------------------|-----------|--------------------------------|------------|
+| Azure SQL MI      |           | Ready — migrate in Wave 1      |            |
+| Azure SQL MI      |           | Remediation needed before MI   |            |
+| SQL on Azure VM   |           | Lift-and-shift candidates      |            |
+| Further assess    |           | Additional data required       |            |
+
+_Per-instance TCO notes and licensing position → Appendix D._
+
+## Per-instance detail (Tier 1 — use for ≤10 instances)
+
 - Candidate workloads for Azure SQL Managed Instance:
   - Readiness status:
   - Licensing / AHB note:
@@ -314,3 +401,39 @@ _Only if `assessment.enabled = true`, `assessmentUploadTime = null`, and recomme
 - Missing field or evidence 1:
 - Missing field or evidence 2:
 - Missing field or evidence 3:
+
+
+# Appendix
+
+_This section is present for **Tier 2 (11–50 instances) and Tier 3 (51+ instances) only**. Omit entirely for Tier 1 (≤10 instances)._
+_For HTML/PDF export (Tier 3), wrap each sub-section in `<details><summary>…</summary>` so content is collapsible. In markdown output, use headings only — all content must remain visible._
+
+## Appendix A — Full machine inventory
+
+| Machine name | OS | SQL version | Edition | vCores | Status | Assessment status |
+|-------------|-----|-------------|---------|--------|--------|------------------|
+|             |     |             |         |        |        |                  |
+
+## Appendix B — Enterprise downgrade audit: GREEN instance details
+
+_Full per-database DMV audit results for instances classified GREEN. AMBER/RED detail is in the main report body._
+
+| machineName | instanceName | databaseName | featureName | executionStatus | errorMessage |
+|-------------|--------------|--------------|-------------|-----------------|--------------|
+|             |              |              |             |                 |              |
+
+## Appendix C — BPA alignment: per-machine detail
+
+_Full check-by-check BPA findings for each machine. Estate-wide heatmap is in the main report body._
+
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
+|         |          |          |       |        |          |               |                |             |
+
+## Appendix D — Azure target recommendation details
+
+_Per-instance TCO notes, licensing position, and AHB eligibility. Action-grouped summary is in the main report body._
+
+| Instance | Machine | Target | Readiness | Licensing / AHB note | TCO note |
+|----------|---------|--------|-----------|----------------------|----------|
+|          |         |        |           |                      |          |
