@@ -839,6 +839,106 @@ SqlAssessment_CL
 
 11. Produce the final answer using the structure in `references/output-template.md`.
 
+12. Adaptive report formatting — scale the report presentation based on estate size:
+
+    **Step 1 — Determine estate tier:**
+    After collecting estate data in Phase 4, count the total number of distinct SQL Server instances in the validated dataset:
+    - **Tier 1: ≤10 instances** — full inline detail (current behaviour, no change)
+    - **Tier 2: 11–50 instances** — aggregated distributions + action-oriented groupings
+    - **Tier 3: 51+ instances** — as Tier 2, plus top-N exception filtering, collapsible HTML sections (export only), and percentage-based heatmaps
+
+    State the detected tier and instance count in the Estate summary opening line, for example:
+    `Estate size: 47 instances across 32 machines — Tier 2 (aggregated) report format applied.`
+
+    **Step 2 — Tier 1 (≤10 instances):**
+    Use all output-template.md sections as-is with full inline detail. No changes to current behaviour.
+
+    **Step 3 — Tier 2 (11–50 instances) section overrides:**
+
+    - **Estate summary — replace inline instance/machine names with distribution counts:**
+      ```
+      SQL instances: {N} across {M} machines
+        Editions:  {N} Enterprise | {N} Standard | {N} Express
+        Versions:  {N}× SQL 2022 | {N}× SQL 2019 | {N}× SQL 2016 (EoS) | {N}× SQL 2014 (EoS)
+        Status:    {N} Connected | {N} Unreachable | {N} Disconnected
+      ```
+      Continue using the existing licensing, backup/monitoring/security, and utilisation subsections unchanged.
+
+    - **Machine inventory — replace inline machine listing with action-oriented groupings table:**
+      Present this table in the Estate summary section immediately after the distribution block:
+      ```
+      | Migration target                    | Machines | Instances | Key characteristic                |
+      |-------------------------------------|----------|-----------|-----------------------------------|
+      | Azure SQL MI (Ready)                | {N}      | {N}       | No blockers identified            |
+      | Azure SQL MI (Remediation needed)   | {N}      | {N}       | Known blockers — see Appendix A   |
+      | SQL on Azure VM                     | {N}      | {N}       | MI-blocked, VM-ready              |
+      | Requires further assessment         | {N}      | {N}       | Unreachable or no assessment data |
+      ```
+      Move the full machine inventory (one row per machine with all properties) to Appendix A.
+
+    - **Enterprise downgrade audit — lead with summary counts; show AMBER/RED detail inline, list GREEN by name only:**
+      Open the section with:
+      ```
+      Downgrade candidates: {N} Enterprise instances
+        GREEN (ready):    {N}
+        AMBER (pending):  {N}
+        RED (blocked):    {N}
+      ```
+      Then list GREEN instance names in a compact block (no per-database detail inline):
+      ```
+      GREEN instances (no blockers — full DMV results in Appendix B):
+        - {instanceName} on {machineName}
+        - ...
+      ```
+      Follow with the full existing structured audit table and runtime validation table for AMBER and RED records only.
+      Move full per-database DMV results for GREEN instances to Appendix B.
+
+    - **BPA alignment — replace per-machine detail tables with an estate-wide findings heatmap:**
+      ```
+      | Check ID | Check name            | Category | Severity      | Machines affected |
+      |----------|-----------------------|----------|---------------|-------------------|
+      | STOR-03  | NTFS block size       | Storage  | High          | {N}/{total}       |
+      | INST-07  | Auto-shrink enabled   | Config   | Medium        | {N}/{total}       |
+      | ...                                                                               |
+      ```
+      Sort by severity descending (Critical → High → Medium → Low → Informational), then by affected machine count descending within each severity band.
+      Move per-machine BPA detail tables to Appendix C.
+      Keep the existing pre-migration remediation checklist in the body for Critical and High findings only.
+
+    - **Azure target recommendations — replace per-instance narrative with an action-grouped summary table:**
+      ```
+      | Migration target  | Instances | Recommended action             | Confidence |
+      |-------------------|-----------|--------------------------------|------------|
+      | Azure SQL MI      | {N}       | Ready — migrate in Wave 1      | High       |
+      | Azure SQL MI      | {N}       | Remediation needed before MI   | Medium     |
+      | SQL on Azure VM   | {N}       | Lift-and-shift candidates      | Medium     |
+      | Further assess    | {N}       | Additional data required       | Low        |
+      ```
+      Follow with migration sequencing recommendations (waves) and SKU right-sizing confidence at a group level.
+      Move per-instance TCO and licensing notes to Appendix D.
+
+    - **Appendix (new section for Tier 2+):**
+      Add an `# Appendix` section after `# Data gaps / follow-up questions` with the following sub-sections:
+      - **Appendix A — Full machine inventory:** one row per machine with all properties (name, OS, version, edition, vCores, status, assessment status)
+      - **Appendix B — Enterprise downgrade audit: GREEN instance details:** full per-database DMV results for GREEN-classified instances
+      - **Appendix C — BPA alignment: per-machine detail:** full check-by-check BPA findings tables for each machine
+      - **Appendix D — Azure target recommendation details:** per-instance TCO notes, licensing position, and AHB eligibility by machine
+
+    **Step 4 — Tier 3 (51+ instances), additional overrides beyond Tier 2:**
+
+    - **Top-N exceptions in report body (default top 10, configurable):**
+      - Enterprise downgrade audit body: show only the top 10 AMBER/RED instances ordered by severity (RED first). State: `"Showing top 10 of {total} AMBER/RED findings — see Appendix B for complete list."`
+      - BPA heatmap body: show only the top 10 failing checks ordered by machines-affected count. State: `"Showing top 10 of {total} failing checks — see Appendix C for complete list."`
+      - Azure target summary table: group by target category (no top-N truncation needed — the table already aggregates by category).
+
+    - **Percentage-based BPA heatmap column:**
+      Replace the raw `{N}/{total}` machines-affected column with `{N}/{total} ({pct}%)` for all BPA heatmap rows.
+
+    - **Collapsible HTML sections (HTML/PDF export only — Phase 7):**
+      When generating HTML output, wrap Appendix sub-sections and per-machine detail blocks in `<details><summary>…</summary>` elements so they can be expanded/collapsed in the browser.
+      Apply to: Appendix A (machine inventory), Appendix B (GREEN DMV details), Appendix C (per-machine BPA tables), Appendix D (per-instance TCO details).
+      Markdown and plain-text output must include all content without collapsing (use headings only).
+
 ## Phase 7 - Optional report export (HTML/PDF)
 
 1. If the user requests export (for example "export report", "save as PDF", or `/export-pdf`), generate a self-contained HTML report:
@@ -887,6 +987,19 @@ SqlAssessment_CL
      - `Reason: {error_detail}`
      - `HTML output: {absolute_html_path}`
      - `Suggested manual command: {edge_or_chrome_command}`
+
+6. Collapsible sections for Tier 3 HTML export:
+   - When the estate is Tier 3 (51+ instances), wrap each Appendix sub-section in a `<details><summary>` block so large data tables are collapsed by default in the browser:
+     ```html
+     <details>
+       <summary><strong>Appendix A — Full machine inventory</strong> (47 machines — click to expand)</summary>
+       <!-- machine inventory table here -->
+     </details>
+     ```
+     Replace the example machine count with the actual count from the estate. Use the same actual-value substitution for all `{N}` and `{M}` placeholders throughout the report.
+   - Apply to: Appendix A, Appendix B, Appendix C, Appendix D.
+   - Do not collapse main report body sections (Executive Summary through Data gaps).
+   - This does not apply to Tier 1 or Tier 2 exports — those use normal headings throughout.
 
 # Guardrails
 
@@ -1082,3 +1195,8 @@ The detailed report structure below is the canonical section order and expands c
 8. Azure target recommendations
 9. Risks and blockers
 10. Data gaps / follow-up questions
+11. Appendix (Tier 2 and Tier 3 only — omit for Tier 1 estates with ≤10 instances):
+    - Appendix A — Full machine inventory
+    - Appendix B — Enterprise downgrade audit: GREEN instance details
+    - Appendix C — BPA alignment: per-machine detail
+    - Appendix D — Azure target recommendation details

@@ -176,6 +176,27 @@ $results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 has utilisation metric
 $sql2016NotAssessed = $reportContent -match '(?i)ARCBOX.SQL2016.{0,100}?not assessed'
 $results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 NOT marked 'not assessed'" -Category "TDD (open issues)" -Passed (-not $sql2016NotAssessed) -Detail $(if ($sql2016NotAssessed) { "ARCBOX-SQL2016 still marked 'not assessed' in Migrate section. Fix #73 should include this machine in assessed machines API call." } else { "" })
 
+# --- Issue #78: Adaptive report formatting ---
+# These assertions validate adaptive formatting behaviour. Because the regression test estate (ArcBox-SQL +
+# ARCBOX-SQL2016) is a 2-instance estate (Tier 1), we assert that NO Tier 2/3 aggregated structures are
+# present and that the report uses full inline detail. Add Tier 2/3 assertions here when a medium/large
+# estate regression dataset is available.
+
+# #78-TDD: Report must declare estate size and tier
+$estateTierDeclared = $reportContent -match '(?i)(estate size|tier 1|tier 2|tier 3|aggregated report format|instances across.*machines)'
+$results += Test-Assertion -Name "#78-TDD: Estate size/tier declaration present" -Category "TDD (adaptive formatting)" -Passed $estateTierDeclared -Detail $(if (-not $estateTierDeclared) { "Report does not contain an estate size or tier declaration. Expected: 'Estate size: N instances' or 'Tier 1/2/3' label in Estate summary." } else { "" })
+
+# #78-TDD (Tier 1 enforcement): 2-instance regression estate MUST NOT produce an Appendix section
+$appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|^#\s+Appendix'
+$results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
+
+# #78-TDD (Tier 1 enforcement): 2-instance estate MUST NOT use action-grouped migration target table
+# Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
+# This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
+# false positives from general narrative text that mentions "Migration target" or "Machines".
+$actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
+$results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
+
 # --- Section 9: Branding/Formatting ---
 $results += Test-ContentContains -Content $reportContent -Pattern "Microsoft" -Name "Branding: Microsoft wordmark" -Category "Formatting"
 $results += Test-ContentContains -Content $reportContent -Pattern "Confidential" -Name "Branding: Confidential watermark" -Category "Formatting"
