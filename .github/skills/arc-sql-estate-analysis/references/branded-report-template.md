@@ -29,6 +29,8 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     body {
       margin: 0;
       font-family: "Segoe UI", "Segoe UI Variable", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
       color: var(--text);
       background: var(--bg);
     }
@@ -89,8 +91,9 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
       padding: 18px;
       page-break-inside: avoid;
     }
-    h1 { margin: 0; font-size: 24px; }
-    h2 { margin: 0 0 12px; font-size: 18px; }
+    h1 { margin: 0; font-size: 22px; }
+    h2 { margin: 0 0 12px; font-size: 16px; }
+    h3 { margin: 14px 0 8px; font-size: 14px; }
     .meta {
       color: var(--muted);
       font-size: 12px;
