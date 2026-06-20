@@ -58,13 +58,15 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline insta
 _Replace the "Scope of estate analysed" and "Host / platform summary" inline text with the distribution block below. All other subsections (licensing, backup, utilisation, dependencies) remain unchanged._
 
 ```
-Estate size: {N} instances — {tier label} report format applied.
+Estate size: {N} instances — Tier 2 (aggregated) report format applied.
 
 SQL instances: {N} across {M} machines
   Editions:  {N} Enterprise | {N} Standard | {N} Express
   Versions:  {N}× SQL 2022 | {N}× SQL 2019 | {N}× SQL 2016 (EoS) | {N}× SQL 2014 (EoS)
   Status:    {N} Connected | {N} Unreachable | {N} Disconnected
 ```
+
+_Replace `Tier 2 (aggregated)` with `Tier 3 (aggregated)` for estates with 51+ instances. Replace all `{N}` and `{M}` placeholders with actual counts from the validated dataset._
 
 ### Machine inventory — action-oriented groupings (Tier 2/3)
 

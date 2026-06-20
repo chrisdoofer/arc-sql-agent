@@ -191,9 +191,10 @@ $appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|^#\
 $results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
 
 # #78-TDD (Tier 1 enforcement): 2-instance estate MUST NOT use action-grouped migration target table
-# The aggregated grouping table has exactly the four rows: "Azure SQL MI (Ready)", "Azure SQL MI (Remediation needed)",
-# "SQL on Azure VM", "Requires further assessment" — this pattern should not appear in a Tier 1 report
-$actionGroupedTable = $reportContent -match '(?i)(Azure SQL MI.*Ready.*Machines.*Instances|Migration target.*Machines.*Instances.*Key characteristic)'
+# Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
+# This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
+# false positives from general narrative text that mentions "Migration target" or "Machines".
+$actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
 $results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
 
 # --- Section 9: Branding/Formatting ---

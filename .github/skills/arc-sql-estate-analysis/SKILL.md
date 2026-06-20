@@ -992,10 +992,11 @@ SqlAssessment_CL
    - When the estate is Tier 3 (51+ instances), wrap each Appendix sub-section in a `<details><summary>` block so large data tables are collapsed by default in the browser:
      ```html
      <details>
-       <summary><strong>Appendix A — Full machine inventory</strong> ({N} machines — click to expand)</summary>
+       <summary><strong>Appendix A — Full machine inventory</strong> (47 machines — click to expand)</summary>
        <!-- machine inventory table here -->
      </details>
      ```
+     Replace the example machine count with the actual count from the estate. Use the same actual-value substitution for all `{N}` and `{M}` placeholders throughout the report.
    - Apply to: Appendix A, Appendix B, Appendix C, Appendix D.
    - Do not collapse main report body sections (Executive Summary through Data gaps).
    - This does not apply to Tier 1 or Tier 2 exports — those use normal headings throughout.

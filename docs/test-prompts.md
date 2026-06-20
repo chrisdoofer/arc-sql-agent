@@ -264,19 +264,19 @@ Provide an estate dataset with 32 SQL Server instances across 22 machines.
 - Enterprise downgrade audit body shows full per-database DMV detail for GREEN instances without redirecting to Appendix
 
 ### 15c — Large estate (51+ instances)
-Provide an estate dataset with 65 SQL Server instances across 48 machines with 18 AMBER/RED downgrade findings and 25 failing BPA checks.
+Provide an estate dataset with 65 SQL Server instances across 48 machines with 18 AMBER/RED downgrade findings and 25 BPA checks with a Fail or Warning status.
 
 ✅ Expected behaviour:
 - Tier 3 format is used
 - All Tier 2 rules apply (aggregated distribution, action-grouped tables, heatmaps, Appendix)
 - Enterprise downgrade audit body shows only the top 10 AMBER/RED findings (ordered RED first), with the message "Showing top 10 of 18 AMBER/RED findings — see Appendix B for complete list"
-- BPA heatmap body shows only the top 10 failing checks (ordered by machines-affected count descending), with the message "Showing top 10 of 25 failing checks — see Appendix C for complete list"
+- BPA heatmap body shows only the top 10 failing/warning checks (ordered by machines-affected count descending), with the message "Showing top 10 of 25 failing checks — see Appendix C for complete list"
 - BPA heatmap machines-affected column includes percentage, e.g. "12/48 (25%)"
 - When HTML export is requested (Phase 7), Appendix sub-sections are wrapped in `<details><summary>…</summary>` for collapsible display; markdown output is not collapsed
 
 ❌ Failure indicators:
 - All 18 AMBER/RED downgrade findings displayed inline without top-N truncation
-- All 25 BPA failing checks displayed inline without top-N truncation
+- All 25 BPA failing/warning checks displayed inline without top-N truncation
 - Percentage column absent from Tier 3 BPA heatmap
 - HTML export does not use collapsible `<details>` wrappers for Appendix content
 - Tier 2 rules not applied (no heatmap, no action-grouped table, no Appendix)
