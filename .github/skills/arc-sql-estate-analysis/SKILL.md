@@ -186,7 +186,7 @@ Use this skill when the user asks to:
    **NOT available in Resource Graph (separate API calls are required and justified):**
    - Azure Migrate project utilisation data — requires Migrate API endpoints
    - Assessed machine metrics from Azure Migrate (CPU/memory baselines, confidence scores)
-   - Agentless dependency analysis data — portal CSV export only (see Phase 4 step 8)
+   - Agentless dependency analysis data — via the `Microsoft.DependencyMap` REST API (primary, see Phase 4 step 8b) or portal CSV export for classic agentless appliance data (fallback, see Phase 4 step 8c)
 
    **Post-query local processing (perform locally — no additional network calls):**
    1. Filter results by `type` field to separate: SQL instances, databases, machines, and Migrate projects
@@ -258,14 +258,26 @@ Use this skill when the user asks to:
 
 8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
 
-   a. Determine dependency data access path:
-      - agentless dependency data is NOT accessible via REST API or PowerShell — it is stored in the Azure Migrate service layer and viewable only in the Azure portal dependency visualization
-      - the only supported path for retrieving this data is the **portal CSV export** (see below)
+   a. Determine dependency data access path. There are two distinct dependency data sources — check for the newer one first:
+      - **Azure Migrate Dependency Map (`Microsoft.DependencyMap/maps`)** — the newer dependency mapping service. Connection data is held in a graph-based datastore that is NOT queryable via Azure Resource Graph, but IS retrievable programmatically via the `Microsoft.DependencyMap` REST API. **This is the primary, preferred path.** See step 8b.
+      - **Classic agentless Azure Migrate appliance dependency analysis** — the older appliance-based feature. This data is NOT accessible via REST API or PowerShell; it lives in the Azure Migrate service layer and is only available via portal CSV export. Use this only as a fallback when no Dependency Map resource exists. See step 8c.
       - do NOT recommend agent-based dependency analysis as an alternative — deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen
 
-   b. Agentless dependency CSV export:
-      - agentless dependency connection data cannot be retrieved programmatically
-      - prompt the user via `ask_user`: "Azure Migrate dependency analysis is enabled but the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
+   b. Direct Dependency Map API extraction (primary path):
+      - resolve the Dependency Map resource(s) in scope using command-templates.md **Template 7 (List Dependency Map Resources)** — this returns the `{mapName}` needed for export
+      - if one or more maps are found, bulk-export dependencies using command-templates.md **Template 8 (Export Dependencies via Direct API)**:
+        - resolve `{focusedMachineId}` from the map's discovered machines, correlating to each Arc-enabled SQL machine by name (case-insensitive, strip domain suffix); if a machine cannot be correlated, surface it in "Data gaps / follow-up questions" rather than guessing
+        - use a 30-day collection window and the default (resolvable) process filter unless the user requests otherwise
+        - the operation is async — poll the `Location` header until `status` is `Succeeded`, then download the CSV from `properties.exportedDataSasUri`
+        - if the result reports `statusCode: PartialMatch` with `availableDaysCount`, disclose that fewer days of data were available than requested as a data-freshness note
+      - for targeted single-machine inspection, use command-templates.md **Template 9 (Get Dependency View for a Focused Machine)**
+      - **API version:** default to `2025-05-01-preview`; if rejected, fall back to `2025-07-01-preview` then `2025-01-31-preview`. If all versions fail, surface the API error and fall back to the portal CSV export path (step 8c)
+      - the exported CSV uses the same column structure as the portal export — parse it using the dependency-CSV correlation rules in step 8d
+      - if no Dependency Map resource is returned by Template 7, the new service is not in use in this scope — fall back to step 8c
+
+   c. Classic agentless dependency CSV export (fallback — only when no Dependency Map resource exists or the API is unavailable):
+      - classic agentless dependency connection data cannot be retrieved programmatically
+      - prompt the user via `ask_user`: "Azure Migrate agentless dependency analysis is enabled but no Dependency Map resource was found, so the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
       - provide export instructions:
         1. In the Azure portal, navigate to the Azure Migrate project
         2. Go to **All inventory** or **Infrastructure inventory** view
@@ -273,7 +285,8 @@ Use this skill when the user asks to:
         4. Select the appliance(s) and a time interval (recommend 30 days)
         5. Set process type to **Resolvable** (default) for clearest results
         6. Select **Generate**, then **Download** the CSV when ready
-      - the exported CSV contains one row per observed dependency with these fields:
+
+   d. Parse the dependency CSV (from either step 8b or step 8c) — the exported CSV contains one row per observed dependency with these fields:
         - `Timeslot` — 6-hour window when the dependency was observed
         - `Source server name`
         - `Source application`
@@ -283,24 +296,24 @@ Use this skill when the user asks to:
         - `Destination application`
         - `Destination process`
         - `Destination port`
-      - when the user provides the CSV:
+      - when the CSV is available:
         - parse and correlate source/destination server names to Arc-enabled SQL machines
         - filter for SQL-relevant connections (destination port 1433, or connections where source/destination matches an Arc SQL machine name)
         - summarise inbound and outbound connections per SQL instance
         - identify SQL-to-SQL dependencies for migration sequencing
 
-   c. Build a dependency map per Arc-enabled SQL machine:
+   e. Build a dependency map per Arc-enabled SQL machine:
       - which other machines/services connect to each SQL instance (inbound on port 1433 or custom SQL ports)
       - which external services each SQL machine connects to (outbound)
       - flag any SQL-to-SQL dependencies (important for migration sequencing)
 
-   e. If dependency analysis is not enabled in the Azure Migrate project:
+   f. If dependency analysis is not enabled (no Dependency Map resource and classic dependency analysis disabled):
       - note that dependency data is unavailable
-      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate agentless dependency analysis is not enabled — enabling it on the Azure Migrate appliance would provide application dependency mapping for migration sequencing"
+      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate dependency analysis is not enabled — enabling it (Dependency Map or the agentless appliance) would provide application dependency mapping for migration sequencing"
 
-   e. If the user declines to export or cannot provide the CSV:
+   g. If the API path fails and the user declines to export or cannot provide the CSV:
       - continue the analysis without dependency data
-      - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate portal but not exported — export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
+      - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate but not retrieved — retry the Dependency Map API export or export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
 
 9. SQL on Azure VM best practices alignment (optional, additive):
    - offer this scan during analysis when either:
@@ -1164,7 +1177,7 @@ SqlAssessment_CL
   - if the response indicates version unsupported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
   - if all versions fail, surface the API error and continue without Migrate data
 
-- Agentless dependency data is NOT accessible via REST API or PowerShell. The data is stored in the Azure Migrate service layer and can only be viewed in the Azure portal or exported as CSV via portal **Manage Dependencies > Export dependencies**. Do not attempt to retrieve agentless dependency data programmatically — prompt the user to export the CSV instead.
+- Dependency data has two sources with different access paths. The newer **Azure Migrate Dependency Map** (`Microsoft.DependencyMap/maps`) IS retrievable programmatically via the `Microsoft.DependencyMap` REST API (connection data lives in a graph datastore that is not in Resource Graph, but the export/view actions return it) — this is the primary path; use command-templates.md Templates 7–9. The older **classic agentless Azure Migrate appliance** dependency data is NOT accessible via REST API or PowerShell and can only be exported as CSV via portal **Manage Dependencies > Export dependencies** — use this only as a fallback when no Dependency Map resource exists. Confirm the Dependency Map API version (`2025-05-01-preview`, falling back to `2025-07-01-preview` then `2025-01-31-preview`).
 
 - Do not recommend agent-based dependency analysis as an alternative to the agentless CSV export. Deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen.
 

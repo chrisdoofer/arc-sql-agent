@@ -45,7 +45,7 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline insta
   |         |           |              | Azure Migrate |
 
 - Application dependency summary (from Azure Migrate, if available):
-  - Dependency analysis type: Agentless / Not available
+  - Dependency analysis type: Dependency Map API / Agentless (portal CSV) / Not available
   - Collection period: last 30 days
 
   | SQL Instance | Inbound connections (top 5) | Outbound connections (top 5) |
