@@ -23,3 +23,6 @@ Review this Arc-enabled SQL estate and validate SKU right-sizing recommendations
 
 ## Prompt 8 - include dependency CSV export from Azure Migrate
 Analyse this Arc-enabled SQL estate. I've exported the dependency data from Azure Migrate as a CSV — here it is. Please include application dependency mapping in the analysis and recommend migration wave sequencing.
+
+## Prompt 9 - retrieve dependencies directly via the Dependency Map API
+Analyse this Arc-enabled SQL estate. I have an Azure Migrate Dependency Map set up — pull the dependency data directly via the `Microsoft.DependencyMap` API (no portal CSV export) and use it to recommend migration wave sequencing.

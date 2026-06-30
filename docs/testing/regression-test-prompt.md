@@ -23,7 +23,7 @@ For this test run, use the following pre-defined answers for all interactive pro
 - Standard SA-covered cores: 0
 - Enterprise SA-covered cores: 2
 - Azure Migrate project selection: Select the first project found (ArcBoxMigrate expected)
-- Dependency data: I do not have a CSV to provide (but confirm the prompt WAS triggered)
+- Dependency data: No `Microsoft.DependencyMap` resource exists in scope, so the agent falls back to the portal CSV path. I do not have a CSV to provide (but confirm the fallback prompt WAS triggered)
 - BPA alignment scan: Yes — run alignment scan
 - All Arc Run Command script approvals: Approve for all listed machines
 - Tier 3 BPA scan (if offered): Yes — run full scan via Arc Run Command
@@ -34,7 +34,7 @@ IMPORTANT: Even though answers are pre-defined, you MUST still execute every pha
 - Scope validation query
 - Consolidated estate ARG query
 - Azure Migrate utilisation data extraction
-- Azure Migrate dependency prompt (ask_user MUST still fire — just use the pre-defined answer)
+- Azure Migrate dependency extraction: first attempt the direct Dependency Map API (list `Microsoft.DependencyMap/maps` via Template 7); when none exists, the CSV fallback ask_user MUST still fire — just use the pre-defined answer
 - Enterprise downgrade DMV audit via Arc Run Command
 - Enterprise downgrade runtime validation via Arc Run Command
 - BPA alignment scan (Tier 1 + Tier 2 + Tier 3 if needed)
@@ -61,7 +61,8 @@ After a successful run, the following should all be true:
 - [ ] ArcBox-SQL_SSIS_2022 noted as assessment not enabled
 - [ ] Azure Migrate project ArcBoxMigrate selected
 - [ ] Utilisation data retrieved (ArcBox-SQL: ~90% CPU, ~68% memory)
-- [ ] Dependency prompt fired (ask_user triggered asking about CSV export)
+- [ ] Dependency Map API attempted first (no `Microsoft.DependencyMap/maps` resource found in scope)
+- [ ] Dependency CSV fallback prompt fired (ask_user triggered asking about CSV export)
 - [ ] Dependency noted as not enabled / no CSV provided
 
 ### Phase 5: Enterprise Downgrade Audit

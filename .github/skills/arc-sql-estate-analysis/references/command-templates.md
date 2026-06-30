@@ -258,7 +258,7 @@ resources
 
 **Data NOT in Resource Graph (requires separate justified API calls):**
 - Azure Migrate assessed machine utilisation metrics (CPU/memory baselines, confidence scores) — Migrate API
-- Agentless dependency data — portal CSV export only
+- Dependency connection data — `Microsoft.DependencyMap` REST API (primary; graph datastore, not in Resource Graph) or classic agentless portal CSV export (fallback)
 
 **Post-query local processing:**
 1. Split rows by `type` field into four groups: instances, databases, machines, Migrate projects
@@ -321,6 +321,126 @@ These queries are executed directly via Azure CLI or GitHub Copilot MCP tools an
 
 ---
 
+### 7. List Azure Migrate Dependency Map Resources
+
+**Purpose:** Discover `Microsoft.DependencyMap/maps` resources in scope and resolve the `{mapName}` required by the dependency view and export operations. Use this in Phase 4 before issuing a dependency view or export call.
+
+**Why direct API:** Dependency connection data is held in a graph-based datastore that is **not** queryable via Azure Resource Graph. The `Microsoft.DependencyMap` resource provider is the supported programmatic path. This is distinct from classic agentless Azure Migrate appliance dependency analysis (which has no API — portal CSV export only).
+
+**List by subscription:**
+```powershell
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.DependencyMap/maps?api-version={dependencyMapApiVersion}" -o json
+```
+
+**List by resource group:**
+```powershell
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps?api-version={dependencyMapApiVersion}" -o json
+```
+
+**Placeholders:**
+- `{subscriptionId}` — Subscription ID (GUID)
+- `{resourceGroup}` — Resource group containing the Dependency Map resource
+- `{dependencyMapApiVersion}` — Dependency Map API version. Default `2025-05-01-preview`. Confirm the tenant accepts this version before relying on it; `2025-07-01-preview` is the latest published version. If a version is rejected, fall back to `2025-07-01-preview` then `2025-01-31-preview`.
+
+**Expected output:** JSON `value[]` of map resources. Use `value[].name` as `{mapName}` for templates 8 and 9. If no maps are returned, the new Dependency Map service is not in use in this scope — fall back to the classic agentless portal CSV export path (SKILL Phase 4 step 8c).
+
+---
+
+### 8. Export Dependencies via Direct API (Bulk CSV)
+
+**Purpose:** Bulk-export observed dependencies from a Dependency Map to CSV programmatically — the direct-API equivalent of the portal **Manage Dependencies → Export dependencies** action. This is the **primary** dependency-data path when a `Microsoft.DependencyMap/maps` resource exists.
+
+**Why direct API over the bundled PowerShell helper script:** the direct `az rest` call keeps every request/response auditable, requires only the Azure CLI (already a prerequisite — no extra PowerShell 5.1+ dependency), avoids opaque external-script logic and uncontrolled file-download side effects, and lets us version the exact call inline here. Convenience features of the helper script (auth, async polling, CSV download) are reproduced by this template.
+
+**Operation:** `Maps_ExportDependencies` — `POST .../providers/Microsoft.DependencyMap/maps/{mapName}/exportDependencies`. This is a long-running (async) operation: it returns `202` with a `Location` header (poll until terminal) or `200` with the result inline. The terminal result carries `properties.exportedDataSasUri` — a short-lived SAS URL to the exported CSV.
+
+#### Template
+```powershell
+$body = @{
+    focusedMachineId = "{focusedMachineId}"
+    applianceNameList = @({applianceNames})
+    filters = @{
+        dateTime = @{
+            startDateTimeUtc = "{startDateTimeUtc}"
+            endDateTimeUtc   = "{endDateTimeUtc}"
+        }
+        processNameFilter = @{
+            operator     = "contains"
+            processNames = @({processNames})
+        }
+    }
+} | ConvertTo-Json -Depth 6 -Compress
+$body | Set-Content "$env:TEMP\depmap-export.json" -NoNewline
+$resp = az rest --method POST `
+    --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps/{mapName}/exportDependencies?api-version={dependencyMapApiVersion}" `
+    --body "@$env:TEMP\depmap-export.json" `
+    --headers "Content-Type=application/json" `
+    -o json
+```
+
+**Async polling:** if the response is empty and the call returned `202`, capture the `Location` response header and poll it with `az rest --method GET --url "{locationUrl}" -o json` every 5–10 seconds until `status` is `Succeeded` (or `Failed`/`Canceled`). When succeeded, read `properties.exportedDataSasUri`.
+
+**Download the CSV:**
+```powershell
+Invoke-WebRequest -UseBasicParsing -Uri "{exportedDataSasUri}" -OutFile "$env:TEMP\dependency-export.csv"
+```
+
+**Placeholders:**
+- `{focusedMachineId}` — machine node ID within the Dependency Map (resolve from the map's discovered machines; correlate to the Arc SQL machine by name). Required by the API.
+- `{applianceNames}` — comma-separated, quoted appliance names, e.g. `"appliance-01","appliance-02"`. Maps to portal appliance selection.
+- `{startDateTimeUtc}` / `{endDateTimeUtc}` — ISO 8601 UTC bounds of the collection window (recommend a 30-day window, e.g. `2024-03-01T00:00:00Z`).
+- `{processNames}` — comma-separated, quoted process-name filters, e.g. `"sqlservr"`. Omit the `processNameFilter` block entirely for all resolvable processes.
+- `{mapName}` — from Template 7.
+- `{dependencyMapApiVersion}` — see Template 7.
+
+**Expected output / result shape:**
+```json
+{
+  "status": "Succeeded",
+  "properties": {
+    "exportedDataSasUri": "https://...blob.core.windows.net/export-data/file.csv?sv=...",
+    "statusCode": "PartialMatch",
+    "additionalInfo": { "availableDaysCount": 7 }
+  }
+}
+```
+The downloaded CSV uses the same column structure as the portal export (`Source server name`, `Destination server name`, `Destination port`, etc.) — parse it with the existing dependency-CSV correlation rules. `statusCode: PartialMatch` with `availableDaysCount` indicates fewer days of data were available than requested — disclose this as a data-freshness note.
+
+---
+
+### 9. Get Dependency View for a Focused Machine (Single Machine)
+
+**Purpose:** Retrieve the dependency view for a single machine — the direct-API equivalent of the portal focused-machine dependency visualization. Use for targeted, per-SQL-instance dependency inspection rather than bulk export.
+
+**Operation:** `Maps_GetDependencyViewForFocusedMachine` — `POST .../providers/Microsoft.DependencyMap/maps/{mapName}/getDependencyViewForFocusedMachine`. Async: returns `202` with a `Location` header; poll until terminal, then read the result.
+
+#### Template
+```powershell
+$body = @{
+    focusedMachineId = "{focusedMachineId}"
+    filters = @{
+        dateTime = @{
+            startDateTimeUtc = "{startDateTimeUtc}"
+            endDateTimeUtc   = "{endDateTimeUtc}"
+        }
+        processNameFilter = @{
+            operator     = "contains"
+            processNames = @({processNames})
+        }
+    }
+} | ConvertTo-Json -Depth 6 -Compress
+$body | Set-Content "$env:TEMP\depmap-view.json" -NoNewline
+az rest --method POST `
+    --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps/{mapName}/getDependencyViewForFocusedMachine?api-version={dependencyMapApiVersion}" `
+    --body "@$env:TEMP\depmap-view.json" `
+    --headers "Content-Type=application/json" `
+    -o json
+```
+
+**Placeholders:** same as Template 8 (no `applianceNameList`). Poll the `Location` header as described in Template 8.
+
+---
+
 ## Usage Guidelines
 
 ### When to use each template:
@@ -331,6 +451,9 @@ These queries are executed directly via Azure CLI or GitHub Copilot MCP tools an
 4. **Only when quota exhausted:** Use Template 4 (Delete) for cleanup, but prefer updating slots
 5. **For all estate inventory queries:** Use Template 5 (Consolidated Estate ARG Query) — one call for all resource types
 6. **Before the full estate query:** Use Template 6 (Scope Validation Query) as a lightweight pre-check in Phase 2
+7. **To discover Dependency Map resources:** Use Template 7 (List Dependency Map Resources) to resolve `{mapName}` before any dependency call
+8. **For bulk dependency data (primary path):** Use Template 8 (Export Dependencies via Direct API) when a `Microsoft.DependencyMap/maps` resource exists; download and parse the resulting CSV
+9. **For single-machine dependency inspection:** Use Template 9 (Get Dependency View for a Focused Machine)
 
 ### Placeholder naming conventions:
 
@@ -341,6 +464,9 @@ All templates use consistent placeholder naming:
 - `{location}` — Azure region (e.g., `eastus`)
 - `{slotName}` — Run command slot name (use pattern: `estate-audit-{machineName}-{slotNumber}`)
 - `{scriptContent}` — Full PowerShell script to execute
+- `{mapName}` — Azure Migrate Dependency Map resource name (`Microsoft.DependencyMap/maps`), resolved via Template 7
+- `{dependencyMapApiVersion}` — Dependency Map API version (default `2025-05-01-preview`; fall back to `2025-07-01-preview` then `2025-01-31-preview`)
+- `{focusedMachineId}` — machine node ID within the Dependency Map, correlated to the Arc SQL machine by name
 
 ### Reusable slot naming pattern:
 
