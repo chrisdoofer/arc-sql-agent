@@ -949,7 +949,7 @@ SqlAssessment_CL
 
 12. Produce the final answer using the structure in `references/output-template.md`.
 
-12. Adaptive report formatting — scale the report presentation based on estate size:
+13. Adaptive report formatting — scale the report presentation based on estate size:
 
     **Step 1 — Determine estate tier:**
     After collecting estate data in Phase 4, count the total number of distinct SQL Server instances in the validated dataset:

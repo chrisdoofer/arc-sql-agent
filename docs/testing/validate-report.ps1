@@ -153,7 +153,7 @@ $securityPostureSection = $reportContent -match '(?i)(security posture|vulnerabi
 $results += Test-Assertion -Name "#82-TDD: Security posture section present" -Category "TDD (open issues)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a 'Security posture' or 'vulnerability exposure' section. Expected when an Azure Migrate project is in scope." } else { "" })
 
 # Issue #82 (secondary): section must include data provenance note referencing preview surface.
-$securityProvenance = $reportContent -match '(?i)(machinesinventoryinsightsresources|inventoryInsights.*vulnerabilities|preview.*undocumented|undocumented.*surface)'
+$securityProvenance = $reportContent -match '(?i)(machinesinventoryinsightsresources|inventoryInsights/vulnerabilities|preview.{0,30}undocumented)'
 $results += Test-Assertion -Name "#82-TDD: Security posture data provenance note present" -Category "TDD (open issues)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not contain the required data provenance note for Security Insights (preview ARG surface)." } else { "" })
 
 # Issue #71 (strict): The dependency prompt must result in user-response language

@@ -331,6 +331,8 @@ _Machines that could not be correlated to discovered Security Insights records a
 
 
 # Quick wins
+
+- Quick win 1:
   - Why it matters:
   - Expected benefit:
   - Confidence:
