@@ -24,6 +24,7 @@ For this test run, use the following pre-defined answers for all interactive pro
 - Enterprise SA-covered cores: 2
 - Azure Migrate project selection: Select the first project found (ArcBoxMigrate expected)
 - Dependency data: No `Microsoft.DependencyMap` resource exists in scope, so the agent falls back to the portal CSV path. I do not have a CSV to provide (but confirm the fallback prompt WAS triggered)
+- Security Insights: Query `machinesinventoryinsightsresources` for the ArcBoxMigrate project scope. If the table returns zero rows or the resource types are not found (preview surface may not be populated), document as a data gap — do NOT fail the analysis.
 - BPA alignment scan: Yes — run alignment scan
 - All Arc Run Command script approvals: Approve for all listed machines
 - Tier 3 BPA scan (if offered): Yes — run full scan via Arc Run Command
@@ -35,10 +36,11 @@ IMPORTANT: Even though answers are pre-defined, you MUST still execute every pha
 - Consolidated estate ARG query
 - Azure Migrate utilisation data extraction
 - Azure Migrate dependency extraction: first attempt the direct Dependency Map API (list `Microsoft.DependencyMap/maps` via Template 7); when none exists, the CSV fallback ask_user MUST still fire — just use the pre-defined answer
+- Azure Migrate Security Insights ARG query (both severity summary and per-machine detail queries)
 - Enterprise downgrade DMV audit via Arc Run Command
 - Enterprise downgrade runtime validation via Arc Run Command
 - BPA alignment scan (Tier 1 + Tier 2 + Tier 3 if needed)
-- Full analysis output with all 10 sections
+- Full analysis output with all sections (including Security posture when data or data-gap note is present)
 - HTML export with validation
 ```
 
@@ -64,6 +66,8 @@ After a successful run, the following should all be true:
 - [ ] Dependency Map API attempted first (no `Microsoft.DependencyMap/maps` resource found in scope)
 - [ ] Dependency CSV fallback prompt fired (ask_user triggered asking about CSV export)
 - [ ] Dependency noted as not enabled / no CSV provided
+- [ ] Security Insights ARG queries executed (severity summary + per-machine detail) against ArcBoxMigrate project scope
+- [ ] Security posture section present in report — either with CVE data OR with explicit data-gap note referencing preview surface
 
 ### Phase 5: Enterprise Downgrade Audit
 - [ ] DMV audit executed on ArcBox-SQL (slot estate-audit-ArcBox-SQL-01)

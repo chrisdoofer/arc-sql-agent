@@ -298,9 +298,39 @@ _Use this section for Tier 1 (≤10 instances). For Tier 2/3, move per-machine d
 3. {Machine} — {next remediation action}
 
 
-# Quick wins
+# Security posture — vulnerability exposure
 
-- Quick win 1:
+_This section is present only when an Azure Migrate project was selected and Security Insights data was queried. Omit entirely if no Azure Migrate project is in scope._
+
+**Data provenance:** _Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data._
+
+## Severity distribution summary
+
+| Severity | Vulnerability records | Distinct CVEs | Max CVSS |
+|----------|-----------------------|---------------|----------|
+| Critical |                       |               |          |
+| High     |                       |               |          |
+| Medium   |                       |               |          |
+| Low      |                       |               |          |
+| **Total**|                       |               |          |
+
+## Top CVEs by CVSS score
+
+| CVE ID | CVSS | Severity | Age (days) | Affected software scope |
+|--------|------|----------|------------|-------------------------|
+|        |      |          |            |                         |
+
+## Per-machine vulnerability summary (correlated Arc-enabled SQL machines)
+
+| Machine | Total CVEs | Critical | High | Max CVSS | Migration priority impact |
+|---------|------------|----------|------|----------|---------------------------|
+|         |            |          |      |          |                           |
+
+_Machines with Critical or High CVEs are flagged as elevated priority in Azure target recommendations._
+_Machines that could not be correlated to discovered Security Insights records are listed in Data gaps / follow-up questions._
+
+
+# Quick wins
   - Why it matters:
   - Expected benefit:
   - Confidence:
