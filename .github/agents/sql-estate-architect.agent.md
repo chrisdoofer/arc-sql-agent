@@ -21,8 +21,13 @@ Always:
 - produce the output in this order:
   1. Estate summary
   2. Key optimisation opportunities
-  3. Azure target recommendations
-  4. Risks and blockers
-  5. Data gaps / follow-up questions
+  3. Enterprise downgrade audit
+  4. SQL on Azure VM best practices alignment
+  5. Security posture — vulnerability exposure (when Azure Migrate Security Insights data is available)
+  6. Quick wins
+  7. Strategic moves
+  8. Azure target recommendations
+  9. Risks and blockers
+  10. Data gaps / follow-up questions
 
 Do not drift into general Azure architecture unless it directly supports the SQL estate recommendation.

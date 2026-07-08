@@ -427,6 +427,77 @@ SqlAssessment_CL
      - Informational = context-only findings
    - if the scan is skipped or unavailable, still include the report section and mark it as `Not assessed`
 
+10. Azure Migrate Security Insights — vulnerability exposure (conditional, when an Azure Migrate project is in scope):
+
+    a. **When to run:** execute this step whenever an Azure Migrate project was selected in Phase 1, regardless of whether utilisation or dependency data was successfully retrieved.
+
+    b. **Query vulnerability records from Azure Resource Graph:**
+
+       Run the following two ARG queries using `az graph query` scoped to the subscription(s) containing the Azure Migrate project:
+
+       **Query A — Severity summary (executive headline):**
+       ```kql
+       machinesinventoryinsightsresources
+       | where type in~ (
+           "Microsoft.OffAzure/vmwareSites/machines/inventoryInsights/vulnerabilities",
+           "Microsoft.OffAzure/hypervSites/machines/inventoryInsights/vulnerabilities",
+           "Microsoft.OffAzure/serverSites/machines/inventoryInsights/vulnerabilities"
+       )
+       | extend
+           cve = tostring(properties.cve),
+           severity = tostring(properties.baseSeverity),
+           cvss = todouble(properties.baseScore)
+       | summarize
+           vulnerabilityCount = count(),
+           distinctCves = dcount(cve),
+           maxCvss = max(cvss)
+           by severity
+       | order by maxCvss desc
+       ```
+
+       **Query B — Per-machine vulnerability detail (top 20 by CVSS score):**
+       ```kql
+       machinesinventoryinsightsresources
+       | where type in~ (
+           "Microsoft.OffAzure/vmwareSites/machines/inventoryInsights/vulnerabilities",
+           "Microsoft.OffAzure/hypervSites/machines/inventoryInsights/vulnerabilities",
+           "Microsoft.OffAzure/serverSites/machines/inventoryInsights/vulnerabilities"
+       )
+       | extend
+           machineResourceId = tostring(split(id, "/inventoryInsights/")[0]),
+           cve = tostring(properties.cve),
+           cvss = todouble(properties.baseScore),
+           severity = tostring(properties.baseSeverity),
+           publishedOn = tostring(properties.publishedOn),
+           scope = tostring(properties.vulnerabilityScopeId)
+       | project machineResourceId, cve, cvss, severity, publishedOn, scope
+       | order by cvss desc
+       | limit 20
+       ```
+
+    c. **Handle empty results gracefully:**
+       - if either query returns zero rows (no appliance, no discoveries, or table not populated), do NOT treat this as an error
+       - record that Security Insights data is unavailable for this scope
+       - surface in "Data gaps / follow-up questions": "Azure Migrate Security Insights data not found for the selected project scope. Ensure the Azure Migrate appliance is deployed and discovery has been completed, or that the appliance version supports Security Insights (preview feature)."
+       - **important caveat:** the `machinesinventoryinsightsresources` ARG table and `inventoryInsights/vulnerabilities` resource types are a **preview/undocumented surface** — if the ARG query fails with a schema or resource-type error, treat this as the feature not being available in the current environment and record as a data gap rather than failing the analysis
+
+    d. **Correlate machines to the Arc-enabled SQL estate:**
+       - parse the `machineResourceId` field (prefix of the vulnerability record `id` before `/inventoryInsights/`) to extract the discovered machine resource ID
+       - match discovered machine resource IDs or names (case-insensitive, strip domain suffix) to the Arc-enabled SQL machines collected in Phase 4
+       - for correlated machines, record total vulnerability count, Critical/High count, and top CVSS score alongside the machine record
+       - for machines that cannot be correlated (discovery machine names differ from Arc machine names), surface in "Data gaps / follow-up questions" with the unmatched names for manual reconciliation
+
+    e. **Store Security Insights results for use in Phase 6:**
+       - severity distribution: count per severity band (Critical, High, Medium, Low), total distinct CVEs, overall max CVSS
+       - top CVEs: list of CVE IDs with CVSS score, severity, publication date, and software scope (from Query B output)
+       - per-machine summary: for each correlated machine — total vulnerability count, Critical count, High count, max CVSS
+       - data provenance note (preview ARG surface, not a committed public API)
+
+    f. **If no Azure Migrate project was selected in Phase 1:**
+       - skip this step entirely
+       - do not add a Security posture section to the report; omit the section rather than producing empty placeholders
+       - if the user asks about vulnerability data, refer them to deploying an Azure Migrate appliance
+
 
 ## Phase 5 - Enterprise downgrade audit
 
@@ -848,11 +919,37 @@ SqlAssessment_CL
    - surface any unexpected dependencies in Risks and blockers (e.g. SQL instance connecting to external non-Azure endpoints, undocumented application connections)
    - flag SQL-to-SQL dependencies explicitly — these affect migration wave planning and downtime windows
 
-10. Separate confirmed findings from assumptions, unknowns, or missing fields.
+10. When Azure Migrate Security Insights data is available (collected in Phase 4 step 10):
 
-11. Produce the final answer using the structure in `references/output-template.md`.
+    a. **Executive Summary headline:** include a one-line security posture headline, for example:
+       - "Security posture: {N} Critical and {N} High CVEs identified across the estate (max CVSS: {score}) — {N} machines with Critical exposure flagged for priority migration."
+       - only include this line when vulnerability data was retrieved; omit when no Security Insights data is available
 
-12. Adaptive report formatting — scale the report presentation based on estate size:
+    b. **Security posture — vulnerability exposure section:** produce this section using the template in `references/output-template.md`. Include:
+       - severity distribution summary (Critical / High / Medium / Low counts, distinct CVE count, max CVSS)
+       - top CVEs by CVSS score (table: CVE ID, CVSS, severity, age in days from publishedOn, affected software scope)
+       - per-machine vulnerability summary (correlated Arc-enabled SQL machines only)
+       - data provenance note: _"Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data."_
+
+    c. **Azure target recommendations — migration priority adjustment:**
+       - flag any Arc-enabled SQL machine with one or more Critical or High CVEs as **higher priority for migration or remediation** in the Azure target recommendations section
+       - append a migration priority note to affected machines, for example: "Priority: elevated — {N} Critical CVE(s) identified (max CVSS: {score}). Recommend accelerating migration or applying outstanding patches before migration window."
+       - machines with no CVE data or only Medium/Low CVEs should not have their priority artificially lowered
+
+    d. **Risks and blockers — unpatched vulnerabilities:**
+       - if any Critical CVEs are present in the estate, add a risk entry: "Unpatched critical vulnerabilities ({N} Critical CVE(s), max CVSS {score}) identified on machines in the migration scope. These increase exposure during any extended migration timeline and should be treated as a migration risk factor."
+       - if no Critical CVEs but High CVEs are present, add a lower-severity risk entry referencing the High CVE count
+
+    e. **Confidence and evidence guardrail:**
+       - always disclose that the Security Insights data comes from a preview ARG surface
+       - do not claim definitive patch status — only report what the Security Insights data shows
+       - if correlation between discovered machines and Arc SQL machines was partial or failed, note the correlation coverage in the section and in "Data gaps / follow-up questions"
+
+11. Separate confirmed findings from assumptions, unknowns, or missing fields.
+
+12. Produce the final answer using the structure in `references/output-template.md`.
+
+13. Adaptive report formatting — scale the report presentation based on estate size:
 
     **Step 1 — Determine estate tier:**
     After collecting estate data in Phase 4, count the total number of distinct SQL Server instances in the validated dataset:
@@ -993,8 +1090,8 @@ SqlAssessment_CL
 5. If browser binaries are unavailable, or conversion fails (for example browser not found, write permission denied, or insufficient disk space), return the generated HTML and clearly state that PDF conversion could not be completed in the current environment.
    - include the HTML output path so the user can run conversion manually
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
-   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
-     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section)
+   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Security posture — vulnerability exposure`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section; include `Security posture — vulnerability exposure` only when an Azure Migrate project was selected and Security Insights data was queried — omit the section entirely if no Azure Migrate project was in scope)
    - failure response format:
      - `PDF export status: Failed`
      - `Reason: {error_detail}`

@@ -145,6 +145,17 @@ $results += Test-Assertion -Name "#72: No BPA parsing failure language" -Categor
 # These assertions define the DESIRED state after each fix is merged.
 # They SHOULD FAIL today. When they pass, the issue is resolved.
 
+# Issue #82: Security posture section — when Azure Migrate is selected, the report must include
+# a "Security posture" section with vulnerability data or an explicit data-gap note.
+# After fix: report should contain "Security posture" heading AND either CVE data or a note that
+# Security Insights data was not available (no appliance / preview surface).
+$securityPostureSection = $reportContent -match '(?i)(security posture|vulnerability exposure)'
+$results += Test-Assertion -Name "#82-TDD: Security posture section present" -Category "TDD (open issues)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a 'Security posture' or 'vulnerability exposure' section. Expected when an Azure Migrate project is in scope." } else { "" })
+
+# Issue #82 (secondary): section must include data provenance note referencing preview surface.
+$securityProvenance = $reportContent -match '(?i)(machinesinventoryinsightsresources|inventoryInsights/vulnerabilities|preview.{0,30}undocumented)'
+$results += Test-Assertion -Name "#82-TDD: Security posture data provenance note present" -Category "TDD (open issues)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not contain the required data provenance note for Security Insights (preview ARG surface)." } else { "" })
+
 # Issue #71 (strict): The dependency prompt must result in user-response language
 # Current bug: prompt doesn't fire at all — report just says "not enabled" generically
 # After fix: report should show "user declined CSV export" or "no CSV provided" (evidence prompt fired)
