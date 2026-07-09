@@ -432,7 +432,7 @@ SqlAssessment_CL
      | INST-04 | https://learn.microsoft.com/en-us/sql/relational-databases/performance/monitor-performance-by-using-the-query-store |
      | INST-06 | https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/backup-compression |
      | INST-11 | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
-   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to an empty string and use the standard no-URL note defined in Part 2 Output requirements below rather than inventing a link
+   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to an empty string and use the standard no-URL note defined under `# Output requirements` → `## Part 2 — Technical Detail & Execution Guide` rather than inventing a link
    - allowed status values: `Pass` | `Fail` | `Warning` | `NotAssessed` | `NotApplicable`
    - allowed severity values: `Critical` | `High` | `Medium` | `Low` | `Informational`
    - classify findings consistently:
@@ -909,7 +909,7 @@ SqlAssessment_CL
 6. Classify recommendations into:
    - Quick wins = low effort steps that improve Azure migration readiness or reduce target Azure costs
    - Strategic moves = higher effort changes that provide medium- to long-term Azure migration value or optimise Azure landing costs
-   - every Quick win and Strategic move in Part 2 must include concise remediation wording plus an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists; if none exists, use the standard no-URL note defined in Part 2 Output requirements below
+   - every Quick win and Strategic move in Part 2 must include concise remediation wording plus an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists; if none exists, use the standard no-URL note defined under `# Output requirements` → `## Part 2 — Technical Detail & Execution Guide`
 
 7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
@@ -985,7 +985,7 @@ SqlAssessment_CL
       - Produce all existing technical sections with full depth (Estate summary through Appendix).
       - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
       - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
-      - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, use the standard no-URL note defined in Part 2 Output requirements below rather than inventing one.
+      - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, use the standard no-URL note defined under `# Output requirements` → `## Part 2 — Technical Detail & Execution Guide` rather than inventing one.
 
 13. Adaptive report formatting — scale the report presentation based on estate size:
 

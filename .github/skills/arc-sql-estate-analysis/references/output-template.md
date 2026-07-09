@@ -146,7 +146,7 @@ _Full machine inventory (name, OS, version, edition, vCores, status) → Appendi
   - SA / AHB interpretation:
   - TCO note: {always frame as impact on Azure migration cost — e.g. "reduces target Azure licensing by X" or "enables AHB eligibility for Azure target"}
   - Downgrade safety status:
-  - Remediation: {one or two concise engineer-facing steps tied to the evidenced blocker or optimisation}
+  - Remediation: {one or two concise customer-ready steps tied to the evidenced blocker or optimisation}
   - Reference: {authoritative Microsoft URL for this recommendation — for example Query Store / Backup Compression / end-of-support / Azure Hybrid Benefit}
 
 - Opportunity 2:
@@ -297,7 +297,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
   - Remaining risks and unknowns
 
 - Remediation note:
-  - {Tie the remediation directly to the detected blocker(s) and chosen Standard-edition target version — for example remove unsupported features, retain Enterprise for blocked workloads, or change the Azure target before migration.}
+  - {Tie the remediation directly to the detected blocker(s) and chosen target edition (for example Standard edition) — for example remove unsupported features, retain Enterprise for blocked workloads, or change the Azure target before migration.}
 - Reference:
   - {authoritative Microsoft Learn URL for the editions/features support matrix of the chosen target SQL Server version}
 
