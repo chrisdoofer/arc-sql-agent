@@ -398,7 +398,7 @@ Invoke-WebRequest -UseBasicParsing -Uri "{exportedDataSasUri}" -OutFile "$env:TE
 **Placeholders:**
 - `{focusedMachineId}` — machine node ID within the Dependency Map (resolve from the map's discovered machines; correlate to the Arc SQL machine by name). Required by the API.
 - `{applianceNames}` — comma-separated, quoted appliance names, e.g. `"appliance-01","appliance-02"`. Maps to portal appliance selection.
-- `{startDateTimeUtc}` / `{endDateTimeUtc}` — ISO 8601 UTC bounds of the collection window (recommend a 30-day window, e.g. `2024-03-01T00:00:00Z`).
+- `{startDateTimeUtc}` / `{endDateTimeUtc}` — ISO 8601 UTC bounds of the collection window. Default to a **28-day** window ending now (e.g. `startDateTimeUtc = (Get-Date).AddDays(-28).ToUniversalTime().ToString("o")`). **Do not exceed 30 days** — the API rejects start dates older than 30 days with `Start date ... cannot be older than 30 days`.
 - `{processNames}` — comma-separated, quoted process-name filters, e.g. `"sqlservr"`. Omit the `processNameFilter` block entirely for all resolvable processes.
 - `{mapName}` — from Template 7.
 - `{dependencyMapApiVersion}` — see Template 7.

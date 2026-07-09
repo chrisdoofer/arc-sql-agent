@@ -267,7 +267,7 @@ Use this skill when the user asks to:
       - resolve the Dependency Map resource(s) in scope using command-templates.md **Template 7 (List Dependency Map Resources)** — this returns the `{mapName}` needed for export
       - if one or more maps are found, bulk-export dependencies using command-templates.md **Template 8 (Export Dependencies via Direct API)**:
         - resolve `{focusedMachineId}` from the map's discovered machines, correlating to each Arc-enabled SQL machine by name (case-insensitive, strip domain suffix); if a machine cannot be correlated, surface it in "Data gaps / follow-up questions" rather than guessing
-        - use a 30-day collection window and the default (resolvable) process filter unless the user requests otherwise
+        - use a **28-day** collection window (the API rejects start dates older than 30 days; 28 days stays safely inside this hard limit) and the default (resolvable) process filter unless the user requests otherwise
         - the operation is async — poll the `Location` header until `status` is `Succeeded`, then download the CSV from `properties.exportedDataSasUri`
         - if the result reports `statusCode: PartialMatch` with `availableDaysCount`, disclose that fewer days of data were available than requested as a data-freshness note
       - for targeted single-machine inspection, use command-templates.md **Template 9 (Get Dependency View for a Focused Machine)**
@@ -282,7 +282,7 @@ Use this skill when the user asks to:
         1. In the Azure portal, navigate to the Azure Migrate project
         2. Go to **All inventory** or **Infrastructure inventory** view
         3. Select **Manage Dependencies** dropdown → **Export dependencies**
-        4. Select the appliance(s) and a time interval (recommend 30 days)
+        4. Select the appliance(s) and a time interval (recommend **28 days** — the portal enforces a 30-day hard limit on start date)
         5. Set process type to **Resolvable** (default) for clearest results
         6. Select **Generate**, then **Download** the CSV when ready
 
