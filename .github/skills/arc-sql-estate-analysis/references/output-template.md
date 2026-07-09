@@ -404,7 +404,7 @@ _Machines that could not be correlated to discovered Security Insights records a
 |------------------|-------------------------|-----------|
 | SQL Server engine / shared components | Apply the latest supported cumulative update or GDR for the affected major version before migration, or accelerate upgrade/migration if the version is out of support. | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
 | SQL Server out-of-support versions | Move to a supported SQL Server version or Azure target; if immediate migration is not possible, evaluate Extended Security Updates as a time-bound mitigation. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview |
-| Extended Security Updates decision path | Use ESU only as an interim risk-reduction step while the migration or upgrade plan is executed. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates |
+| Extended Security Updates (ESU) | Use ESU only as an interim risk-reduction step while the migration or upgrade plan is executed. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates |
 | Other Microsoft component families (for example Windows Server or .NET) | Filter the Microsoft Security Update Guide by CVE and affected product family, then apply the relevant Microsoft patch guidance for that component. | https://msrc.microsoft.com/update-guide/ |
 
 
