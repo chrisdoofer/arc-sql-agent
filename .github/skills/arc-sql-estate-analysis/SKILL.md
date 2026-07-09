@@ -30,11 +30,13 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 
    `Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts.`
 
+   Here, "Phase 5" means the Enterprise downgrade audit phase defined in this skill.
+
 2. The initial prompt must also supply these required decisions explicitly:
    - tenant identifier (tenant ID or tenant DNS name)
    - subscription scope
    - Azure Migrate project decision
-   - Software Assurance declaration (`Yes`, `No`, or `Unsure`); if `Yes`, include both Standard and Enterprise SA-covered core counts
+   - Software Assurance declaration (`Yes`, `No`, or `Unsure`); if `Yes`, include both Standard and Enterprise SA-covered core counts to keep the run fully unattended
    - SQL on Azure VM best-practices alignment scan decision (`Yes` or `No`)
    - export format decision (`HTML`, `PDF`, or no export) and output destination if not using the current working directory defaults
 
@@ -61,6 +63,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - Because scripts are not shown before execution in this mode, the final report MUST include an `Unattended execution log` subsection listing every write operation performed with: machine, operation, slot name (if applicable), script pattern, and result.
 
 6. If the standing-authorization phrase is absent, or any required decision above is missing, invalid, or ambiguous, fall back to the normal interactive behaviour for the affected gate(s) rather than guessing.
+   - Example: if Software Assurance = `Yes` but one core count is missing, prompt only for the missing core count value(s)
 
 # Analysis workflow
 
@@ -90,8 +93,9 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 7. If one or more Azure Migrate projects are found:
    - if a valid Unattended mode prompt already supplied the Azure Migrate project decision, honour it without an `ask_user` prompt:
      - if the prompt names a project and that project is found in scope, store its resource ID for use in Phase 4 data acquisition
-     - if the prompt says to auto-select the only project in scope, do so only when exactly one project exists; otherwise fall back to interactive prompting for this gate only
+     - if the prompt says to auto-select the only project in scope, do so only when exactly one project exists; otherwise stop and report that the project decision is ambiguous in the validated scope
      - if the prompt says to continue without Azure Migrate data when no matching project is found, continue and note that decision
+     - if the prompt names a project that is not found and does not explicitly allow continuing without Azure Migrate data, stop and report that the requested project could not be resolved in the validated scope
    - otherwise present the list to the user via `ask_user`
    - prompt: "I found the following Azure Migrate project(s) in your tenant. Would you like me to include utilisation and dependency data from one of these in the analysis?"
    - choices: list of project names (with subscription and resource group context) + "Skip — don't use Azure Migrate data"
@@ -603,7 +607,7 @@ SqlAssessment_CL
       - Show the complete, untruncated script content (Pattern 1 — DMV audit, using the exact reference implementation from "Consolidated script patterns" below).
       - Briefly describe what each script does (e.g. "This script queries `sys.dm_db_persisted_sku_features` across all user databases to detect persisted Enterprise-only features.").
       - Never substitute a description in place of the full script content.
-      - In Unattended mode, skip the presentation and approval prompts entirely; execute only the exact built-in `Pattern 1` or `Pattern 2` reference implementation defined in this skill, and record the script pattern used in the final `Unattended execution log`.
+      - In Unattended mode, skip the presentation and approval prompts entirely; execute only the exact built-in `Pattern 1` reference implementation defined in this skill, and record the script pattern used in the final `Unattended execution log`.
 
       **Step 2 — Request approval via `ask_user`.**
       - Choices: `["Approve and execute", "Skip this check", "Modify script first"]`

@@ -48,6 +48,6 @@ Run the Arc-enabled SQL estate analysis unattended, end to end, with no further 
 - Dependency data: pull directly via the Microsoft.DependencyMap API (no portal CSV prompt); if unavailable, note as a data gap and continue.
 - Output: produce the full two-part report and export the branded HTML report to the working directory.
 
-Standing authorization phrase: "Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts."
+Standing-authorization phrase: "Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts."
 
 If any required value above is missing or scope cannot be validated, stop and tell me rather than guessing.
