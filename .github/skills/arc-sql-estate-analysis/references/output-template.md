@@ -107,7 +107,7 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline insta
   |             |                           |                            |
 
 
-### Tier 2 / Tier 3 aggregated format (use for 11+ instances instead of inline names above)
+## Tier 2 / Tier 3 aggregated format (use for 11+ instances instead of inline names above)
 
 _Replace the "Scope of estate analysed" and "Host / platform summary" inline text with the distribution block below. All other subsections (licensing, backup, utilisation, dependencies) remain unchanged._
 
@@ -122,7 +122,7 @@ SQL instances: {N} across {M} machines
 
 _Replace `Tier 2 (aggregated)` with `Tier 3 (aggregated)` for estates with 51+ instances. Replace all `{N}` and `{M}` placeholders with actual counts from the validated dataset._
 
-#### Machine inventory — action-oriented groupings (Tier 2/3)
+### Machine inventory — action-oriented groupings (Tier 2/3)
 
 _Replace any flat per-machine listing with this action-grouped table. Full machine inventory (one row per machine) moves to Appendix A._
 

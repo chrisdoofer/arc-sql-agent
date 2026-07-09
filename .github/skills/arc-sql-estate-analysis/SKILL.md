@@ -957,8 +957,16 @@ SqlAssessment_CL
 11. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
 12. Produce the final answer using the two-part structure in `references/output-template.md`:
-    - **Part 1 — Executive Briefing** first: write the five Part 1 sections (Executive Summary, Estate at a glance, Key risks and issues, Strategic migration and modernisation opportunities, Recommended Azure direction) as a concise, business-framed narrative. Draw from the same evidence collected in Phases 4–5. Do not include per-database or per-instance raw tables in Part 1. Frame every point through reliability, cost, security, and end-of-support lenses, connecting to Azure migration or modernisation as the outcome. Present the Enterprise → Standard downgrade at summary level only (GREEN/AMBER/RED counts and headline direction) — full per-database detail belongs in Part 2.
-    - **Part 2 — Technical Detail & Execution Guide** immediately after: produce all existing technical sections with full depth (Estate summary through Appendix). No data is collected twice — Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
+    - **Part 1 — Executive Briefing** (produce first):
+      - Write the five Part 1 sections: Executive Summary, Estate at a glance, Key risks and issues, Strategic migration and modernisation opportunities, Recommended Azure direction.
+      - Draw from the same evidence collected in Phases 4–5 — no data is collected twice.
+      - Do not include per-database or per-instance raw tables in Part 1.
+      - Frame every point through reliability, cost, security, and end-of-support lenses, connecting to Azure migration or modernisation as the outcome.
+      - Present the Enterprise → Standard downgrade at summary level only (GREEN/AMBER/RED counts and headline direction) — full per-database detail belongs in Part 2.
+    - **Part 2 — Technical Detail & Execution Guide** (produce immediately after Part 1):
+      - Produce all existing technical sections with full depth (Estate summary through Appendix).
+      - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
+      - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
 
 13. Adaptive report formatting — scale the report presentation based on estate size:
 
@@ -1102,7 +1110,7 @@ SqlAssessment_CL
    - include the HTML output path so the user can run conversion manually
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
    - required headings for Part 1: `Executive Summary`, `Estate at a glance`, `Key risks and issues`, `Strategic migration and modernisation opportunities`, `Recommended Azure direction`
-    - required headings for Part 2: `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+   - required headings for Part 2: `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
      (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section; include `Security posture — vulnerability exposure` only when an Azure Migrate project was selected and Security Insights data was queried — omit the section entirely if no Azure Migrate project was in scope)
    - failure response format:
      - `PDF export status: Failed`
