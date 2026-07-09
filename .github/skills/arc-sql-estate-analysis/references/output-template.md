@@ -146,10 +146,16 @@ _Full machine inventory (name, OS, version, edition, vCores, status) → Appendi
   - SA / AHB interpretation:
   - TCO note: {always frame as impact on Azure migration cost — e.g. "reduces target Azure licensing by X" or "enables AHB eligibility for Azure target"}
   - Downgrade safety status:
+  - Remediation: {one or two concise engineer-facing steps tied to the evidenced blocker or optimisation}
+  - Reference: {authoritative Microsoft URL for this recommendation — for example Query Store / Backup Compression / end-of-support / Azure Hybrid Benefit}
 
 - Opportunity 2:
+  - Remediation:
+  - Reference:
 
 - Opportunity 3:
+  - Remediation:
+  - Reference:
 
 
 ## Enterprise downgrade audit
@@ -290,6 +296,11 @@ _Then continue with the structured audit tables below for AMBER and RED records 
   - Runtime validation execution status and blockers
   - Remaining risks and unknowns
 
+- Remediation note:
+  - Validate each detected persisted feature and runtime blocker against the target SQL Server Standard feature matrix; where unsupported, retain Enterprise for that workload or remove the blocker before migration.
+- Reference:
+  - Editions and supported features of SQL Server 2022: https://learn.microsoft.com/en-us/sql/sql-server/editions-and-components-of-sql-server-2022
+
 
 ## SQL on Azure VM best practices alignment
 
@@ -316,10 +327,11 @@ _**Tier 3 additional:** show only the top 10 failing checks in the heatmap (orde
 
 _Sort by severity descending (Critical → High → Medium → Low → Informational), then by machines-affected count descending within each severity band._
 _Tier 3: add `({pct}%)` to the machines-affected column and truncate to top 10 with a "see Appendix C" note._
+_Use the authoritative Microsoft URL mapped to each check ID. If a specific check has no dedicated page, use the SQL Server on Azure VM best-practices checklist._
 
-| Check ID | Check name | Category | Severity | Machines affected |
-|----------|------------|----------|----------|-------------------|
-|          |            |          |          |                   |
+| Check ID | Check name | Category | Severity | Machines affected | Reference |
+|----------|------------|----------|----------|-------------------|-----------|
+|          |            |          |          |                   |           |
 
 _Per-machine BPA detail tables → Appendix C._
 
@@ -329,27 +341,30 @@ _Use this section for Tier 1 (≤10 instances). For Tier 2/3, move per-machine d
 
 #### Critical and High severity findings
 
-| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
-|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
-|         |          |          |       |        |          |               |                |             |
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation | Reference |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|-----------|
+|         |          |          |       |        |          |               |                |             |           |
 
 #### Medium and Low severity findings
 
-| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
-|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
-|         |          |          |       |        |          |               |                |             |
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation | Reference |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|-----------|
+|         |          |          |       |        |          |               |                |             |           |
 
 #### Informational
 
-| Machine | Instance | Check ID | Check | Status | Severity | Detail |
-|---------|----------|----------|-------|--------|----------|--------|
-|         |          |          |       |        |          |        |
+| Machine | Instance | Check ID | Check | Status | Severity | Detail | Reference |
+|---------|----------|----------|-------|--------|----------|--------|-----------|
+|         |          |          |       |        |          |        |           |
 
 ### Pre-migration remediation checklist
 
-1. {Machine} — {Critical/High remediation action}
-2. {Machine} — {next remediation action}
-3. {Machine} — {next remediation action}
+1. {Machine} — {Critical/High remediation action}  
+   Reference: {authoritative Microsoft URL for the cited check}
+2. {Machine} — {next remediation action}  
+   Reference: {authoritative Microsoft URL for the cited check}
+3. {Machine} — {next remediation action}  
+   Reference: {authoritative Microsoft URL for the cited check}
 
 
 ## Security posture — vulnerability exposure
@@ -383,6 +398,15 @@ _This section is present only when an Azure Migrate project was selected and Sec
 _Machines with Critical or High CVEs are flagged as elevated priority in Azure target recommendations._
 _Machines that could not be correlated to discovered Security Insights records are listed in Data gaps / follow-up questions._
 
+### Patch/remediation guidance by affected component family
+
+| Component family | Recommended remediation | Reference |
+|------------------|-------------------------|-----------|
+| SQL Server engine / shared components | Apply the latest supported cumulative update or GDR for the affected major version before migration, or accelerate upgrade/migration if the version is out of support. | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
+| SQL Server out-of-support versions | Move to a supported SQL Server version or Azure target; if immediate migration is not possible, evaluate Extended Security Updates as a time-bound mitigation. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview |
+| Extended Security Updates decision path | Use ESU only as an interim risk-reduction step while the migration or upgrade plan is executed. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates |
+| Other Microsoft component families (for example Windows Server or .NET) | Filter the Microsoft Security Update Guide by CVE and affected product family, then apply the relevant Microsoft patch guidance for that component. | https://msrc.microsoft.com/update-guide/ |
+
 
 ## Quick wins
 
@@ -390,16 +414,22 @@ _Machines that could not be correlated to discovered Security Insights records a
   - Why it matters:
   - Expected benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 - Quick win 2:
   - Why it matters:
   - Expected benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 - Quick win 3:
   - Why it matters:
   - Expected benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 
 ## Strategic moves
@@ -409,18 +439,24 @@ _Machines that could not be correlated to discovered Security Insights records a
   - Dependency / blocker:
   - Expected long-term benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 - Strategic move 2:
   - Why it matters:
   - Dependency / blocker:
   - Expected long-term benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 - Strategic move 3:
   - Why it matters:
   - Dependency / blocker:
   - Expected long-term benefit:
   - Confidence:
+  - Remediation:
+  - Reference:
 
 
 ## Azure target recommendations
@@ -430,14 +466,16 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action
 
 ### Action-grouped summary (Tier 2/3 — use instead of per-instance narrative below)
 
-| Migration target  | Instances | Recommended action             | Confidence |
-|-------------------|-----------|--------------------------------|------------|
-| Azure SQL MI      |           | Ready — migrate in Wave 1      |            |
-| Azure SQL MI      |           | Remediation needed before MI   |            |
-| SQL on Azure VM   |           | Lift-and-shift candidates      |            |
-| Further assess    |           | Additional data required       |            |
+| Migration target  | Instances | Recommended action             | Confidence | Reference |
+|-------------------|-----------|--------------------------------|------------|-----------|
+| Azure SQL MI      |           | Ready — migrate in Wave 1      |            | https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview |
+| Azure SQL MI      |           | Remediation needed before MI   |            | https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview |
+| SQL on Azure VM   |           | Lift-and-shift candidates      |            | https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist |
+| Further assess    |           | Additional data required       |            | https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview |
 
 _Per-instance TCO notes and licensing position → Appendix D._
+
+_Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AHB affects the recommendation: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit_
 
 ### Per-instance detail (Tier 1 — use for ≤10 instances)
 
@@ -448,14 +486,19 @@ _Per-instance TCO notes and licensing position → Appendix D._
   - If Not Ready, blocker details:
   - Why it is blocked:
   - Remediation:
+  - Reference: https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview
 
 - Candidate workloads for SQL Server on Azure Virtual Machines:
   - Licensing / AHB note:
   - TCO note: {frame as Azure target cost impact, not on-prem savings}
+  - Remediation:
+  - Reference: https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist
 
 - Candidate workloads for Arc-enabled SQL Server PAYG as an interim or transition path:
   - Licensing / AHB note:
   - TCO note: {frame as transition step towards Azure migration, not standalone on-prem optimisation}
+  - Remediation:
+  - Reference: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
 
 - Preferred target and rationale:
 
@@ -514,9 +557,9 @@ _Full per-database DMV audit results for instances classified GREEN. AMBER/RED d
 
 _Full check-by-check BPA findings for each machine. Estate-wide heatmap is in the main report body._
 
-| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
-|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
-|         |          |          |       |        |          |               |                |             |
+| Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation | Reference |
+|---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|-----------|
+|         |          |          |       |        |          |               |                |             |           |
 
 ### Appendix D — Azure target recommendation details
 

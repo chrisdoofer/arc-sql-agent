@@ -418,9 +418,21 @@ SqlAssessment_CL
        "expectedValue": "Each file type on a distinct drive",
        "detail": "Data and log files share drive E:\\",
        "severity": "High",
-       "remediation": "Separate data and log files onto distinct drives before Azure migration."
+       "remediation": "Separate data and log files onto distinct drives before Azure migration.",
+       "referenceUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist"
      }
      ```
+   - maintain the BPA check-ID → authoritative Microsoft URL mapping below so `referenceUrl` values stay consistent across reports. Prefer stable `learn.microsoft.com` URLs; use another Microsoft-owned authoritative domain only when no Learn page exists.
+     | Check ID(s) | Authoritative URL |
+     |-------------|-------------------|
+     | STOR-01, STOR-03, INST-07, INST-08, INST-09, INST-10, SEC-01, SEC-02, HADR-01, OPS-* | https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist |
+     | STOR-02, STOR-04 | https://learn.microsoft.com/en-us/sql/relational-databases/databases/tempdb-database |
+     | INST-01 | https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/server-memory-server-configuration-options |
+     | INST-03 | https://learn.microsoft.com/en-us/sql/relational-databases/databases/instant-file-initialization |
+     | INST-04 | https://learn.microsoft.com/en-us/sql/relational-databases/performance/monitor-performance-by-using-the-query-store |
+     | INST-06 | https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/backup-compression |
+     | INST-11 | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
+   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to `No authoritative Microsoft URL available for this specific check.` rather than inventing a link
    - allowed status values: `Pass` | `Fail` | `Warning` | `NotAssessed` | `NotApplicable`
    - allowed severity values: `Critical` | `High` | `Medium` | `Low` | `Informational`
    - classify findings consistently:
@@ -897,6 +909,7 @@ SqlAssessment_CL
 6. Classify recommendations into:
    - Quick wins = low effort steps that improve Azure migration readiness or reduce target Azure costs
    - Strategic moves = higher effort changes that provide medium- to long-term Azure migration value or optimise Azure landing costs
+   - every Quick win and Strategic move in Part 2 must include concise remediation wording plus an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists; if none exists, state `No authoritative Microsoft URL available for this specific remediation.`
 
 7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
@@ -904,6 +917,10 @@ SqlAssessment_CL
    - Arc-enabled SQL Server PAYG as an interim transition option
    - explicitly state whether Azure Hybrid Benefit appears eligible based on the declared SA-covered cores
    - reflect the declared SA position in TCO comparisons and PAYG versus licence-included guidance
+   - include authoritative Microsoft URLs for target-specific remediation guidance where applicable:
+     - Azure SQL Managed Instance readiness / blockers: https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview
+     - SQL Server on Azure VM best-practice remediation: https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist
+     - Azure Hybrid Benefit licensing guidance: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
    - When Azure SQL Managed Instance readiness metadata is available:
      - report the readiness state for each MI candidate
      - if a workload is marked Not Ready, retrieve the blocker details from the source data
@@ -938,6 +955,7 @@ SqlAssessment_CL
        - severity distribution summary (Critical / High / Medium / Low counts, distinct CVE count, max CVSS)
        - top CVEs by CVSS score (table: CVE ID, CVSS, severity, age in days from publishedOn, affected software scope)
        - per-machine vulnerability summary (correlated Arc-enabled SQL machines only)
+       - patch/remediation guidance by affected component family, using authoritative Microsoft URLs where available (for example SQL Server builds, SQL Server end-of-support/ESU guidance, or Microsoft Security Update Guide)
        - data provenance note: _"Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data."_
 
     c. **Azure target recommendations — migration priority adjustment:**
@@ -967,6 +985,7 @@ SqlAssessment_CL
       - Produce all existing technical sections with full depth (Estate summary through Appendix).
       - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
       - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
+      - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, state that explicitly rather than inventing one.
 
 13. Adaptive report formatting — scale the report presentation based on estate size:
 
@@ -1328,6 +1347,8 @@ Produce first. Concise, business-framed narrative framed through reliability, co
 ## Part 2 — Technical Detail & Execution Guide (engineer audience)
 
 Produce second, immediately after Part 1 in the same output. Full existing depth so engineers can act. Adaptive Tier 1/2/3 formatting rules apply within Part 2 (see Phase 6 step 13).
+
+All remediation guidance in Part 2 must be concise, customer-ready, and sourced. Include an authoritative Microsoft Learn URL (or other Microsoft-owned authoritative URL) everywhere one exists; if no authoritative Microsoft URL exists for a specific remediation, say so explicitly rather than inventing a link.
 
 6. Estate summary (full distributions / inventory — Tier 1/2/3 formatting applies)
 7. Key optimisation opportunities (detailed, with confidence levels)
