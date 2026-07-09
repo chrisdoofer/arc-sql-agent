@@ -297,9 +297,9 @@ _Then continue with the structured audit tables below for AMBER and RED records 
   - Remaining risks and unknowns
 
 - Remediation note:
-  - Validate each detected persisted feature and runtime blocker against the target SQL Server Standard feature matrix; where unsupported, retain Enterprise for that workload or remove the blocker before migration.
+  - {Tie the remediation directly to the detected blocker(s) and chosen Standard-edition target version — for example remove unsupported features, retain Enterprise for blocked workloads, or change the Azure target before migration.}
 - Reference:
-  - Editions and supported features of SQL Server 2022: https://learn.microsoft.com/en-us/sql/sql-server/editions-and-components-of-sql-server-2022
+  - {authoritative Microsoft Learn URL for the editions/features support matrix of the chosen target SQL Server version}
 
 
 ## SQL on Azure VM best practices alignment
@@ -475,7 +475,7 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action
 
 _Per-instance TCO notes and licensing position → Appendix D._
 
-Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AHB affects the recommendation: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
+Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AHB affects the recommendation: https://learn.microsoft.com/en-us/azure/cost-management-billing/azure-hybrid-benefits/
 
 ### Per-instance detail (Tier 1 — use for ≤10 instances)
 
@@ -498,7 +498,7 @@ Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AH
   - Licensing / AHB note:
   - TCO note: {frame as transition step towards Azure migration, not standalone on-prem optimisation}
   - Remediation:
-  - Reference: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
+  - Reference: https://learn.microsoft.com/en-us/azure/cost-management-billing/azure-hybrid-benefits/
 
 - Preferred target and rationale:
 

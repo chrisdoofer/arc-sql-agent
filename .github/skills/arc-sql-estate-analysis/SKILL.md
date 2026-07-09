@@ -422,7 +422,7 @@ SqlAssessment_CL
        "referenceUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist"
      }
      ```
-   - keep the BPA check-ID → authoritative Microsoft URL mapping below current in this skill definition so `referenceUrl` values stay consistent across reports. Prefer stable `learn.microsoft.com` URLs; use another Microsoft-owned authoritative domain only when no Learn page exists.
+   - keep the BPA check-ID → authoritative Microsoft URL mapping below current in this skill definition so `referenceUrl` values stay consistent across reports. Repository maintainers should review it whenever BPA coverage changes or Microsoft publishes new canonical pages. Prefer stable `learn.microsoft.com` URLs; use another Microsoft-owned authoritative domain only when no Learn page exists.
      | Check ID(s) | Authoritative URL |
      |-------------|-------------------|
      | STOR-01, STOR-03, INST-07, INST-08, INST-09, INST-10, SEC-01, SEC-02, HADR-01, OPS-* | https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist |
@@ -920,7 +920,7 @@ SqlAssessment_CL
    - include authoritative Microsoft URLs for target-specific remediation guidance where applicable:
      - Azure SQL Managed Instance readiness / blockers: https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/assessment-overview
      - SQL Server on Azure VM best-practice remediation: https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist
-     - Azure Hybrid Benefit licensing guidance: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
+     - Azure Hybrid Benefit licensing guidance: https://learn.microsoft.com/en-us/azure/cost-management-billing/azure-hybrid-benefits/
    - When Azure SQL Managed Instance readiness metadata is available:
      - report the readiness state for each MI candidate
      - if a workload is marked Not Ready, retrieve the blocker details from the source data
