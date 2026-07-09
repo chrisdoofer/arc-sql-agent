@@ -52,6 +52,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - Standing authorization covers ONLY the documented Phase 5 write set:
      - RunCommandHandler extension install / upgrade
      - create / update / delete of reusable `estate-audit-*` run command slots
+     - execution of those slots only when the submitted payload is the built-in Pattern 1 or Pattern 2 reference script
    - Any other resource modification still requires an explicit approval prompt.
    - Only the built-in reference scripts may run under standing authorization:
      - Pattern 1 — DMV audit
@@ -123,7 +124,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 
 2. If the query returns no resources:
    - outside Unattended mode, always confirm with the user before concluding that no resources exist
-   - in Unattended mode, do not issue an `ask_user` prompt here; if the scope still cannot be validated after the fallback attempts below, stop with a scope-validation error rather than guessing
+   - in Unattended mode, do not issue an `ask_user` prompt here; if the alternative query approach in step 3 still cannot validate scope, stop with a scope-validation error rather than guessing
 
 3. If query results are inconsistent, empty, or suspected to be incorrect:
    - attempt an alternative query approach immediately when:
@@ -602,7 +603,7 @@ SqlAssessment_CL
       - Show the complete, untruncated script content (Pattern 1 — DMV audit, using the exact reference implementation from "Consolidated script patterns" below).
       - Briefly describe what each script does (e.g. "This script queries `sys.dm_db_persisted_sku_features` across all user databases to detect persisted Enterprise-only features.").
       - Never substitute a description in place of the full script content.
-      - In Unattended mode, skip the presentation and approval prompts entirely; execute only the exact built-in `Pattern 1` or `Pattern 2` reference script from the "Consolidated script patterns" section below, and record the script pattern used in the final `Unattended execution log`.
+      - In Unattended mode, skip the presentation and approval prompts entirely; execute only the exact built-in `Pattern 1` or `Pattern 2` reference implementation defined in this skill, and record the script pattern used in the final `Unattended execution log`.
 
       **Step 2 — Request approval via `ask_user`.**
       - Choices: `["Approve and execute", "Skip this check", "Modify script first"]`
