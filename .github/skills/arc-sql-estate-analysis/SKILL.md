@@ -740,8 +740,9 @@ SqlAssessment_CL
   - Maximum slots needed per machine: 2 (one for DMV audit, one for runtime checks — both run as consolidated scripts)
 
 - Parallel execution across machines:
-  - When multiple machines require audit, submit run commands on EACH machine simultaneously using `--no-wait`
-  - Then poll for results across all machines
+  - When multiple machines require audit, submit run commands on EACH machine simultaneously using plain `az rest --method PUT` (no `--no-wait` — `az rest` does not support that flag)
+  - Each PUT returns immediately with `provisioningState=Creating`; execution continues asynchronously on the Arc host
+  - After all PUTs have been submitted, poll results across all machines using Template 3 (Poll) until each reaches `execState=Succeeded` or `execState=Failed`
   - This overlaps execution time: 2 machines × 2 scripts = 4 operations, but elapsed time ≈ 2 sequential operations (not 4)
   - DO NOT run multiple concurrent commands on the SAME machine (risk of HCRP500)
   - DO run commands on DIFFERENT machines in parallel
