@@ -432,7 +432,7 @@ SqlAssessment_CL
      | INST-04 | https://learn.microsoft.com/en-us/sql/relational-databases/performance/monitor-performance-by-using-the-query-store |
      | INST-06 | https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/backup-compression |
      | INST-11 | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
-   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to `No authoritative Microsoft URL available for this specific check.` rather than inventing a link
+   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to `No authoritative Microsoft URL available for this specific remediation.` rather than inventing a link
    - allowed status values: `Pass` | `Fail` | `Warning` | `NotAssessed` | `NotApplicable`
    - allowed severity values: `Critical` | `High` | `Medium` | `Low` | `Informational`
    - classify findings consistently:
