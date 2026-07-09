@@ -108,11 +108,6 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
       font-weight: 700;
       letter-spacing: 0.2px;
     }
-    .part-divider .part-subtitle {
-      margin: 4px 0 0;
-      font-size: 12px;
-      opacity: 0.85;
-    }
     .part-1-divider { border-top: 4px solid #0078d4; }
     .part-2-divider { border-top: 4px solid #005a9e; }
     h1 { margin: 0; font-size: 22px; }
@@ -189,7 +184,6 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
 
     <div class="part-divider part-1-divider">
       <h1>Part 1 — Executive Briefing</h1>
-      <div class="part-subtitle">Decision-maker audience · Business-framed narrative · Reliability · Cost · Security · End-of-support</div>
     </div>
     <section><h2>Executive Summary</h2>{{executiveSummaryHtml}}</section>
     <section><h2>Estate at a glance</h2>{{estateAtAGlanceHtml}}</section>
@@ -199,7 +193,6 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
 
     <div class="part-divider part-2-divider">
       <h1>Part 2 — Technical Detail &amp; Execution Guide</h1>
-      <div class="part-subtitle">Engineer audience · Full depth for action · DBA · Security · Infrastructure</div>
     </div>
     <section><h2>Estate summary</h2>{{estateSummaryHtml}}</section>
     <section><h2>Key optimisation opportunities</h2>{{keyOptimisationsHtml}}</section>

@@ -1315,19 +1315,19 @@ SqlAssessment_CL
 
 Always produce the sections below in the two-part order. Both parts are derived from the same evidence collected in Phases 4–5 — no data is collected twice.
 
-## Part 1 — Executive Briefing (decision-maker audience)
+## Part 1 — Executive Briefing
 
 Produce first. Concise, business-framed narrative framed through reliability, cost, security, and end-of-support lenses. No per-database or per-instance raw tables in Part 1. Every point must connect to Azure migration or modernisation as the outcome.
 
-1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
+1. Executive Summary (3–5 concise bullet points highlighting key risks, optimisation opportunities, and Azure direction)
 2. Estate at a glance (headline counts only: total instances, editions, EoS exposure, security posture headline — full distributions are in Part 2)
 3. Key risks and issues (high-level, framed by reliability / cost / security / end-of-support — no per-machine tables)
 4. Strategic migration and modernisation opportunities — including Enterprise → Standard downgrade at summary level (GREEN/AMBER/RED counts and headline licensing/TCO direction only — per-database detail is in Part 2)
 5. Recommended Azure direction (target options at a glance + indicative benefit; per-instance SKU, TCO, and sequencing are in Part 2)
 
-## Part 2 — Technical Detail & Execution Guide (engineer audience)
+## Part 2 — Technical Detail & Execution Guide
 
-Produce second, immediately after Part 1 in the same output. Full existing depth so engineers can act. Adaptive Tier 1/2/3 formatting rules apply within Part 2 (see Phase 6 step 13).
+Produce second, immediately after Part 1 in the same output. Full existing depth for action. Adaptive Tier 1/2/3 formatting rules apply within Part 2 (see Phase 6 step 13).
 
 6. Estate summary (full distributions / inventory — Tier 1/2/3 formatting applies)
 7. Key optimisation opportunities (detailed, with confidence levels)

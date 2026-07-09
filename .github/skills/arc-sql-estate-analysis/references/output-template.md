@@ -1,6 +1,6 @@
 # Part 1 — Executive Briefing
 
-_Audience: CIO / IT Director / business decision-maker. Concise, business-framed narrative. No per-database or per-instance raw tables. Every point is framed through reliability, cost, security, and end-of-support risk lenses — and connects to Azure migration or modernisation as the outcome._
+_Concise, business-framed narrative. No per-database or per-instance raw tables. Every point is framed through reliability, cost, security, and end-of-support risk lenses — and connects to Azure migration or modernisation as the outcome._
 
 ## Executive Summary
 
@@ -60,7 +60,7 @@ _Target options at a glance. Per-instance SKU detail, TCO, and sequencing are in
 
 # Part 2 — Technical Detail & Execution Guide
 
-_Audience: DBA / Security / Infrastructure Engineer. Full depth for action. Contains all existing sections with per-instance and per-database detail, execution guidance, and appendices._
+_Full depth for action. Contains all existing sections with per-instance and per-database detail, execution guidance, and appendices._
 
 ## Estate summary
 
