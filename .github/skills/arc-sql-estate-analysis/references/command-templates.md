@@ -544,10 +544,23 @@ az rest --method PUT --url "https://management.azure.com/subscriptions/12345678-
 
 ---
 
+### Parallel submission across multiple machines
+
+When the estate has multiple Arc machines requiring audit, submit run commands in parallel to overlap execution time:
+
+1. **Submit phase** — issue one `az rest --method PUT` call per machine (do NOT add `--no-wait`; `az rest` does not support that flag). Each PUT returns immediately with `provisioningState=Creating`, indicating the run command resource has been created and execution has started asynchronously on the Arc host.
+2. **Poll phase** — after all PUTs have been issued, poll each machine with Template 3 until `execState` reaches `Succeeded` or `Failed`.
+3. **Constraint** — never submit more than one concurrent run command to the *same* machine (risk of HCRP500 conflict). Parallelism is across *different* machines only.
+
+This pattern achieves elapsed time ≈ single-machine execution time regardless of how many machines are audited simultaneously.
+
+---
+
 ## Summary
 
 **Key takeaways:**
 - Always use Template 2 (REST API with encoding) for run command submissions
+- Never add `--no-wait` to `az rest` commands — the flag is not supported; use plain PUT (returns `provisioningState=Creating`) then poll separately
 - Never construct run command submission commands from scratch
 - Never pass complex SQL queries via CLI arguments
 - Always write JSON bodies to temp files
