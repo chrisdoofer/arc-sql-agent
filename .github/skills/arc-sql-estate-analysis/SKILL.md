@@ -422,7 +422,7 @@ SqlAssessment_CL
        "referenceUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist"
      }
      ```
-   - maintain the BPA check-ID → authoritative Microsoft URL mapping below so `referenceUrl` values stay consistent across reports. Prefer stable `learn.microsoft.com` URLs; use another Microsoft-owned authoritative domain only when no Learn page exists.
+   - keep the BPA check-ID → authoritative Microsoft URL mapping below current in this skill definition so `referenceUrl` values stay consistent across reports. Prefer stable `learn.microsoft.com` URLs; use another Microsoft-owned authoritative domain only when no Learn page exists.
      | Check ID(s) | Authoritative URL |
      |-------------|-------------------|
      | STOR-01, STOR-03, INST-07, INST-08, INST-09, INST-10, SEC-01, SEC-02, HADR-01, OPS-* | https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist |
@@ -432,7 +432,7 @@ SqlAssessment_CL
      | INST-04 | https://learn.microsoft.com/en-us/sql/relational-databases/performance/monitor-performance-by-using-the-query-store |
      | INST-06 | https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/backup-compression |
      | INST-11 | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
-   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to an empty string and state `No authoritative Microsoft URL available for this specific remediation.` in the report output rather than inventing a link
+   - if a finding's remediation is not explicitly covered by any maintained mapping and no other authoritative Microsoft page exists, set `referenceUrl` to an empty string and use the standard no-URL note defined in Output requirements rather than inventing a link
    - allowed status values: `Pass` | `Fail` | `Warning` | `NotAssessed` | `NotApplicable`
    - allowed severity values: `Critical` | `High` | `Medium` | `Low` | `Informational`
    - classify findings consistently:
@@ -909,7 +909,7 @@ SqlAssessment_CL
 6. Classify recommendations into:
    - Quick wins = low effort steps that improve Azure migration readiness or reduce target Azure costs
    - Strategic moves = higher effort changes that provide medium- to long-term Azure migration value or optimise Azure landing costs
-   - every Quick win and Strategic move in Part 2 must include concise remediation wording plus an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists; if none exists, state `No authoritative Microsoft URL available for this specific remediation.`
+   - every Quick win and Strategic move in Part 2 must include concise remediation wording plus an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists; if none exists, use the standard no-URL note defined in Output requirements
 
 7. Recommend candidate Azure target options, for example:
    - Azure SQL Managed Instance
@@ -985,7 +985,7 @@ SqlAssessment_CL
       - Produce all existing technical sections with full depth (Estate summary through Appendix).
       - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
       - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
-      - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, state that explicitly rather than inventing one.
+      - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, use the standard no-URL note defined in Output requirements rather than inventing one.
 
 13. Adaptive report formatting — scale the report presentation based on estate size:
 
@@ -1349,6 +1349,8 @@ Produce first. Concise, business-framed narrative framed through reliability, co
 Produce second, immediately after Part 1 in the same output. Full existing depth so engineers can act. Adaptive Tier 1/2/3 formatting rules apply within Part 2 (see Phase 6 step 13).
 
 All remediation guidance in Part 2 must be concise, customer-ready, and sourced. Include an authoritative Microsoft Learn URL (or other Microsoft-owned authoritative URL) everywhere one exists; if no authoritative Microsoft URL exists for a specific remediation, say so explicitly rather than inventing a link.
+
+Standard no-URL note (use this exact wording when needed): `No authoritative Microsoft URL available for this specific remediation.`
 
 6. Estate summary (full distributions / inventory — Tier 1/2/3 formatting applies)
 7. Key optimisation opportunities (detailed, with confidence levels)
