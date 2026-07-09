@@ -956,7 +956,17 @@ SqlAssessment_CL
 
 11. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
-12. Produce the final answer using the structure in `references/output-template.md`.
+12. Produce the final answer using the two-part structure in `references/output-template.md`:
+    - **Part 1 — Executive Briefing** (produce first):
+      - Write the five Part 1 sections: Executive Summary, Estate at a glance, Key risks and issues, Strategic migration and modernisation opportunities, Recommended Azure direction.
+      - Draw from the same evidence collected in Phases 4–5 — no data is collected twice.
+      - Do not include per-database or per-instance raw tables in Part 1.
+      - Frame every point through reliability, cost, security, and end-of-support lenses, connecting to Azure migration or modernisation as the outcome.
+      - Present the Enterprise → Standard downgrade at summary level only (GREEN/AMBER/RED counts and headline direction) — full per-database detail belongs in Part 2.
+    - **Part 2 — Technical Detail & Execution Guide** (produce immediately after Part 1):
+      - Produce all existing technical sections with full depth (Estate summary through Appendix).
+      - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
+      - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
 
 13. Adaptive report formatting — scale the report presentation based on estate size:
 
@@ -1099,7 +1109,8 @@ SqlAssessment_CL
 5. If browser binaries are unavailable, or conversion fails (for example browser not found, write permission denied, or insufficient disk space), return the generated HTML and clearly state that PDF conversion could not be completed in the current environment.
    - include the HTML output path so the user can run conversion manually
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
-   - required headings: `Executive Summary`, `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Security posture — vulnerability exposure`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
+   - required headings for Part 1: `Executive Summary`, `Estate at a glance`, `Key risks and issues`, `Strategic migration and modernisation opportunities`, `Recommended Azure direction`
+   - required headings for Part 2: `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
      (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section; include `Security posture — vulnerability exposure` only when an Azure Migrate project was selected and Security Insights data was queried — omit the section entirely if no Azure Migrate project was in scope)
    - failure response format:
      - `PDF export status: Failed`
@@ -1302,20 +1313,33 @@ SqlAssessment_CL
 
 # Output requirements
 
-Always produce the sections below in order:
-The detailed report structure below is the canonical section order and expands core customer-facing sections into explicit audit and planning blocks.
+Always produce the sections below in the two-part order. Both parts are derived from the same evidence collected in Phases 4–5 — no data is collected twice.
+
+## Part 1 — Executive Briefing (decision-maker audience)
+
+Produce first. Concise, business-framed narrative framed through reliability, cost, security, and end-of-support lenses. No per-database or per-instance raw tables in Part 1. Every point must connect to Azure migration or modernisation as the outcome.
 
 1. Executive Summary (3–5 concise bullet points for CIO/IT Director audience, highlighting key risks, optimisation opportunities, and Azure direction)
-2. Estate summary
-3. Key optimisation opportunities
-4. Enterprise downgrade audit
-5. SQL on Azure VM best practices alignment (when executed, or state Not assessed if skipped)
-6. Quick wins
-7. Strategic moves
-8. Azure target recommendations
-9. Risks and blockers
-10. Data gaps / follow-up questions
-11. Appendix (Tier 2 and Tier 3 only — omit for Tier 1 estates with ≤10 instances):
+2. Estate at a glance (headline counts only: total instances, editions, EoS exposure, security posture headline — full distributions are in Part 2)
+3. Key risks and issues (high-level, framed by reliability / cost / security / end-of-support — no per-machine tables)
+4. Strategic migration and modernisation opportunities — including Enterprise → Standard downgrade at summary level (GREEN/AMBER/RED counts and headline licensing/TCO direction only — per-database detail is in Part 2)
+5. Recommended Azure direction (target options at a glance + indicative benefit; per-instance SKU, TCO, and sequencing are in Part 2)
+
+## Part 2 — Technical Detail & Execution Guide (engineer audience)
+
+Produce second, immediately after Part 1 in the same output. Full existing depth so engineers can act. Adaptive Tier 1/2/3 formatting rules apply within Part 2 (see Phase 6 step 13).
+
+6. Estate summary (full distributions / inventory — Tier 1/2/3 formatting applies)
+7. Key optimisation opportunities (detailed, with confidence levels)
+8. Enterprise downgrade audit (DMV + runtime validation detail, classification — Tier 1/2/3 formatting applies)
+9. SQL on Azure VM best practices alignment (when executed, or state Not assessed if skipped)
+10. Security posture — vulnerability exposure (when Azure Migrate project in scope; omit entirely otherwise)
+11. Quick wins
+12. Strategic moves
+13. Azure target recommendations (per-instance SKU, sequencing, TCO — Tier 1/2/3 formatting applies)
+14. Risks and blockers
+15. Data gaps / follow-up questions
+16. Appendix (Tier 2 and Tier 3 only — omit for Tier 1 estates with ≤10 instances):
     - Appendix A — Full machine inventory
     - Appendix B — Enterprise downgrade audit: GREEN instance details
     - Appendix C — BPA alignment: per-machine detail

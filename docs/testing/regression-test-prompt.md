@@ -89,7 +89,8 @@ After a successful run, the following should all be true:
 
 ### Phase 6-7: Analysis & Export
 - [ ] HTML report generated at estate-report.html
-- [ ] All 10 required sections present in HTML
+- [ ] Part 1 — Executive Briefing and Part 2 — Technical Detail & Execution Guide both present in HTML
+- [ ] All 16 required sections present in HTML (Part 1: 5 sections + Part 2: 11 sections)
 - [ ] GREEN/RED badges rendered correctly
 - [ ] Status badges (Pass/Fail/Warning) rendered for BPA alignment
 - [ ] Assessment data (MI/VM readiness, costs) included in Azure target recommendations

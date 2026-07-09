@@ -77,7 +77,13 @@ $results = @()
 
 # --- Section 1: Required Sections ---
 $requiredSections = @(
+    "Part 1",
+    "Part 2",
     "Executive Summary",
+    "Estate at a glance",
+    "Key risks",
+    "Strategic migration",
+    "Recommended Azure direction",
     "Estate summary",
     "Key optimisation opportunities",
     "Enterprise downgrade audit",

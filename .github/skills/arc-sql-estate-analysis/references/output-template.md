@@ -1,4 +1,8 @@
-# Executive Summary
+# Part 1 — Executive Briefing
+
+_Audience: CIO / IT Director / business decision-maker. Concise, business-framed narrative. No per-database or per-instance raw tables. Every point is framed through reliability, cost, security, and end-of-support risk lenses — and connects to Azure migration or modernisation as the outcome._
+
+## Executive Summary
 
 - Summary point 1
 - Summary point 2
@@ -8,7 +12,57 @@
 - Enterprise → Standard downgrade readiness (if applicable): [GREEN / AMBER / RED]
 
 
-# Estate summary
+## Estate at a glance
+
+_Headline counts only — no per-instance or per-database tables. Full distributions are in Part 2._
+
+- Total SQL Server instances:
+- Total host machines:
+- Editions: {N} Enterprise | {N} Standard | {N} Express | {N} Other
+- End-of-support / end-of-life exposure: {N} instances on EoS versions (SQL 2014 / 2016 / 2017)
+- Security posture headline: {N} Critical CVEs | {N} High CVEs | Max CVSS: {score} (or: No Security Insights data available)
+- Downgrade candidates: {N} Enterprise → Standard (GREEN: {N} | AMBER: {N} | RED: {N}) _(if applicable)_
+
+
+## Key risks and issues
+
+_High-level, framed by reliability / cost / security. No per-machine tables._
+
+- **Reliability:** {key reliability risk — e.g. EoS exposure, unpatched OS, no HA/DR, backup gaps}
+- **Cost:** {key cost risk — e.g. over-licensed Enterprise editions, PAYG exposure, unconfirmed AHB eligibility}
+- **Security:** {key security risk — e.g. Critical/High CVEs, missing patches, unencrypted data at rest}
+- **End-of-support:** {EoS/EoL instances and associated risk — e.g. no security updates, MI/VM migration urgency}
+
+
+## Strategic migration and modernisation opportunities
+
+_Summary-level view. Full detail with execution steps is in Part 2._
+
+- **Enterprise → Standard downgrade opportunity:** GREEN: {N} | AMBER: {N} | RED: {N}
+  - Headline direction: {e.g. "Downgrading {N} eligible instances before migration reduces Azure licensing cost and enables Azure Hybrid Benefit eligibility"}
+- **Azure migration opportunities:** {brief summary — e.g. "{N} instances assessed as Ready for Azure SQL MI; {N} require remediation before MI"}
+- **Licensing / AHB opportunity:** {e.g. "Declared SA-covered cores support AHB eligibility for {N} instances — confirm to avoid PAYG exposure on Azure"}
+- **Quick wins:** {e.g. "{N} low-effort improvements that directly improve Azure migration readiness"}
+
+
+## Recommended Azure direction
+
+_Target options at a glance. Per-instance SKU detail, TCO, and sequencing are in Part 2._
+
+- **Primary target:** {Azure SQL Managed Instance / SQL Server on Azure VM / Mixed}
+  - Indicative benefit: {e.g. "Removes on-premises infrastructure management overhead; improves reliability through managed HA/DR and automatic patching"}
+- **Interim option:** {Arc-enabled SQL Server PAYG as transition step, if applicable}
+- **Migration wave outline:** {e.g. "Wave 1: {N} instances ready now; Wave 2: {N} instances pending remediation"}
+- **Azure Hybrid Benefit position:** {eligible / partially eligible / not confirmed — brief note}
+
+
+---
+
+# Part 2 — Technical Detail & Execution Guide
+
+_Audience: DBA / Security / Infrastructure Engineer. Full depth for action. Contains all existing sections with per-instance and per-database detail, execution guidance, and appendices._
+
+## Estate summary
 
 _Estate size determination: count distinct SQL Server instances from the validated dataset. State the tier at the top of this section._
 _**Tier 1 (≤10 instances):** use full inline detail as shown below._
@@ -82,7 +136,7 @@ _Replace any flat per-machine listing with this action-grouped table. Full machi
 _Full machine inventory (name, OS, version, edition, vCores, status) → Appendix A._
 
 
-# Key optimisation opportunities
+## Key optimisation opportunities
 
 - Opportunity 1:
   - Downgrade readiness: [GREEN / AMBER / RED]
@@ -98,13 +152,13 @@ _Full machine inventory (name, OS, version, edition, vCores, status) → Appendi
 - Opportunity 3:
 
 
-# Enterprise downgrade audit
+## Enterprise downgrade audit
 
 _**Tier 1 (≤10 instances):** use full inline detail as shown below._
 _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the summary counts block and compact GREEN listing, then show the structured audit tables for AMBER and RED records only. Full DMV results for GREEN instances move to Appendix B._
 _**Tier 3 additional:** if AMBER/RED findings exceed 10, show top 10 ordered by severity (RED first) and state "Showing top 10 of {total} AMBER/RED findings — see Appendix B for complete list."_
 
-## Tier 2/3 summary block (use for 11+ instances at the top of this section)
+### Tier 2/3 summary block (use for 11+ instances at the top of this section)
 
 ```
 Downgrade candidates: {N} Enterprise instances
@@ -127,7 +181,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Structured audit results
+### Structured audit results
 
 | machineName | instanceName | databaseName | featureName | executionStatus | errorMessage |
 |-------------|--------------|--------------|-------------|-----------------|--------------|
@@ -135,7 +189,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Persisted feature findings (summary)
+### Persisted feature findings (summary)
 
 - Total databases audited:
 - Databases with persisted features:
@@ -144,7 +198,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Runtime validation results (Arc Run Command)
+### Runtime validation results (Arc Run Command)
 
 | machineName | instanceName | checkName | result | executionStatus | errorMessage |
 |-------------|--------------|-----------|--------|-----------------|--------------|
@@ -158,7 +212,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Target edition support interpretation (SQL Server 2022 Standard default)
+### Target edition support interpretation (SQL Server 2022 Standard default)
 
 - Interpret persisted feature findings against SQL Server 2022 Standard edition support:
 
@@ -173,7 +227,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Runtime validation interpretation
+### Runtime validation interpretation
 
 - Always On availability groups:
   - Basic AG-only compatible or blocker identified:
@@ -190,7 +244,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Downgrade readiness classification
+### Downgrade readiness classification
 
 - GREEN:
   - DMV audit executed successfully with no persisted features detected
@@ -211,7 +265,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Downgrade confidence
+### Downgrade confidence
 
 - Per-instance or per-database confidence level:
   - Instance / Database: [name]  
@@ -226,7 +280,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
 
 ---
 
-## Final decision guidance
+### Final decision guidance
 
 - Enterprise → Standard downgrade:
   - Recommended / Conditional / Not recommended
@@ -237,7 +291,7 @@ _Then continue with the structured audit tables below for AMBER and RED records 
   - Remaining risks and unknowns
 
 
-# SQL on Azure VM best practices alignment
+## SQL on Azure VM best practices alignment
 
 _**Tier 1 (≤10 instances):** use full per-machine detail tables as shown in "Detailed findings" below._
 _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace per-machine detail tables with the estate-wide heatmap table shown below. Keep the pre-migration remediation checklist for Critical and High findings only. Per-machine detail tables move to Appendix C._
@@ -248,7 +302,7 @@ _**Tier 3 additional:** show only the top 10 failing checks in the heatmap (orde
 - Total checks executed:
 - Pass: | Fail: | Warning: | Not assessed:
 
-## Summary by category
+### Summary by category
 
 | Category | Pass | Fail | Warning | Not assessed |
 |----------|------|------|---------|--------------|
@@ -258,7 +312,7 @@ _**Tier 3 additional:** show only the top 10 failing checks in the heatmap (orde
 | HADR | | | | |
 | Operations | | | | |
 
-## Estate-wide findings heatmap (Tier 2/3 — use instead of per-machine detail tables below)
+### Estate-wide findings heatmap (Tier 2/3 — use instead of per-machine detail tables below)
 
 _Sort by severity descending (Critical → High → Medium → Low → Informational), then by machines-affected count descending within each severity band._
 _Tier 3: add `({pct}%)` to the machines-affected column and truncate to top 10 with a "see Appendix C" note._
@@ -269,42 +323,42 @@ _Tier 3: add `({pct}%)` to the machines-affected column and truncate to top 10 w
 
 _Per-machine BPA detail tables → Appendix C._
 
-## Detailed findings
+### Detailed findings
 
 _Use this section for Tier 1 (≤10 instances). For Tier 2/3, move per-machine detail to Appendix C and use the heatmap above instead._
 
-### Critical and High severity findings
+#### Critical and High severity findings
 
 | Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
 |---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
 |         |          |          |       |        |          |               |                |             |
 
-### Medium and Low severity findings
+#### Medium and Low severity findings
 
 | Machine | Instance | Check ID | Check | Status | Severity | Current value | Expected value | Remediation |
 |---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
 |         |          |          |       |        |          |               |                |             |
 
-### Informational
+#### Informational
 
 | Machine | Instance | Check ID | Check | Status | Severity | Detail |
 |---------|----------|----------|-------|--------|----------|--------|
 |         |          |          |       |        |          |        |
 
-## Pre-migration remediation checklist
+### Pre-migration remediation checklist
 
 1. {Machine} — {Critical/High remediation action}
 2. {Machine} — {next remediation action}
 3. {Machine} — {next remediation action}
 
 
-# Security posture — vulnerability exposure
+## Security posture — vulnerability exposure
 
 _This section is present only when an Azure Migrate project was selected and Security Insights data was queried. Omit entirely if no Azure Migrate project is in scope._
 
 **Data provenance:** _Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data._
 
-## Severity distribution summary
+### Severity distribution summary
 
 | Severity | Vulnerability records | Distinct CVEs | Max CVSS |
 |----------|-----------------------|---------------|----------|
@@ -314,13 +368,13 @@ _This section is present only when an Azure Migrate project was selected and Sec
 | Low      |                       |               |          |
 | **Total**|                       |               |          |
 
-## Top CVEs by CVSS score
+### Top CVEs by CVSS score
 
 | CVE ID | CVSS | Severity | Age (days) | Affected software scope |
 |--------|------|----------|------------|-------------------------|
 |        |      |          |            |                         |
 
-## Per-machine vulnerability summary (correlated Arc-enabled SQL machines)
+### Per-machine vulnerability summary (correlated Arc-enabled SQL machines)
 
 | Machine | Total CVEs | Critical | High | Max CVSS | Migration priority impact |
 |---------|------------|----------|------|----------|---------------------------|
@@ -330,7 +384,7 @@ _Machines with Critical or High CVEs are flagged as elevated priority in Azure t
 _Machines that could not be correlated to discovered Security Insights records are listed in Data gaps / follow-up questions._
 
 
-# Quick wins
+## Quick wins
 
 - Quick win 1:
   - Why it matters:
@@ -348,7 +402,7 @@ _Machines that could not be correlated to discovered Security Insights records a
   - Confidence:
 
 
-# Strategic moves
+## Strategic moves
 
 - Strategic move 1:
   - Why it matters:
@@ -369,12 +423,12 @@ _Machines that could not be correlated to discovered Security Insights records a
   - Confidence:
 
 
-# Azure target recommendations
+## Azure target recommendations
 
 _**Tier 1 (≤10 instances):** use full per-instance narrative as shown below._
 _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action-grouped summary table, then follow with migration sequencing and SKU right-sizing at a group level. Per-instance TCO and licensing notes move to Appendix D._
 
-## Action-grouped summary (Tier 2/3 — use instead of per-instance narrative below)
+### Action-grouped summary (Tier 2/3 — use instead of per-instance narrative below)
 
 | Migration target  | Instances | Recommended action             | Confidence |
 |-------------------|-----------|--------------------------------|------------|
@@ -385,7 +439,7 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action
 
 _Per-instance TCO notes and licensing position → Appendix D._
 
-## Per-instance detail (Tier 1 — use for ≤10 instances)
+### Per-instance detail (Tier 1 — use for ≤10 instances)
 
 - Candidate workloads for Azure SQL Managed Instance:
   - Readiness status:
@@ -417,14 +471,14 @@ _Per-instance TCO notes and licensing position → Appendix D._
   - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Migrate dependency analysis to inform migration sequencing"
 
 
-# Risks and blockers
+## Risks and blockers
 
 - Risk 1:
 - Risk 2:
 - Risk 3:
 
 
-# Data gaps / follow-up questions
+## Data gaps / follow-up questions
 
 _If Software Assurance status is `Not confirmed` or `Unknown`, add a follow-up asking the user to confirm active Software Assurance coverage and covered Standard / Enterprise core counts._
 
@@ -437,18 +491,18 @@ _Only if `assessment.enabled = true`, `assessmentUploadTime = null`, and recomme
 - Missing field or evidence 3:
 
 
-# Appendix
+## Appendix
 
 _This section is present for **Tier 2 (11–50 instances) and Tier 3 (51+ instances) only**. Omit entirely for Tier 1 (≤10 instances)._
 _For HTML/PDF export (Tier 3), wrap each sub-section in `<details><summary>…</summary>` so content is collapsible. In markdown output, use headings only — all content must remain visible._
 
-## Appendix A — Full machine inventory
+### Appendix A — Full machine inventory
 
 | Machine name | OS | SQL version | Edition | vCores | Status | Assessment status |
 |-------------|-----|-------------|---------|--------|--------|------------------|
 |             |     |             |         |        |        |                  |
 
-## Appendix B — Enterprise downgrade audit: GREEN instance details
+### Appendix B — Enterprise downgrade audit: GREEN instance details
 
 _Full per-database DMV audit results for instances classified GREEN. AMBER/RED detail is in the main report body._
 
@@ -456,7 +510,7 @@ _Full per-database DMV audit results for instances classified GREEN. AMBER/RED d
 |-------------|--------------|--------------|-------------|-----------------|--------------|
 |             |              |              |             |                 |              |
 
-## Appendix C — BPA alignment: per-machine detail
+### Appendix C — BPA alignment: per-machine detail
 
 _Full check-by-check BPA findings for each machine. Estate-wide heatmap is in the main report body._
 
@@ -464,7 +518,7 @@ _Full check-by-check BPA findings for each machine. Estate-wide heatmap is in th
 |---------|----------|----------|-------|--------|----------|---------------|----------------|-------------|
 |         |          |          |       |        |          |               |                |             |
 
-## Appendix D — Azure target recommendation details
+### Appendix D — Azure target recommendation details
 
 _Per-instance TCO notes, licensing position, and AHB eligibility. Action-grouped summary is in the main report body._
 
