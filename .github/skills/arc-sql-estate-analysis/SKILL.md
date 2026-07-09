@@ -62,8 +62,8 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - Do not run arbitrary or user-supplied scripts under standing authorization.
    - Because scripts are not shown before execution in this mode, the final report MUST include an `Unattended execution log` subsection listing every write operation performed with: machine, operation, slot name (if applicable), script pattern, and result.
 
-6. If the standing-authorization phrase is absent, or any required decision above is missing, invalid, or ambiguous, fall back to the normal interactive behaviour for the affected gate(s) rather than guessing.
-   - Example: if Software Assurance = `Yes` but one core count is missing, prompt only for the missing core count value(s)
+6. If the standing-authorization phrase is absent, or any required decision above is missing, invalid, or ambiguous, fall back to the normal interactive behaviour for the affected gate(s) rather than proceeding with assumed or default values.
+   - Example: if Software Assurance = `Yes` but one core count is missing, prompt only for the missing core count value(s) rather than assuming zero or silently skipping the prompt
 
 # Analysis workflow
 
@@ -128,7 +128,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 
 2. If the query returns no resources:
    - outside Unattended mode, always confirm with the user before concluding that no resources exist
-   - in Unattended mode, do not issue an `ask_user` prompt here; if the alternative query approach in step 3 still cannot validate scope, stop with a scope-validation error rather than guessing
+   - in Unattended mode, do not issue an `ask_user` prompt here; if the alternative query approach in step 3 still cannot validate scope, stop with a scope-validation error
 
 3. If query results are inconsistent, empty, or suspected to be incorrect:
    - attempt an alternative query approach immediately when:
@@ -174,7 +174,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - Prompt 3: "How many SQL Server Enterprise edition cores are covered by Software Assurance?"
    - Accept freeform numeric input for both prompts
    - Store the declared values separately as Standard SA-covered cores and Enterprise SA-covered cores
-   - if Unattended mode supplied `Yes` but omitted either core count, prompt only for the missing value(s) rather than guessing
+   - if Unattended mode supplied `Yes` but omitted either core count, prompt only for the missing value(s) rather than proceeding with incomplete licensing data
 
 3. If the user selects `No` or `Unsure`:
    - Record Software Assurance status as `Not confirmed` for `No`
