@@ -205,11 +205,30 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     <section><h2>Key optimisation opportunities</h2>{{keyOptimisationsHtml}}</section>
     <section><h2>Enterprise downgrade audit</h2>{{enterpriseDowngradeAuditHtml}}</section>
     <section><h2>SQL on Azure VM best practices alignment</h2>{{sqlVmBestPracticesAlignmentHtml}}</section>
+    {{#if includeSecurityPosture}}
+    <section><h2>Security posture — vulnerability exposure</h2>{{securityPostureHtml}}</section>
+    {{/if}}
     <section><h2>Quick wins</h2>{{quickWinsHtml}}</section>
     <section><h2>Strategic moves</h2>{{strategicMovesHtml}}</section>
     <section><h2>Azure target recommendations</h2>{{azureTargetsHtml}}</section>
     <section><h2>Risks and blockers</h2>{{risksHtml}}</section>
     <section><h2>Data gaps / follow-up questions</h2>{{dataGapsHtml}}</section>
+    {{#if includeAppendix}}
+    <section>
+      <h2>Appendix</h2>
+      {{#if isTier3}}
+      <details><summary><strong>Appendix A — Full machine inventory</strong></summary>{{appendixAHtml}}</details>
+      <details><summary><strong>Appendix B — Enterprise downgrade audit: GREEN instance details</strong></summary>{{appendixBHtml}}</details>
+      <details><summary><strong>Appendix C — BPA alignment: per-machine detail</strong></summary>{{appendixCHtml}}</details>
+      <details><summary><strong>Appendix D — Azure target recommendation details</strong></summary>{{appendixDHtml}}</details>
+      {{else}}
+      <h3>Appendix A — Full machine inventory</h3>{{appendixAHtml}}
+      <h3>Appendix B — Enterprise downgrade audit: GREEN instance details</h3>{{appendixBHtml}}
+      <h3>Appendix C — BPA alignment: per-machine detail</h3>{{appendixCHtml}}
+      <h3>Appendix D — Azure target recommendation details</h3>{{appendixDHtml}}
+      {{/if}}
+    </section>
+    {{/if}}
   </main>
 
   <footer>
