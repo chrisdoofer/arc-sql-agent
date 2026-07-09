@@ -1252,7 +1252,7 @@ SqlAssessment_CL
 
 ## Script execution transparency guardrails
 
-- Always present the full script content to the user before executing via Arc Run Command. Never summarise, truncate, or substitute a description in place of the actual script, except for the single sanctioned Unattended mode defined above.
+- Always present the full script content to the user before executing via Arc Run Command. Never summarize, truncate, or substitute a description in place of the actual script, except for the single sanctioned Unattended mode defined above.
 - Use the following presentation format for every script before requesting approval:
 
   ```

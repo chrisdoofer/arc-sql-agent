@@ -30,7 +30,7 @@ Analyse this Arc-enabled SQL estate. I have an Azure Migrate Dependency Map set 
 ## Prompt 10 - unattended end-to-end analysis (zero further interaction)
 
 > ⚠️ **WARNING — use with care.** This prompt grants **standing approval** for the skill to make **write changes to your Arc-enabled machines without asking again**: it installs/upgrades the Arc Run Command extension and creates, updates, and deletes Run Command resources (the reusable `estate-audit-*` slots), and executes the built-in DMV and runtime audit scripts against your SQL instances. There are **no per-step confirmations** once it starts.
-> - Only use against an estate you **own and are authorised to audit**.
+> - Only use against an estate you **own and are authorized to audit**.
 > - Confirm the **tenant and subscription scope** are correct before submitting — scope validation still runs, but standing approval means mistakes execute automatically within the validated scope.
 > - Runs against **all** in-scope Enterprise DB-engine instances.
 > - Prefer the interactive prompts (Prompts 1–9) for production estates or when you want to review each script first.
