@@ -9,6 +9,7 @@ This file contains exact, copy-paste-ready PowerShell command templates for Azur
 3. **Always encode scripts separately** then insert into the body — never attempt to pass raw SQL or PowerShell via CLI arguments
 4. **Use a single PowerShell call** for the encode-and-submit workflow — do not split across multiple tool calls that lose variable context
 5. **Use reusable command slots** to avoid quota limits — update existing slots rather than creating new commands
+6. **Suppress CLI warnings before JSON output** — set `$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'` immediately before any `az` call whose output is assigned to a variable or piped to `ConvertFrom-Json`. CLI preview and deprecation warnings are written to stdout and corrupt JSON parsing if not suppressed. Never use `2>&1` in a pipeline that feeds `ConvertFrom-Json` — stderr redirection folds warnings into the JSON stream and causes parse failures.
 
 ## Template Categories
 
@@ -19,6 +20,7 @@ This file contains exact, copy-paste-ready PowerShell command templates for Azur
 **Usage:** Use this before attempting to create a run command to avoid quota conflicts.
 
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az connectedmachine run-command list --machine-name {machineName} --resource-group {resourceGroup} --query "[].{name:name, status:provisioningState}" -o json
 ```
 
@@ -56,6 +58,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 5 -Compress
 $body | Set-Content "$env:TEMP\rc-{slotName}.json" -NoNewline
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method PUT --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.HybridCompute/machines/{machineName}/runCommands/{slotName}?api-version=2024-07-10" --body "@$env:TEMP\rc-{slotName}.json" -o json
 ```
 
@@ -90,6 +93,7 @@ az rest --method PUT --url "https://management.azure.com/subscriptions/{subscrip
 **Usage:** Poll this after submitting a run command to check for completion and retrieve results.
 
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az connectedmachine run-command show --machine-name {machineName} --resource-group {resourceGroup} --name {slotName} --query "{status:provisioningState, execState:instanceView.executionState, exitCode:instanceView.exitCode, stdout:instanceView.output, stderr:instanceView.error}" -o json
 ```
 
@@ -228,6 +232,7 @@ While this file focuses on Arc Run Command execution, the skill also relies on A
 **Usage:** Execute once after scope validation (Phase 2). Post-process results locally to separate and correlate resource types. Do not make individual ARM GET calls for data that is already returned by this query.
 
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az graph query -q "resources | where (type =~ 'microsoft.azurearcdata/sqlserverinstances' or type =~ 'microsoft.azurearcdata/sqlserverinstances/databases' or type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.migrate/migrateprojects') | where subscriptionId in ('{sub1}','{sub2}') | project id, name, type, resourceGroup, subscriptionId, location, properties, tags" --subscriptions {subscriptionIds} --first 1000 -o json
 ```
 
@@ -273,6 +278,7 @@ resources
 - If the response contains a `skip_token` field, retrieve the next page:
 
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az graph query -q "{same query}" --subscriptions {subscriptionIds} --first 1000 --skip-token "{skipToken}" -o json
 ```
 
@@ -295,6 +301,7 @@ resources
 
 **Azure CLI equivalent:**
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az graph query -q "resources | where type =~ 'microsoft.hybridcompute/machines' or type =~ 'microsoft.azurearcdata/sqlserverinstances' | summarize count() by type, subscriptionId" --subscriptions {subscriptionIds} -o json
 ```
 
@@ -329,11 +336,13 @@ These queries are executed directly via Azure CLI or GitHub Copilot MCP tools an
 
 **List by subscription:**
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.DependencyMap/maps?api-version={dependencyMapApiVersion}" -o json
 ```
 
 **List by resource group:**
 ```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps?api-version={dependencyMapApiVersion}" -o json
 ```
 
@@ -371,6 +380,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 6 -Compress
 $body | Set-Content "$env:TEMP\depmap-export.json" -NoNewline
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 $resp = az rest --method POST `
     --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps/{mapName}/exportDependencies?api-version={dependencyMapApiVersion}" `
     --body "@$env:TEMP\depmap-export.json" `
@@ -430,6 +440,7 @@ $body = @{
     }
 } | ConvertTo-Json -Depth 6 -Compress
 $body | Set-Content "$env:TEMP\depmap-view.json" -NoNewline
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method POST `
     --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.DependencyMap/maps/{mapName}/getDependencyViewForFocusedMachine?api-version={dependencyMapApiVersion}" `
     --body "@$env:TEMP\depmap-view.json" `
@@ -526,6 +537,7 @@ $body = @{
 $body | Set-Content "$env:TEMP\rc-estate-audit-ArcBox-SQL-01-01.json" -NoNewline
 
 # Submit via REST API
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method PUT --url "https://management.azure.com/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/rg-arc-sql/providers/Microsoft.HybridCompute/machines/ArcBox-SQL-01/runCommands/estate-audit-ArcBox-SQL-01-01?api-version=2024-07-10" --body "@$env:TEMP\rc-estate-audit-ArcBox-SQL-01-01.json" -o json
 ```
 
@@ -553,6 +565,8 @@ az rest --method PUT --url "https://management.azure.com/subscriptions/12345678-
 - Always write JSON bodies to temp files
 - Always use reusable slot names to avoid quota issues
 - Keep encode-and-submit workflow in a single PowerShell call
+- Always set `$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'` before any `az` call whose output is parsed as JSON
+- Never use `2>&1` in a pipeline that feeds `ConvertFrom-Json`
 
 **Expected outcomes:**
 - Zero Azure CLI argument parsing errors

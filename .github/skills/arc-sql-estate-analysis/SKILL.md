@@ -379,6 +379,7 @@ SqlAssessment_CL
            $queryPath = Join-Path $env:TEMP ("la-bpa-query-" + [guid]::NewGuid().ToString() + ".json")
            $queryBody | Set-Content $queryPath
 
+           $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
            $response = az rest --method POST --url "https://api.loganalytics.io/v1/workspaces/$workspaceGuid/query" --body "@$queryPath" --headers "Content-Type=application/json" -o json | ConvertFrom-Json
            ```
         4. Use `summarize` to deduplicate repeated BPA findings (especially file-level backup media rows)
@@ -714,6 +715,11 @@ SqlAssessment_CL
     - Variable loss across tool calls (via single PowerShell call patterns)
     - Encoding requirements for complex SQL queries
   - Expected outcome: reliable, first-attempt execution success with zero argument parsing or encoding errors
+
+- **CLI output hygiene — ALWAYS apply when parsing az output as JSON:**
+  - Set `$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'` immediately before every `az` call whose output is assigned to a variable or piped to `ConvertFrom-Json`. CLI preview and deprecation warnings write to stdout and corrupt JSON parsing if not suppressed.
+  - NEVER use `2>&1` in a pipeline that feeds `ConvertFrom-Json`. Stderr redirection folds warning lines into the stdout stream, causing `Unexpected character encountered while parsing value: W` parse failures.
+  - The command templates in `references/command-templates.md` already include this env var — do not remove it.
 
 - Run command quota management (CRITICAL — understand before any execution):
   - Azure Arc enforces a maximum of 25 run commands per machine.
