@@ -230,16 +230,18 @@ Use this skill when the user asks to:
 
 7. Azure Migrate utilisation data extraction (when an Azure Migrate project was selected in Phase 1):
 
+   > **Resource type note:** `Microsoft.Migrate/migrateProjects` is the project *container* resource used for discovery (returned by the consolidated ARG query). Assessment and utilisation data lives under a **different resource type**: `Microsoft.Migrate/assessmentProjects`. Do not query `migrateProjects` for assessments — it only supports api-versions up to `2020-06-01-preview` and has no assessment sub-resources.
+
    a. List assessments in the selected project:
       ```
-      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/assessments?api-version=2023-05-01
+      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments?api-version=2023-03-15
       ```
-      - if the API version is not supported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
+      - to enumerate available groups first: `GET .../assessmentProjects/{project}/groups?api-version=2023-03-15`
       - prefer Azure SQL assessment types where available; fall back to Azure VM assessments for utilisation data
 
    b. For each relevant assessment, retrieve assessed machines:
       ```
-      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/migrateProjects/{project}/assessments/{assessment}/assessedMachines?api-version=2023-05-01
+      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments/{assessment}/assessedMachines?api-version=2023-03-15
       ```
 
    c. Extract per-machine utilisation metrics:
@@ -1269,10 +1271,11 @@ SqlAssessment_CL
   - if utilisation data is available for some Arc machines but not others, clearly distinguish which sizing recommendations are utilisation-validated versus configuration-based only
   - do not generalise utilisation patterns from covered machines to uncovered machines
 
-- Azure Migrate API version compatibility:
-  - attempt the latest stable API version (`2023-05-01`) first
-  - if the response indicates version unsupported, fall back to `2020-05-01-preview` then `2018-09-01-preview`
-  - if all versions fail, surface the API error and continue without Migrate data
+- Azure Migrate resource type and API version:
+  - `Microsoft.Migrate/migrateProjects` is the **project container** — use it only for project discovery (already returned by the consolidated ARG query). It supports api-versions up to `2020-06-01-preview` only and has no assessment or utilisation sub-resources.
+  - `Microsoft.Migrate/assessmentProjects` is the **assessment data store** — use api-version `2023-03-15` for all assessment and assessed-machine queries.
+  - do NOT query `migrateProjects` for assessments; doing so returns `NoRegisteredProviderFound` for any version later than `2020-06-01-preview`.
+  - if the `assessmentProjects` api-version `2023-03-15` is not accepted, fall back to `2019-10-01` then `2018-02-02`; if all versions fail, surface the API error and continue without Migrate data
 
 - Dependency data has two sources with different access paths. The newer **Azure Migrate Dependency Map** (`Microsoft.DependencyMap/maps`) IS retrievable programmatically via the `Microsoft.DependencyMap` REST API (connection data lives in a graph datastore that is not in Resource Graph, but the export/view actions return it) — this is the primary path; use command-templates.md Templates 7–9. The older **classic agentless Azure Migrate appliance** dependency data is NOT accessible via REST API or PowerShell and can only be exported as CSV via portal **Manage Dependencies > Export dependencies** — use this only as a fallback when no Dependency Map resource exists. Confirm the Dependency Map API version (`2025-05-01-preview`, falling back to `2025-07-01-preview` then `2025-01-31-preview`).
 
