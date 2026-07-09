@@ -22,6 +22,45 @@ Use this skill when the user asks to:
 - fall back to Excel, JSON, or CSV input if live Azure access is unavailable or cannot be validated
 - export the final analysis as a branded HTML or PDF report (including `/export-pdf`)
 
+# Unattended (non-interactive) mode
+
+Unattended mode is the single sanctioned way to run this skill end to end without per-step `ask_user` prompts.
+
+1. Engage Unattended mode only when the initial prompt contains this standing-authorization phrase verbatim (or the same canonical text with only surrounding quote / punctuation differences):
+
+   `Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts.`
+
+2. The initial prompt must also supply these required decisions explicitly:
+   - tenant identifier (tenant ID or tenant DNS name)
+   - subscription scope
+   - Azure Migrate project decision
+   - Software Assurance declaration (`Yes`, `No`, or `Unsure`); if `Yes`, include both Standard and Enterprise SA-covered core counts
+   - SQL on Azure VM best-practices alignment scan decision (`Yes` or `No`)
+   - export format decision (`HTML`, `PDF`, or no export) and output destination if not using the current working directory defaults
+
+3. The initial prompt should also pre-answer any other interactive gate it wants to suppress, including:
+   - whether to run the Tier 3 full Arc Run Command alignment scan if Tier 1 / Tier 2 evidence is incomplete
+   - the dependency-data path decision (direct Dependency Map API only, classic portal CSV fallback, or continue without dependency data if unavailable)
+
+4. When Unattended mode is valid:
+   - treat the Phase 1 tenant / scope / project selections, Phase 3 Software Assurance declaration, Phase 4 alignment / dependency / export gates, and the documented Phase 5 write approvals as pre-answered from the initial prompt
+   - do not issue additional `ask_user` calls for those gates
+   - if a non-required gate value is omitted, fall back to interactive prompting for that specific gate only and note the fallback in the report rather than guessing
+
+5. Safety constraints that still apply in Unattended mode:
+   - Phase 2 scope validation is NEVER bypassed. If scope cannot be validated, or returned resources fall outside the requested tenant / subscription scope, stop with a scope-validation error.
+   - Standing authorization covers ONLY the documented Phase 5 write set:
+     - RunCommandHandler extension install / upgrade
+     - create / update / delete of reusable `estate-audit-*` run command slots
+   - Any other resource modification still requires an explicit approval prompt.
+   - Only the built-in reference scripts may run under standing authorization:
+     - Pattern 1 — DMV audit
+     - Pattern 2 — runtime validation
+   - Do not run arbitrary or user-supplied scripts under standing authorization.
+   - Because scripts are not shown before execution in this mode, the final report MUST include an `Unattended execution log` subsection listing every write operation performed with: machine, operation, slot name (if applicable), script pattern, and result.
+
+6. If the standing-authorization phrase is absent, or any required decision above is missing, invalid, or ambiguous, fall back to the normal interactive behaviour for the affected gate(s) rather than guessing.
+
 # Analysis workflow
 
 ## Phase 1 - Determine data acquisition mode
@@ -32,13 +71,13 @@ Use this skill when the user asks to:
 
 2. If the user does not explicitly provide a file, prefer live Azure tenant data by default.
 
-3. If live Azure tenant data is selected, obtain tenant scope from the user before any live query:
+3. If live Azure tenant data is selected, obtain tenant scope from the user before any live query unless a valid Unattended mode prompt already supplied it:
    - accept either a tenant ID (GUID) or tenant DNS name
    - if the user has access to multiple tenants, do not proceed until the tenant is explicitly identified
 
 4. Resolve the subscriptions available in the selected tenant.
 
-5. Ask the user to confirm the subscription scope for analysis:
+5. Ask the user to confirm the subscription scope for analysis unless a valid Unattended mode prompt already supplied the subscription decision:
    - single subscription
    - multiple subscriptions
    - all subscriptions in tenant
@@ -48,7 +87,11 @@ Use this skill when the user asks to:
 6. Azure Migrate project discovery is performed as part of the consolidated estate query in Phase 4 (the `microsoft.migrate/migrateprojects` type is included in that query). There is no need to run a separate project discovery query at this point. Once the consolidated query result is available in Phase 4, extract Migrate project rows from it and proceed as follows:
 
 7. If one or more Azure Migrate projects are found:
-   - present the list to the user via `ask_user`
+   - if a valid Unattended mode prompt already supplied the Azure Migrate project decision, honour it without an `ask_user` prompt:
+     - if the prompt names a project and that project is found in scope, store its resource ID for use in Phase 4 data acquisition
+     - if the prompt says to auto-select the only project in scope, do so only when exactly one project exists; otherwise fall back to interactive prompting for this gate only
+     - if the prompt says to continue without Azure Migrate data when no matching project is found, continue and note that decision
+   - otherwise present the list to the user via `ask_user`
    - prompt: "I found the following Azure Migrate project(s) in your tenant. Would you like me to include utilisation and dependency data from one of these in the analysis?"
    - choices: list of project names (with subscription and resource group context) + "Skip — don't use Azure Migrate data"
    - if the user selects a project, store the project resource ID for use in Phase 4 data acquisition
@@ -79,8 +122,8 @@ Use this skill when the user asks to:
      - do not conclude that no resources exist yet
 
 2. If the query returns no resources:
-   - always confirm with the user before concluding that no resources exist
-   - ask whether data is expected in the selected scope
+   - outside Unattended mode, always confirm with the user before concluding that no resources exist
+   - in Unattended mode, do not issue an `ask_user` prompt here; if the scope still cannot be validated after the fallback attempts below, stop with a scope-validation error rather than guessing
 
 3. If query results are inconsistent, empty, or suspected to be incorrect:
    - attempt an alternative query approach immediately when:
@@ -115,15 +158,18 @@ Use this skill when the user asks to:
 
 ## Phase 3 - Collect licensing declarations
 
-1. After tenant / subscription scope has been validated, but before licensing recommendations are formed, prompt the user via `ask_user`:
-   - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licences in this estate?"
-   - Choices: `Yes` / `No` / `Unsure`
+1. After tenant / subscription scope has been validated, but before licensing recommendations are formed:
+   - if a valid Unattended mode prompt already supplied the Software Assurance declaration, use it directly
+   - otherwise prompt the user via `ask_user`:
+     - Prompt 1: "Do you have active Software Assurance coverage on any SQL Server licences in this estate?"
+     - Choices: `Yes` / `No` / `Unsure`
 
-2. If the user selects `Yes`, immediately follow up via `ask_user` with:
+2. If the declared Software Assurance answer is `Yes`, collect the covered core counts:
    - Prompt 2: "How many SQL Server Standard edition cores are covered by Software Assurance?"
    - Prompt 3: "How many SQL Server Enterprise edition cores are covered by Software Assurance?"
    - Accept freeform numeric input for both prompts
    - Store the declared values separately as Standard SA-covered cores and Enterprise SA-covered cores
+   - if Unattended mode supplied `Yes` but omitted either core count, prompt only for the missing value(s) rather than guessing
 
 3. If the user selects `No` or `Unsure`:
    - Record Software Assurance status as `Not confirmed` for `No`
@@ -279,7 +325,8 @@ Use this skill when the user asks to:
 
    c. Classic agentless dependency CSV export (fallback — only when no Dependency Map resource exists or the API is unavailable):
       - classic agentless dependency connection data cannot be retrieved programmatically
-      - prompt the user via `ask_user`: "Azure Migrate agentless dependency analysis is enabled but no Dependency Map resource was found, so the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
+      - if a valid Unattended mode prompt already says to continue without the portal CSV fallback, do not prompt; continue the analysis and note the dependency gap
+      - otherwise prompt the user via `ask_user`: "Azure Migrate agentless dependency analysis is enabled but no Dependency Map resource was found, so the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
       - provide export instructions:
         1. In the Azure portal, navigate to the Azure Migrate project
         2. Go to **All inventory** or **Infrastructure inventory** view
@@ -321,7 +368,8 @@ Use this skill when the user asks to:
    - offer this scan during analysis when either:
      - SQL Server on Azure VM is identified as a candidate target, or
      - the user explicitly asks for Azure SQL VM best-practices alignment
-   - first prompt via `ask_user`:
+   - if a valid Unattended mode prompt already supplied the alignment-scan decision, honour it without an `ask_user` prompt
+   - otherwise first prompt via `ask_user`:
      - "SQL Server on Azure VM has been identified as a candidate target. Would you like me to run an Azure VM best practices alignment scan on the Arc-enabled SQL machines?"
      - choices: `["Yes — run alignment scan", "Skip — not needed for this analysis"]`
    - if accepted, use this execution order:
@@ -401,7 +449,8 @@ SqlAssessment_CL
          - OPS and HADR operational checks where BPA evidence exists
      - **Tier 3 (Arc Run Command, fallback only):**
        - offer only when BPA is unavailable/incomplete (`bestPracticesAssessment = null`, no workspace with `SqlAssessment_CL` found after full enumeration, or required checks remain unresolved after exhausting all time windows)
-       - after Tier 1/2, prompt:
+       - if a valid Unattended mode prompt already supplied the Tier 3 full-scan decision, honour it without an `ask_user` prompt
+       - otherwise, after Tier 1/2, prompt:
          - "The Resource Graph scan identified {X} findings from {Y} checks. There are {Z} additional checks (storage layout, SQL config, maintenance jobs) that require live queries via Arc Run Command. Would you like me to run the full scan?"
          - choices: `["Yes — run full scan via Arc Run Command", "No — Resource Graph results are sufficient"]`
        - if approved, execute unresolved checks using consolidated scripts (SQL + OS), reusable command slots, and existing approval guardrails
@@ -518,7 +567,12 @@ SqlAssessment_CL
 
 1. You MUST attempt an Enterprise downgrade audit before making any Enterprise → Standard recommendation.
 
-2. Before executing ANY write operation in this phase (extension installation, run command creation, run command update, or run command deletion), you MUST obtain explicit user approval via `ask_user`:
+2. Unless valid Unattended mode applies, before executing ANY write operation in this phase (extension installation, run command creation, run command update, or run command deletion), you MUST obtain explicit user approval via `ask_user`:
+   - In Unattended mode, treat approval as pre-granted ONLY for the documented Phase 5 write set defined above:
+     - RunCommandHandler extension install / upgrade
+     - create / update / delete of reusable `estate-audit-*` run command slots
+   - In Unattended mode, any other resource modification still requires an explicit approval prompt.
+   - In Unattended mode, record every write operation for the final report `Unattended execution log` using: machine, operation, slot name (if applicable), script pattern (`Pattern 1`, `Pattern 2`, or `N/A`), and result.
 
    a. **Extension installation check** — before installing or upgrading the Arc Run Command extension (`Microsoft.Cplat.Core.RunCommandHandlerWindows`) on any machine:
       - Present: "The Arc Run Command extension needs to be installed on {machineName} to execute the Enterprise downgrade audit. This will install the 'Microsoft.Cplat.Core.RunCommandHandlerWindows' extension on this machine in subscription {subscriptionId}. Shall I proceed?"
@@ -548,6 +602,7 @@ SqlAssessment_CL
       - Show the complete, untruncated script content (Pattern 1 — DMV audit, using the exact reference implementation from "Consolidated script patterns" below).
       - Briefly describe what each script does (e.g. "This script queries `sys.dm_db_persisted_sku_features` across all user databases to detect persisted Enterprise-only features.").
       - Never substitute a description in place of the full script content.
+      - In Unattended mode, skip the presentation and approval prompts entirely; execute only the exact built-in `Pattern 1` or `Pattern 2` reference script from the "Consolidated script patterns" section below, and record the script pattern used in the final `Unattended execution log`.
 
       **Step 2 — Request approval via `ask_user`.**
       - Choices: `["Approve and execute", "Skip this check", "Modify script first"]`
@@ -634,11 +689,12 @@ SqlAssessment_CL
 
 9. You MUST execute a separate runtime feature validation stage via Arc Run Command alongside the DMV findings before presenting any Enterprise → Standard downgrade as safe to proceed:
    - treat the DMV audit as persisted feature validation only
-   - **Before submitting the runtime validation script**, apply the same script presentation and approval gate defined in step 2b above:
+   - **Before submitting the runtime validation script**, apply the same script presentation and approval gate defined in step 2b above unless valid Unattended mode is active:
      - Present the full consolidated runtime script (Pattern 2 — runtime validation, from "Consolidated script patterns") in a code block to the user
      - Include: target machine, instance name, purpose ("This script checks for Always On AG configuration, Resource Governor, partitioned tables, and SQL Agent online index operations to identify Enterprise-only runtime feature usage"), and estimated execution time
      - Apply batch approval when the same script targets multiple machines (same rules as step 2b)
      - If the user declines, set `executionStatus = Skipped` for all runtime checks on that machine; note in output that runtime validation was declined; downgrade confidence falls to Low; continue analysis with available data
+     - In Unattended mode, skip this prompt and run only the exact built-in Pattern 2 reference script, then record the write operation in the final `Unattended execution log`
    - execute ALL runtime checks on each machine in a SINGLE consolidated script execution (not one query per round-trip)
    - the consolidated runtime script MUST execute the following queries and return structured JSON output:
      - Always On availability groups:
@@ -982,7 +1038,7 @@ SqlAssessment_CL
       - Frame every point through reliability, cost, security, and end-of-support lenses, connecting to Azure migration or modernisation as the outcome.
       - Present the Enterprise → Standard downgrade at summary level only (GREEN/AMBER/RED counts and headline direction) — full per-database detail belongs in Part 2.
     - **Part 2 — Technical Detail & Execution Guide** (produce immediately after Part 1):
-      - Produce all existing technical sections with full depth (Estate summary through Appendix).
+      - Produce all existing technical sections with full depth (Estate summary through Appendix), including the conditional `Unattended execution log` subsection under `Data gaps / follow-up questions` whenever Unattended mode performed Phase 5 write operations.
       - Part 2 expands the same evidence with per-instance and per-database detail, execution steps, and structured tables.
       - Adaptive Tier 1/2/3 formatting rules (step 13) apply within Part 2.
       - Every Part 2 remediation recommendation must include an authoritative Microsoft Learn (or other Microsoft-owned authoritative) URL where one exists. If no authoritative Microsoft URL exists for a specific recommendation, use the standard no-URL note defined under `# Output requirements` → `## Part 2 — Technical Detail & Execution Guide` rather than inventing one.
@@ -1089,7 +1145,7 @@ SqlAssessment_CL
 
 ## Phase 7 - Optional report export (HTML/PDF)
 
-1. If the user requests export (for example "export report", "save as PDF", or `/export-pdf`), generate a self-contained HTML report:
+1. If the user requests export (for example "export report", "save as PDF", or `/export-pdf`), or a valid Unattended mode prompt pre-authorises export, generate a self-contained HTML report:
    - use `references/output-template.md` for section order and headings
    - use `references/branded-report-template.md` for branded HTML structure and styling
 
@@ -1108,7 +1164,7 @@ SqlAssessment_CL
      - generic export request (such as "export report"): generate HTML unless PDF is explicitly requested
      - rationale: HTML export has no browser binary dependency and is the safest default artifact
      - if PDF is explicitly requested (for example "export report as PDF"), generate HTML and convert to PDF
-     - if the request is ambiguous, ask whether the user wants HTML or PDF
+     - if the request is ambiguous, ask whether the user wants HTML or PDF unless a valid Unattended mode prompt already supplied the export decision
    - if user provides an output path, use it
    - otherwise default to current session working directory
    - default filenames:
@@ -1170,7 +1226,7 @@ SqlAssessment_CL
  
 ## Change approval guardrails
 
-- Never modify customer Azure resources without explicit user approval via `ask_user`.
+- Never modify customer Azure resources without explicit user approval via `ask_user`, except for the single sanctioned Unattended mode defined above.
 - Present the action, target resource, and subscription before requesting approval.
 - Use choices: `["Approve", "Skip this step", "Cancel analysis"]` for all approval prompts.
 - If the user selects **Approve**: proceed with the action.
@@ -1184,10 +1240,14 @@ SqlAssessment_CL
   - Arc Run Command resource deletion
   - Any ARM PUT, POST, PATCH, or DELETE that modifies resources in the customer's subscription
   - Any `az rest --method PUT/POST/PATCH/DELETE` call that modifies state
+- The only exception is valid Unattended mode, and even then ONLY for:
+  - RunCommandHandler extension install / upgrade
+  - create / update / delete of reusable `estate-audit-*` run command slots
+- Any other write operation still requires an explicit approval prompt even in Unattended mode.
 
 ## Script execution transparency guardrails
 
-- Always present the full script content to the user before executing via Arc Run Command. Never summarise, truncate, or substitute a description in place of the actual script.
+- Always present the full script content to the user before executing via Arc Run Command. Never summarise, truncate, or substitute a description in place of the actual script, except for the single sanctioned Unattended mode defined above.
 - Use the following presentation format for every script before requesting approval:
 
   ```
@@ -1209,7 +1269,12 @@ SqlAssessment_CL
 - Offer batch approval when the same script template targets multiple machines: present the script once, list all target machines, and offer `["Approve for all listed machines", "Approve individually per machine", "Skip all"]`.
 - If the user declines (Skip this check or Skip all), note the skipped check in output, set `executionStatus = Skipped`, and adjust downgrade confidence to Low for any affected machines.
 - If the user selects **Modify script first**, collect their changes, re-present the updated script in full, and request approval again before proceeding.
-- No script may ever be submitted to Arc Run Command without the user first seeing the complete script content and explicitly approving execution.
+- In Unattended mode, only the exact built-in reference scripts may run:
+  - Pattern 1 — DMV audit
+  - Pattern 2 — runtime validation
+- No arbitrary or user-supplied script may run under standing authorization.
+- No script may ever be submitted to Arc Run Command without the user first seeing the complete script content and explicitly approving execution, unless valid Unattended mode is active with the canonical standing-authorization phrase and the required pre-answered decisions.
+- When Unattended mode is used, the final report MUST include the after-the-fact `Unattended execution log` for every standing-authorized write operation.
 
 ## Enterprise downgrade audit guardrails
 
@@ -1362,6 +1427,8 @@ Standard no-URL note (use this exact wording when needed): `No authoritative Mic
 13. Azure target recommendations (per-instance SKU, sequencing, TCO — Tier 1/2/3 formatting applies)
 14. Risks and blockers
 15. Data gaps / follow-up questions
+    - when Unattended mode performed Phase 5 write operations, add a subsection immediately after the data-gap bullets titled `Unattended execution log`
+    - in that subsection, list every standing-authorized write operation with: machine, operation, slot name, script pattern, and result
 16. Appendix (Tier 2 and Tier 3 only — omit for Tier 1 estates with ≤10 instances):
     - Appendix A — Full machine inventory
     - Appendix B — Enterprise downgrade audit: GREEN instance details

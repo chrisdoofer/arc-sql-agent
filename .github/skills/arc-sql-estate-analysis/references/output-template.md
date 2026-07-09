@@ -533,6 +533,14 @@ _Only if `assessment.enabled = true`, `assessmentUploadTime = null`, and recomme
 - Missing field or evidence 2:
 - Missing field or evidence 3:
 
+### Unattended execution log (include only when Unattended mode performed Phase 5 write operations)
+
+_Required for sanctioned Unattended mode runs because scripts are not shown before execution. List every standing-authorized write action performed after the fact._
+
+| Machine | Operation | Slot name | Script pattern | Result |
+|---------|-----------|-----------|----------------|--------|
+|         |           |           |                |        |
+
 
 ## Appendix
 
