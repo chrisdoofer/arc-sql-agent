@@ -198,13 +198,20 @@ This document describes the step-by-step execution flow of the Arc SQL Estate An
 ┌──────────────────────────────────────┐
 │ 9. ANALYSIS & REPORT GENERATION      │
 │                                      │
-│  1. Executive Summary                │
-│  2. Estate Summary                   │
-│  3. Key Optimisation Opportunities   │
-│  4. Enterprise Downgrade Audit       │
-│  5. Azure Target Recommendations     │
-│  6. Risks and Blockers               │
-│  7. Data Gaps / Follow-up Questions  │
+│  Part 1 — Executive Briefing         │
+│    1. Executive Summary              │
+│    2. Estate at a glance             │
+│    3. Key risks and issues           │
+│    4. Strategic migration opps       │
+│    5. Recommended Azure direction    │
+│                                      │
+│  Part 2 — Technical Execution Guide  │
+│    6. Estate Summary                 │
+│    7. Key Optimisation Opportunities │
+│    8. Enterprise Downgrade Audit     │
+│    9. Azure Target Recommendations   │
+│   10. Risks and Blockers             │
+│   11. Data Gaps / Follow-up Questions│
 └──────────────────────────────────────┘
 ```
 
