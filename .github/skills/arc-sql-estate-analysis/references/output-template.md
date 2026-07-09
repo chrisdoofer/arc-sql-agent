@@ -475,7 +475,7 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action
 
 _Per-instance TCO notes and licensing position → Appendix D._
 
-_Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AHB affects the recommendation: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit_
+Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AHB affects the recommendation: https://learn.microsoft.com/en-us/azure/azure-sql/database/azure-hybrid-benefit
 
 ### Per-instance detail (Tier 1 — use for ≤10 instances)
 
