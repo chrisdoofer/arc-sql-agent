@@ -26,3 +26,29 @@ Analyse this Arc-enabled SQL estate. I've exported the dependency data from Azur
 
 ## Prompt 9 - retrieve dependencies directly via the Dependency Map API
 Analyse this Arc-enabled SQL estate. I have an Azure Migrate Dependency Map set up — pull the dependency data directly via the `Microsoft.DependencyMap` API (no portal CSV export) and use it to recommend migration wave sequencing.
+
+## Prompt 10 - unattended end-to-end analysis (zero further interaction)
+
+> ⚠️ **WARNING — use with care.** This prompt grants **standing approval** for the skill to make **write changes to your Arc-enabled machines without asking again**: it installs/upgrades the Arc Run Command extension and creates, updates, and deletes Run Command resources (the reusable `estate-audit-*` slots), and executes the built-in DMV and runtime audit scripts against your SQL instances.
+> There are **no per-step confirmations** once it starts.
+> - Only use against an estate you **own and are authorized to audit**.
+> - Confirm the **tenant and subscription scope** are correct before submitting — scope validation still runs, but standing approval means mistakes execute automatically within the validated scope.
+> - Runs against **all** in-scope Enterprise DB-engine instances.
+> - Prefer the interactive prompts (Prompts 1–9) for production estates or when you want to review each script first.
+>
+> Replace the `<...>` placeholders with your values.
+
+Run the Arc-enabled SQL estate analysis unattended, end to end, with no further questions — treat every decision below as pre-answered and do not prompt me again.
+
+- Tenant: <tenant-id-or-dns>
+- Subscription scope: <all subscriptions | these subscription IDs: ...>
+- Azure Migrate: use project <project-name> (or auto-select the only project in scope; if none, continue without it). Include utilisation baseline, application dependency mapping via the Microsoft.DependencyMap API, and Security Insights.
+- Software Assurance: <Yes|No|Unsure> — Standard SA-covered cores: <n>, Enterprise SA-covered cores: <n>.
+- Run the SQL on Azure VM best-practices alignment scan: yes, including the full Arc Run Command scan if Resource Graph/BPA coverage is incomplete.
+- Enterprise downgrade audit: I pre-authorize all required Arc Run Command write operations on the in-scope machines — extension install/upgrade, and create/update/delete of the reusable estate-audit-* command slots — using the skill's built-in Pattern 1 (DMV) and Pattern 2 (runtime) reference scripts only. Run both stages across all Enterprise DB-engine instances. Do not ask me to approve individual machines or scripts; instead list every write operation you performed in the final report.
+- Dependency data: pull directly via the Microsoft.DependencyMap API (no portal CSV prompt); if unavailable, note as a data gap and continue.
+- Output: produce the full two-part report and export the branded HTML report to the working directory.
+
+Standing-authorization phrase: "Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts."
+
+If any required value above is missing or scope cannot be validated, stop and tell me rather than guessing.
