@@ -464,7 +464,7 @@ $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
 az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Migrate/assessmentProjects/{assessmentProjectName}/sqlAssessments?api-version=2024-03-03-preview" -o json
 ```
 
-> **Known limitation:** The list operation may return `Internal Server Error` on some tenants (a known preview API limitation). If it fails, proceed to Step 2.
+> **Known limitation:** The list operation may return `Internal Server Error` on some assessment projects (a known limitation of the `2024-03-03-preview` API surface — the list endpoint is not fully implemented for all project configurations). This is not a transient error; retry will not help. If it fails, proceed to Step 2 (direct GET by known name).
 
 **Step 2 — Direct GET on known assessment name (fallback when list fails):**
 ```powershell

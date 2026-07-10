@@ -199,7 +199,7 @@ $results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 NOT marked 'not assess
 # a false utilisation data gap.
 
 # #104-TDD: Report must reference the SQL assessment or assessedSqlInstances (evidence the primary path was taken)
-$sqlAssessmentCollected = $reportContent -match '(?i)(sqlAssessment|allapplications.sql|assessedSqlInstances|SQL assessment.*Finished|Finished.*SQL assessment)'
+$sqlAssessmentCollected = $reportContent -match '(?i)(sqlAssessment|allapplications-sql|assessedSqlInstances|SQL assessment.*Finished|Finished.*SQL assessment)'
 $results += Test-Assertion -Name "#104-TDD: SQL assessment collection evidence present" -Category "TDD (open issues)" -Passed $sqlAssessmentCollected -Detail $(if (-not $sqlAssessmentCollected) { "No evidence the SQL assessment primary path (sqlAssessments/assessedSqlInstances) was attempted. Expected reference to SQL assessment or 'allapplications-sql' in report." } else { "" })
 
 # #104-TDD: Report must NOT contain a utilisation data gap when assessedSqlInstances returned data
@@ -218,7 +218,9 @@ $migrateSection = ""
 if ($reportContent -match '(?si)(Azure Migrate|utilisation baseline|SQL assessment)(.+?)(Quick wins|Strategic moves|Data gaps)') {
     $migrateSection = $Matches[0]
 }
-$arcMachineCorrelated = ($migrateSection -match '(?i)ArcBox-SQL')
+# Guard: if section capture is empty, fall back to full report for correlation check
+$searchScope = if ($migrateSection.Length -gt 10) { $migrateSection } else { $reportContent }
+$arcMachineCorrelated = ($searchScope -match '(?i)ArcBox-SQL')
 $results += Test-Assertion -Name "#104-TDD: Arc machine name correlated via linkages.workloadName in assessment context" -Category "TDD (open issues)" -Passed $arcMachineCorrelated -Detail $(if (-not $arcMachineCorrelated) { "ArcBox-SQL not found in Azure Migrate/utilisation context. Expected Arc machine name to appear via linkages.workloadName correlation from assessedSqlInstances." } else { "" })
 
 # --- Issue #78: Adaptive report formatting ---

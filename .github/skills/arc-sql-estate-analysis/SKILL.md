@@ -322,7 +322,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
             - `ReadyWithConditions` → **Ready with conditions** (AMBER)
             - `NotSuitable` → **Not ready** (RED)
             - absent / `Unknown` → **Unknown** (GREY)
-          - **Critical:** `ConditionallySuitable` must NOT be reported as "Not Ready" — it is a meaningfully different finding indicating the instance can be migrated with acknowledged conditions
+          - **Critical:** `ConditionallySuitable` must NOT be reported as "Not Ready" — it indicates the instance can be migrated with acknowledged conditions (for example: a minor feature or configuration change is required before migration, such as enabling a compatibility level, addressing a deprecated feature, or accepting a service-tier constraint). This is a meaningfully different finding from `NotSuitable`, which indicates a hard blocker preventing migration.
           - extract `confidenceScore` and disclose alongside readiness
           - extract recommended SKU from `skus[]` (tier, hardware generation, vCore count)
           - read cost figures from `totalCost.costDetail`; check `savingsOptions` to frame RI/AHB savings accurately — do not present base pay-as-you-go cost as the only option when RI/AHB savings are available
