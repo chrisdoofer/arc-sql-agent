@@ -1465,6 +1465,11 @@ SqlAssessment_CL
 
 Always produce the sections below in the two-part order. Both parts are derived from the same evidence collected in Phases 4–5 — no data is collected twice.
 
+**Single source of truth (avoid repetition):** Part 1 (executive) restating a Part 2 fact at headline level is expected. Repeating the same fact in full across multiple Part 2 sections is not — it is the main cause of report bloat. Each finding has exactly one **authoritative home section** where it is stated in full (evidence, numbers, confidence, remediation, reference); every other mention must be a one-clause headline or an explicit cross-reference ("see §Section"), never a re-explanation. See the "Authoring principle — single source of truth" block at the top of `references/output-template.md` for the finding→home mapping. In particular:
+- **Quick wins** and **Strategic moves** are classification views only — one line per item pointing to its home section (effort + confidence + pointer). Do not reproduce detail already in Key optimisation opportunities, BPA alignment, or the Enterprise downgrade audit.
+- BPA config fixes (max memory, Query Store, auto-close/shrink, backup compression, storage, Defender) live in the BPA alignment section and its remediation checklist — reference them elsewhere, do not re-list.
+- Before finalising, scan for any fact stated in full in more than one Part 2 section and collapse the extra copies.
+
 ## Part 1 — Executive Briefing
 
 Produce first. Concise, business-framed narrative framed through reliability, cost, security, and end-of-support lenses. No per-database or per-instance raw tables in Part 1. Every point must connect to Azure migration or modernisation as the outcome.

@@ -1,3 +1,22 @@
+> ## Authoring principle — single source of truth (read before writing any section)
+>
+> This report has two deliberate layers: **Part 1** (executive) and **Part 2** (technical). Restating a Part 2 fact at executive level in Part 1 is expected. **Repeating the same fact multiple times _within_ Part 2 is not** — it is the primary cause of report bloat.
+>
+> **Rule:** every finding has exactly one **authoritative home section** where it is stated in full (evidence, numbers, confidence, remediation, reference). Every other mention must be either a **one-clause headline** or an explicit **cross-reference** ("see §Section name") — never a re-explanation.
+>
+> | Finding | Authoritative home (state in full once) | Everywhere else |
+> |---|---|---|
+> | Enterprise→Standard downgrade (per-instance GREEN/AMBER/RED, DMV + runtime detail) | **Enterprise downgrade audit** | Exec Summary & Strategic opps: headline counts only; Key optimisation: one line + confidence |
+> | BPA config fixes (max memory, Query Store, auto-close/shrink, backup compression, storage layout, Defender) | **SQL on Azure VM BPA alignment** + its remediation checklist | Quick wins: reference the checklist, do **not** re-list; Risks: do not re-list |
+> | Vulnerabilities / CVEs | **Security posture — vulnerability exposure** | Exec/At a glance/Key risks: one-line headline; Azure target & Risks: single pointer |
+> | Azure target readiness, SKU, cost | **Azure target recommendations** (+ Appendix D) | Recommended direction (Part 1): exec-level; Estate summary groupings: light readiness table only |
+> | Licensing / SA / AHB cores | **Licensing position** (in Estate summary) | Exec & Strategic: one-line; Key optimisation: AHB as a single opportunity |
+> | Sizing confidence & assessment coverage caveats | **Data gaps / follow-up questions** | Others: brief "(see Data gaps)" only |
+>
+> **Quick wins** and **Strategic moves** are **classification views**, not new content: each entry is a single line that points to the item's home section (effort + confidence + pointer). Do not reproduce the "Why it matters / Expected benefit / Remediation / Reference" detail that already lives in the home section.
+>
+> Before finalising, scan for any fact that appears in full in more than one Part 2 section and collapse the extra copies to a headline or cross-reference.
+
 # Part 1 — Executive Briefing
 
 _Concise, business-framed narrative. No per-database or per-instance raw tables. Every point is framed through reliability, cost, security, and end-of-support risk lenses — and connects to Azure migration or modernisation as the outcome._
@@ -410,53 +429,20 @@ _Machines that could not be correlated to discovered Security Insights records a
 
 ## Quick wins
 
-- Quick win 1:
-  - Why it matters:
-  - Expected benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
+_Low-effort actions already detailed in their home sections. One line each — classify by effort/confidence and point to the home section. Do **not** restate the full finding here._
 
-- Quick win 2:
-  - Why it matters:
-  - Expected benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
-
-- Quick win 3:
-  - Why it matters:
-  - Expected benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
+- {action} — home: {§Key optimisation opportunities / §BPA alignment / §Enterprise downgrade audit}. Effort: Low. Confidence: {level}.
+- {action} — home: {section}. Effort: Low. Confidence: {level}.
+- {action} — home: {section}. Effort: Low. Confidence: {level}.
 
 
 ## Strategic moves
 
-- Strategic move 1:
-  - Why it matters:
-  - Dependency / blocker:
-  - Expected long-term benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
+_Higher-effort moves already detailed in their home sections. One line each — point to the home section and note the key dependency/blocker. Do **not** restate the full finding here._
 
-- Strategic move 2:
-  - Why it matters:
-  - Dependency / blocker:
-  - Expected long-term benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
-
-- Strategic move 3:
-  - Why it matters:
-  - Dependency / blocker:
-  - Expected long-term benefit:
-  - Confidence:
-  - Remediation:
-  - Reference:
+- {move} — home: {§Azure target recommendations / §Enterprise downgrade audit / §Licensing position}. Effort: High. Dependency: {blocker}. Confidence: {level}.
+- {move} — home: {section}. Effort: High. Dependency: {blocker}. Confidence: {level}.
+- {move} — home: {section}. Effort: High. Dependency: {blocker}. Confidence: {level}.
 
 
 ## Azure target recommendations
