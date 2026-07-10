@@ -193,6 +193,34 @@ $results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 has utilisation metric
 $sql2016NotAssessed = $reportContent -match '(?i)ARCBOX.SQL2016.{0,100}?not assessed'
 $results += Test-Assertion -Name "#73-TDD: ARCBOX-SQL2016 NOT marked 'not assessed'" -Category "TDD (open issues)" -Passed (-not $sql2016NotAssessed) -Detail $(if ($sql2016NotAssessed) { "ARCBOX-SQL2016 still marked 'not assessed' in Migrate section. Fix #73 should include this machine in assessed machines API call." } else { "" })
 
+# --- Issue #104: SQL-specific assessment collection (sqlAssessments/{name}/assessedSqlInstances) ---
+# These assertions validate that when a Finished Azure Migrate SQL assessment exists, the skill collects
+# per-instance data from it and does NOT fall back to stale ARM-synced skuRecommendationResults or report
+# a false utilisation data gap.
+
+# #104-TDD: Report must reference the SQL assessment or assessedSqlInstances (evidence the primary path was taken)
+$sqlAssessmentCollected = $reportContent -match '(?i)(sqlAssessment|allapplications.sql|assessedSqlInstances|SQL assessment.*Finished|Finished.*SQL assessment)'
+$results += Test-Assertion -Name "#104-TDD: SQL assessment collection evidence present" -Category "TDD (open issues)" -Passed $sqlAssessmentCollected -Detail $(if (-not $sqlAssessmentCollected) { "No evidence the SQL assessment primary path (sqlAssessments/assessedSqlInstances) was attempted. Expected reference to SQL assessment or 'allapplications-sql' in report." } else { "" })
+
+# #104-TDD: Report must NOT contain a utilisation data gap when assessedSqlInstances returned data
+# A false utilisation gap is the primary symptom of falling back to stale ARM-synced data.
+$utilisationGap = $reportContent -match '(?i)(utilisation.*not available|no utilisation.*data|utilization.*not available|no utilization.*data|utilisation.*gap|utilization.*gap)'
+$results += Test-Assertion -Name "#104-TDD: No false utilisation data gap when SQL assessment available" -Category "TDD (open issues)" -Passed (-not $utilisationGap) -Detail $(if ($utilisationGap) { "Report contains a utilisation data gap despite a Finished SQL assessment being available. The skill should extract percentageCoresUtilization from assessedSqlInstances." } else { "" })
+
+# #104-TDD: Report must use ConditionallySuitable/Conditionally ready language (not 'Not Ready') for MI readiness
+# when the SQL assessment returns ConditionallySuitable for an instance (ArcBox-SQL was ConditionallySuitable for MI)
+$conditionallySuitable = $reportContent -match '(?i)(Conditionally\s+ready|ConditionallySuitable|Conditionally\s+suitable)'
+$results += Test-Assertion -Name "#104-TDD: ConditionallySuitable readiness mapped correctly (not 'Not Ready')" -Category "TDD (open issues)" -Passed $conditionallySuitable -Detail $(if (-not $conditionallySuitable) { "Report does not contain 'Conditionally ready' or 'ConditionallySuitable' language. Expected when SQL assessment returns ConditionallySuitable for MI target. Must NOT be reported as 'Not Ready'." } else { "" })
+
+# #104-TDD: Report must correlate instances via linkages.workloadName (evidence: Arc machine name appears in Migrate section)
+# workloadName gives the exact Arc machine name - it must appear in the utilisation/assessment context
+$migrateSection = ""
+if ($reportContent -match '(?si)(Azure Migrate|utilisation baseline|SQL assessment)(.+?)(Quick wins|Strategic moves|Data gaps)') {
+    $migrateSection = $Matches[0]
+}
+$arcMachineCorrelated = ($migrateSection -match '(?i)ArcBox-SQL')
+$results += Test-Assertion -Name "#104-TDD: Arc machine name correlated via linkages.workloadName in assessment context" -Category "TDD (open issues)" -Passed $arcMachineCorrelated -Detail $(if (-not $arcMachineCorrelated) { "ArcBox-SQL not found in Azure Migrate/utilisation context. Expected Arc machine name to appear via linkages.workloadName correlation from assessedSqlInstances." } else { "" })
+
 # --- Issue #78: Adaptive report formatting ---
 # These assertions validate adaptive formatting behaviour. Because the regression test estate (ArcBox-SQL +
 # ARCBOX-SQL2016) is a 2-instance estate (Tier 1), we assert that NO Tier 2/3 aggregated structures are

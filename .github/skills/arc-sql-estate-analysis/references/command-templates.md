@@ -452,6 +452,136 @@ az rest --method POST `
 
 ---
 
+### 10. List / Get SQL Assessments from an Assessment Project
+
+**Purpose:** Discover SQL-specific assessments (`Microsoft.Migrate/assessmentProjects/.../sqlAssessments`) and verify their status before retrieving per-instance data. Use this in Phase 4 step 7a **before** attempting the group-scoped VM assessment fallback path.
+
+**Why a separate template:** SQL assessment data lives under a distinct sub-resource type (`sqlAssessments`) with its own api-version (`2024-03-03-preview`). Earlier api-versions (`2023-03-15`, `2023-04-01-preview`) return `InvalidHttpRequestPath` or `Internal Server Error` for this resource path. The SQL assessment contains per-instance utilisation, MI/VM/DB readiness, SKU recommendations, and cost — data that is not available from the group-scoped VM assessment path.
+
+**Step 1 — Attempt to list SQL assessments at project scope:**
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Migrate/assessmentProjects/{assessmentProjectName}/sqlAssessments?api-version=2024-03-03-preview" -o json
+```
+
+> **Known limitation:** The list operation may return `Internal Server Error` on some tenants (a known preview API limitation). If it fails, proceed to Step 2.
+
+**Step 2 — Direct GET on known assessment name (fallback when list fails):**
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Migrate/assessmentProjects/{assessmentProjectName}/sqlAssessments/{sqlAssessmentName}?api-version=2024-03-03-preview" -o json
+```
+
+Try the following names in order until one succeeds: `allapplications-sql`, `{assessmentProjectName}-sql`, `default`.
+
+**Placeholders:**
+- `{subscriptionId}` — Subscription ID (GUID) containing the Azure Migrate project
+- `{resourceGroup}` — Resource group of the Azure Migrate / assessment project
+- `{assessmentProjectName}` — Name of the `Microsoft.Migrate/assessmentProjects` resource (note: this is distinct from the `migrateProjects` container — the assessment project name typically matches the migrate project name, e.g. `migrate2684project`)
+- `{sqlAssessmentName}` — SQL assessment name (e.g. `allapplications-sql`); try well-known names when list is unavailable
+
+**Expected output (list):** JSON `value[]` of SQL assessment resources. Filter for `properties.status = Finished` — only Finished assessments contain complete readiness and cost data.
+
+**Expected output (single GET):**
+```json
+{
+  "name": "allapplications-sql",
+  "properties": {
+    "status": "Finished",
+    "lastUpdatedTime": "2026-07-10T08:00:34Z",
+    "numberOfMachines": 10,
+    "numberOfInstances": 10
+  }
+}
+```
+
+Use `properties.status` and `properties.lastUpdatedTime` to assess freshness before extracting instance data.
+
+---
+
+### 11. Get Assessed SQL Instances from a SQL Assessment
+
+**Purpose:** Retrieve per-instance SQL assessment data — utilisation baselines, MI/VM/DB readiness, SKU recommendations, cost, and Arc-machine linkage — from a Finished SQL assessment. This is the data source that replaces ARM-synced `skuRecommendationResults` when a Finished SQL assessment exists.
+
+**Operation:** `GET .../sqlAssessments/{name}/assessedSqlInstances?api-version=2024-03-03-preview`
+
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az rest --method GET --url "https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Migrate/assessmentProjects/{assessmentProjectName}/sqlAssessments/{sqlAssessmentName}/assessedSqlInstances?api-version=2024-03-03-preview" -o json
+```
+
+**Pagination:** check the response for a `nextLink` field; if present, follow it to retrieve subsequent pages until `nextLink` is absent.
+
+**Placeholders:**
+- `{subscriptionId}`, `{resourceGroup}`, `{assessmentProjectName}` — same as Template 10
+- `{sqlAssessmentName}` — name of the Finished SQL assessment resolved via Template 10
+
+**Key response fields to extract per instance (`value[]` array):**
+
+| Field path | Description | Use in report |
+|---|---|---|
+| `properties.extendedDetails.percentageCoresUtilization` | Average CPU utilisation (%) over collection period | Utilisation baseline; raise confidence Low→Medium/High |
+| `properties.extendedDetails.memoryInUseInMB` | Average memory in use (MB) | Convert to GB for reporting |
+| `properties.extendedDetails.numberOfCoresAllocated` | vCores discovered | Validate against ARM inventory |
+| `properties.extendedDetails.sqlEdition` | Discovered SQL edition | Validate against ARM `edition` field |
+| `properties.extendedDetails.sqlVersion` | Discovered SQL version | Validate against ARM `version` field |
+| `properties.extendedDetails.productSupportStatus` | EoS/ESU dates from assessment | Use for end-of-support analysis |
+| `properties.extendedDetails.databaseSummary` | Per-database summary from assessment | Supplement ARM database inventory |
+| `properties.recommendations[].targetType` | Target type: `AzureSqlManagedInstance` / `AzureSqlVirtualMachine` / `AzureSqlDatabase` | Maps to MI / SQL VM / SQL DB columns |
+| `properties.recommendations[].migrationSuitability.readiness` | Readiness: `Suitable` / `ConditionallySuitable` / `ReadyWithConditions` / `NotSuitable` | See readiness mapping table below |
+| `properties.recommendations[].confidenceScore` | Confidence score (0–100) | Disclose alongside readiness |
+| `properties.recommendations[].skus` | Recommended SKU details (tier, hardware, vCores) | Azure target SKU recommendation |
+| `properties.recommendations[].totalCost.costDetail` | Cost breakdown per billing model | Report cost; check `savingsOptions` for RI/AHB framing |
+| `properties.linkages[].kind` | Linkage type: `Machine` = Arc host | Use for machine correlation |
+| `properties.linkages[].linkageType` | `Parent` = the Arc host this instance runs on | Filter for `kind=Machine, linkageType=Parent` |
+| `properties.linkages[].workloadName` | Arc machine name | **Primary correlation key** to Arc `microsoft.hybridcompute/machines` resources |
+
+**Readiness value mapping:**
+
+| API value | Report language | Indicator |
+|---|---|---|
+| `Suitable` | Ready | GREEN |
+| `ConditionallySuitable` | Conditionally ready | AMBER |
+| `ReadyWithConditions` | Ready with conditions | AMBER |
+| `NotSuitable` | Not ready | RED |
+| `Unknown` / absent | Unknown | GREY |
+
+> **Important:** `ConditionallySuitable` must NOT be reported as "Not Ready". It indicates the instance can be migrated with acknowledged conditions — a meaningfully different finding from `NotSuitable`.
+
+**Expected output shape:**
+```json
+{
+  "value": [
+    {
+      "name": "instance-guid",
+      "properties": {
+        "extendedDetails": {
+          "sqlEdition": "Enterprise",
+          "sqlVersion": "SQL Server 2019",
+          "numberOfCoresAllocated": 8,
+          "percentageCoresUtilization": 42.5,
+          "memoryInUseInMB": 12288
+        },
+        "recommendations": [
+          {
+            "targetType": "AzureSqlManagedInstance",
+            "migrationSuitability": { "readiness": "ConditionallySuitable" },
+            "confidenceScore": 87,
+            "skus": [ { "tier": "BusinessCritical", "hardwareGeneration": "Gen5", "targetVCores": 8 } ],
+            "totalCost": { "costDetail": { "computeCost": 1200.00, "savingsOptions": "ThreeYearReserved" } }
+          }
+        ],
+        "linkages": [
+          { "kind": "Machine", "linkageType": "Parent", "workloadName": "ArcBox-SQL" }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
 ## Usage Guidelines
 
 ### When to use each template:
@@ -465,6 +595,8 @@ az rest --method POST `
 7. **To discover Dependency Map resources:** Use Template 7 (List Dependency Map Resources) to resolve `{mapName}` before any dependency call
 8. **For bulk dependency data (primary path):** Use Template 8 (Export Dependencies via Direct API) when a `Microsoft.DependencyMap/maps` resource exists; download and parse the resulting CSV
 9. **For single-machine dependency inspection:** Use Template 9 (Get Dependency View for a Focused Machine)
+10. **To discover SQL-specific assessments (primary utilisation path):** Use Template 10 (List/Get SQL Assessments) to find Finished `sqlAssessments` resources — try list first, fall back to direct GET on known names; always use `api-version=2024-03-03-preview`
+11. **To retrieve per-instance SQL data (primary utilisation path):** Use Template 11 (Get Assessed SQL Instances) to extract per-instance utilisation, readiness, SKU, cost, and Arc-machine linkage from a Finished SQL assessment; this supersedes ARM-synced `skuRecommendationResults`
 
 ### Placeholder naming conventions:
 
@@ -478,6 +610,8 @@ All templates use consistent placeholder naming:
 - `{mapName}` — Azure Migrate Dependency Map resource name (`Microsoft.DependencyMap/maps`), resolved via Template 7
 - `{dependencyMapApiVersion}` — Dependency Map API version (default `2025-05-01-preview`; fall back to `2025-07-01-preview` then `2025-01-31-preview`)
 - `{focusedMachineId}` — machine node ID within the Dependency Map, correlated to the Arc SQL machine by name
+- `{assessmentProjectName}` — Name of the `Microsoft.Migrate/assessmentProjects` resource (distinct from the `migrateProjects` container)
+- `{sqlAssessmentName}` — SQL assessment name within the assessment project, resolved via Template 10 (e.g. `allapplications-sql`)
 
 ### Reusable slot naming pattern:
 
