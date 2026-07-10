@@ -235,8 +235,8 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - Azure Migrate project identifiers: `id`, `name`, `resourceGroup`, `subscriptionId`, `location`
 
    **NOT available in Resource Graph (separate API calls are required and justified):**
-   - Azure Migrate project utilisation data — requires Migrate API endpoints
-   - Assessed machine metrics from Azure Migrate (CPU/memory baselines, confidence scores)
+   - Azure Migrate SQL assessment data — per-instance utilisation, readiness, SKU, and cost from `sqlAssessments/{name}/assessedSqlInstances` (api-version `2024-03-03-preview`); see Phase 4 step 7a
+   - Azure Migrate VM/group-scoped assessed machine metrics (CPU/memory baselines, confidence scores); see Phase 4 step 7b (fallback)
    - Agentless dependency analysis data — via the `Microsoft.DependencyMap` REST API (primary, see Phase 4 step 8b) or portal CSV export for classic agentless appliance data (fallback, see Phase 4 step 8c)
 
    **Post-query local processing (perform locally — no additional network calls):**
@@ -256,7 +256,8 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 5. Migration assessment data handling:
    - Assessment results are stored in a **telemetry data plane** (accessed via the `getTelemetry` action), not directly in ARM resource properties
    - The ARM properties `properties.migration.assessment.skuRecommendationResults` and `serverAssessments` are synced summaries from that telemetry plane; `assessmentUploadTime` is a freshness indicator, not the extraction gate
-   - When `skuRecommendationResults` or `serverAssessments` contains usable data:
+   - **SQL assessment supersedes ARM-synced data:** if Phase 4 step 7a finds a Finished SQL assessment at `assessmentProjects/{project}/sqlAssessments/{name}`, use the data from `assessedSqlInstances` (readiness, utilisation, SKU, cost) as the authoritative source for each correlated instance. Retain ARM-synced `skuRecommendationResults` / `serverAssessments` only as a fallback for instances not covered by the SQL assessment.
+   - When `skuRecommendationResults` or `serverAssessments` contains usable data and no Finished SQL assessment exists:
      - use the populated ARM fields as the data source for MI/VM/DB readiness, SKU recommendations, and cost evidence even if `assessmentUploadTime` is null
      - if `assessmentUploadTime` is null or appears stale/inconsistent, disclose that the assessment freshness timestamp is unavailable or inconsistent, but do not suppress the populated assessment output
    - Only when `assessment.enabled = true` and the recommendation fields are not populated:
@@ -283,31 +284,87 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 
    > **Resource type note:** `Microsoft.Migrate/migrateProjects` is the project *container* resource used for discovery (returned by the consolidated ARG query). Assessment and utilisation data lives under a **different resource type**: `Microsoft.Migrate/assessmentProjects`. Do not query `migrateProjects` for assessments — it only supports api-versions up to `2020-06-01-preview` and has no assessment sub-resources.
 
-   a. List assessments in the selected project:
-      ```
-      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments?api-version=2023-03-15
-      ```
-      - to enumerate available groups first: `GET .../assessmentProjects/{project}/groups?api-version=2023-03-15`
-      - prefer Azure SQL assessment types where available; fall back to Azure VM assessments for utilisation data
+   > **Assessment source priority:** when a Finished SQL assessment exists at `assessmentProjects/{project}/sqlAssessments/{name}`, use its per-instance data (readiness, utilisation, SKU, cost) in preference to ARM-synced `skuRecommendationResults` on the Arc SQL instance resource. Retain ARM-synced data only as a fallback when no Finished SQL assessment is available.
 
-   b. For each relevant assessment, retrieve assessed machines:
-      ```
-      GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments/{assessment}/assessedMachines?api-version=2023-03-15
-      ```
+   a. **Primary path — SQL-specific assessment** (use command-templates.md Templates 10 and 11):
 
-   c. Extract per-machine utilisation metrics:
-      - `percentageCpuUtilization` — average CPU usage over collection period
-      - `percentageMemoryUtilization` — average memory usage
-      - `confidenceRatingInPercentage` — data quality indicator
-      - disk I/O and network throughput where available
-      - note the collection period (start/end dates) for data freshness disclosure
+      i. Attempt to list SQL assessments in the project (api-version `2024-03-03-preview`):
+         ```
+         GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/sqlAssessments?api-version=2024-03-03-preview
+         ```
+         - **api-version `2024-03-03-preview` is required** — earlier versions (`2023-03-15`, `2023-04-01-preview`) return `InvalidHttpRequestPath` or `Internal Server Error` for SQL assessment sub-resources
+         - if the list call returns `Internal Server Error` (a known limitation of the preview API), fall back to a direct GET on likely assessment names — try `allapplications-sql`, `{project-name}-sql`, and `default` in that order:
+           ```
+           GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/sqlAssessments/{name}?api-version=2024-03-03-preview
+           ```
+         - if no SQL assessment is found (list is empty or all direct GETs return 404), skip to the fallback path in step 7b
 
-   d. Correlate Azure Migrate machines to Arc-enabled SQL machines:
-      - match by machine name (primary, case-insensitive, strip domain suffix if needed)
-      - fall back to IP address matching if name match fails
-      - fall back to FQDN matching if IP match fails
-      - if automatic correlation confidence is below 80% (e.g. name mismatch, IP mismatch), surface the attempted match for user confirmation rather than assuming
-      - surface unmatched machines in "Data gaps / follow-up questions" with both the Arc machine name and Migrate machine name for manual reconciliation
+      ii. For each SQL assessment with `properties.status = Finished`, retrieve per-instance data:
+          ```
+          GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/sqlAssessments/{name}/assessedSqlInstances?api-version=2024-03-03-preview
+          ```
+          - follow `nextLink` pagination until all instances are retrieved
+
+      iii. Extract per-instance utilisation metrics from `properties.extendedDetails`:
+           - `percentageCoresUtilization` — average CPU utilisation over collection period; use this as the utilisation baseline (not `percentageCpuUtilization` from the VM assessment path)
+           - `memoryInUseInMB` — average memory in use; convert to GB for reporting
+           - per-disk throughput (`readThroughputInMBps`, `writeThroughputInMBps`) and latency where available
+           - `numberOfCoresAllocated` — vCores discovered; validate against ARM `vCores`
+           - `sqlEdition`, `sqlVersion` — validate against ARM inventory
+           - `productSupportStatus` — EoS/ESU dates from the assessment
+           - note `properties.lastUpdatedTime` on the SQL assessment resource for data freshness disclosure
+
+      iv. Extract readiness and cost from `properties.recommendations[]` (one entry per target type):
+          - target types: `AzureSqlManagedInstance`, `AzureSqlVirtualMachine`, `AzureSqlDatabase`
+          - map `migrationSuitability.readiness` to report language using this exact table — do not deviate:
+            - `Suitable` → **Ready** (GREEN)
+            - `ConditionallySuitable` → **Conditionally ready** (AMBER)
+            - `ReadyWithConditions` → **Ready with conditions** (AMBER)
+            - `NotSuitable` → **Not ready** (RED)
+            - absent / `Unknown` → **Unknown** (GREY)
+          - **Critical:** `ConditionallySuitable` must NOT be reported as "Not Ready" — it indicates the instance can be migrated with acknowledged conditions (for example: a minor feature or configuration change is required before migration, such as enabling a compatibility level, addressing a deprecated feature, or accepting a service-tier constraint). This is a meaningfully different finding from `NotSuitable`, which indicates a hard blocker preventing migration.
+          - extract `confidenceScore` and disclose alongside readiness
+          - extract recommended SKU from `skus[]` (tier, hardware generation, vCore count)
+          - read cost figures from `totalCost.costDetail`; check `savingsOptions` to frame RI/AHB savings accurately — do not present base pay-as-you-go cost as the only option when RI/AHB savings are available
+
+      v. Correlate SQL instances to Arc machines using `properties.linkages[]`:
+         - **Primary:** find the entry where `kind = Machine` AND `linkageType = Parent`; read `workloadName` — this is the Arc machine name and provides the most reliable correlation
+         - **Secondary:** the same linkage entry's GUID fields (`machineArmId` / `discoveredMachineId`) can be used to correlate Security Insights records
+         - fall back to name-based matching (case-insensitive, strip domain suffix) only when no `kind=Machine` linkage exists
+         - surface unmatched instances in "Data gaps / follow-up questions"
+
+      vi. Confidence level adjustment when SQL assessment data is used:
+          - raise sizing recommendation confidence Low → Medium when `percentageCoresUtilization` and `memoryInUseInMB` are available for the instance
+          - raise Medium → High only when `properties.lastUpdatedTime` on the SQL assessment is within the last 30 days AND `confidenceScore` is above 80%
+          - when SQL assessment data is used, clearly attribute the utilisation baseline as "Azure Migrate SQL assessment: {assessment name}, updated {lastUpdatedTime}"
+
+   b. **Fallback path — group-scoped VM assessment** (use only when no Finished SQL assessment is found in step 7a):
+
+      i. List groups and assessments in the project:
+         ```
+         GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups?api-version=2023-03-15
+         GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments?api-version=2023-03-15
+         ```
+         - prefer Azure SQL assessment types where available; fall back to Azure VM assessments for utilisation data
+
+      ii. For each relevant assessment, retrieve assessed machines:
+          ```
+          GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Migrate/assessmentProjects/{project}/groups/{group}/assessments/{assessment}/assessedMachines?api-version=2023-03-15
+          ```
+
+      iii. Extract per-machine utilisation metrics:
+           - `percentageCpuUtilization` — average CPU usage over collection period
+           - `percentageMemoryUtilization` — average memory usage
+           - `confidenceRatingInPercentage` — data quality indicator
+           - disk I/O and network throughput where available
+           - note the collection period (start/end dates) for data freshness disclosure
+
+      iv. Correlate Azure Migrate machines to Arc-enabled SQL machines:
+          - match by machine name (primary, case-insensitive, strip domain suffix if needed)
+          - fall back to IP address matching if name match fails
+          - fall back to FQDN matching if IP match fails
+          - if automatic correlation confidence is below 80% (e.g. name mismatch, IP mismatch), surface the attempted match for user confirmation rather than assuming
+          - surface unmatched machines in "Data gaps / follow-up questions" with both the Arc machine name and Migrate machine name for manual reconciliation
 
 8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
 
@@ -990,13 +1047,16 @@ SqlAssessment_CL
      - if blocker detail is not available, state that clearly and add it to Data gaps / follow-up questions instead of inferring a reason
 
 8. When Azure Migrate utilisation data is available:
-   - include workload utilisation baselines in Estate summary with source attribution ("Azure Migrate project: {name}")
-   - surface the collection period and confidence rating alongside utilisation figures
+   - include workload utilisation baselines in Estate summary with source attribution:
+     - for SQL assessment data: "Azure Migrate SQL assessment: {assessment name}, updated {lastUpdatedTime}"
+     - for VM assessment data: "Azure Migrate project: {name}"
+   - surface the assessment freshness date and confidence rating alongside utilisation figures
    - use utilisation data to validate or refine SKU right-sizing recommendations:
      - if average CPU utilisation is below 30%, flag as over-provisioned and recommend a smaller SKU
      - if average CPU utilisation is above 80%, flag as potentially under-provisioned
-   - increase confidence rating on sizing recommendations from Low → Medium or High when utilisation data supports the recommendation
+   - increase confidence rating on sizing recommendations from Low → Medium or High when utilisation data supports the recommendation (per the confidence rules in Phase 4 step 7a vi)
    - if utilisation data is available for some machines but not others, clearly distinguish which recommendations are utilisation-validated and which are configuration-based only
+   - when SQL assessment readiness is available, use it (with the readiness mapping in Phase 4 step 7a iv) as the primary readiness signal for Azure target recommendations; do not report a utilisation data gap when `percentageCoresUtilization` is populated in the SQL assessment
 
 9. When Azure Migrate dependency data is available:
    - include an application dependency summary in Estate summary showing key inbound and outbound connections per SQL instance
@@ -1367,8 +1427,8 @@ SqlAssessment_CL
 - Always disclose the data source when presenting utilisation or dependency findings. Clearly attribute data to "Azure Migrate project: {name}" with the collection period and confidence rating.
 
 - Do not assume that Azure Migrate discovered machines map 1:1 to Arc-enabled SQL machines. Machine correlation must be validated:
-  - match by machine name first (case-insensitive, strip domain suffix if needed)
-  - fall back to IP address, then FQDN
+  - for SQL assessment data (`assessedSqlInstances`): use `properties.linkages[]` where `kind=Machine` and `linkageType=Parent` — read `workloadName` as the Arc machine name (most reliable path; use this in preference to name matching)
+  - for VM assessment data (`assessedMachines`): match by machine name first (case-insensitive, strip domain suffix if needed), fall back to IP address, then FQDN
   - if automatic correlation confidence is below 80%, surface the attempted match for user confirmation rather than assuming a match
   - surface unmatched machines from either side in "Data gaps / follow-up questions"
 
@@ -1380,9 +1440,10 @@ SqlAssessment_CL
 
 - Azure Migrate resource type and API version:
   - `Microsoft.Migrate/migrateProjects` is the **project container** — use it only for project discovery (already returned by the consolidated ARG query). It supports api-versions up to `2020-06-01-preview` only and has no assessment or utilisation sub-resources.
-  - `Microsoft.Migrate/assessmentProjects` is the **assessment data store** — use api-version `2023-03-15` for all assessment and assessed-machine queries.
+  - `Microsoft.Migrate/assessmentProjects` is the **assessment data store** — use api-version `2024-03-03-preview` for SQL assessment queries (`sqlAssessments/{name}` and `sqlAssessments/{name}/assessedSqlInstances`); use api-version `2023-03-15` for group-scoped VM assessment queries (`groups`, `assessments`, `assessedMachines`).
+  - `sqlAssessments` sub-resources **require** `api-version=2024-03-03-preview` — earlier versions (`2023-03-15`, `2023-04-01-preview`) return `InvalidHttpRequestPath` or `Internal Server Error` for this resource path.
   - do NOT query `migrateProjects` for assessments; doing so returns `NoRegisteredProviderFound` for any version later than `2020-06-01-preview`.
-  - if the `assessmentProjects` api-version `2023-03-15` is not accepted, fall back to `2019-10-01` then `2018-02-02`; if all versions fail, surface the API error and continue without Migrate data
+  - if the `assessmentProjects` api-version `2023-03-15` is not accepted for VM assessment fallback, fall back to `2019-10-01` then `2018-02-02`; if all versions fail, surface the API error and continue without Migrate data
 
 - Dependency data has two sources with different access paths. The newer **Azure Migrate Dependency Map** (`Microsoft.DependencyMap/maps`) IS retrievable programmatically via the `Microsoft.DependencyMap` REST API (connection data lives in a graph datastore that is not in Resource Graph, but the export/view actions return it) — this is the primary path; use command-templates.md Templates 7–9. The older **classic agentless Azure Migrate appliance** dependency data is NOT accessible via REST API or PowerShell and can only be exported as CSV via portal **Manage Dependencies > Export dependencies** — use this only as a fallback when no Dependency Map resource exists. Confirm the Dependency Map API version (`2025-05-01-preview`, falling back to `2025-07-01-preview` then `2025-01-31-preview`).
 

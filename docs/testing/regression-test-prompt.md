@@ -34,7 +34,8 @@ After analysis is complete, export to HTML at the default path (estate-report.ht
 IMPORTANT: Even though answers are pre-defined, you MUST still execute every phase of the analysis workflow including:
 - Scope validation query
 - Consolidated estate ARG query
-- Azure Migrate utilisation data extraction
+- Azure Migrate SQL assessment primary path: attempt `sqlAssessments?api-version=2024-03-03-preview` list; if list fails, try direct GET on `allapplications-sql`; retrieve `assessedSqlInstances` for any Finished assessment
+- Azure Migrate utilisation data extraction (from assessedSqlInstances; do NOT fall back to ARM-synced skuRecommendationResults when a Finished SQL assessment exists)
 - Azure Migrate dependency extraction: first attempt the direct Dependency Map API (list `Microsoft.DependencyMap/maps` via Template 7); when none exists, the CSV fallback ask_user MUST still fire — just use the pre-defined answer
 - Azure Migrate Security Insights ARG query (both severity summary and per-machine detail queries)
 - Enterprise downgrade DMV audit via Arc Run Command
@@ -58,11 +59,18 @@ After a successful run, the following should all be true:
 
 ### Phase 4: Data Acquisition
 - [ ] Consolidated ARG query returned: 3 instances, 15 databases, 7 machines, 1 Migrate project
-- [ ] Assessment data extracted for ArcBox-SQL (MI=NotReady, VM=Ready)
-- [ ] Assessment data extracted for ARCBOX-SQL2016 (MI=Ready, VM=Ready)
+- [ ] SQL assessment primary path attempted: `sqlAssessments?api-version=2024-03-03-preview` called on the ArcBoxMigrate assessment project
+- [ ] If list fails (Internal Server Error), direct GET tried on `allapplications-sql` (or similar well-known name)
+- [ ] Finished SQL assessment found and `assessedSqlInstances` retrieved (10 instances expected)
+- [ ] Per-instance utilisation extracted from `extendedDetails.percentageCoresUtilization` / `memoryInUseInMB`
+- [ ] Readiness mapped from `recommendations[].migrationSuitability.readiness` (ConditionallySuitable → "Conditionally ready", NOT "Not Ready")
+- [ ] Arc machine correlation via `linkages[kind=Machine].workloadName`
+- [ ] ARM-synced `skuRecommendationResults` used only as fallback (not primary source when SQL assessment is Finished)
+- [ ] Assessment data extracted for ArcBox-SQL (MI=ConditionallySuitable/Conditionally ready, VM=Suitable/Ready)
+- [ ] Assessment data extracted for ARCBOX-SQL2016 (MI=Ready or ConditionallySuitable, VM=Ready)
 - [ ] ArcBox-SQL_SSIS_2022 noted as assessment not enabled
 - [ ] Azure Migrate project ArcBoxMigrate selected
-- [ ] Utilisation data retrieved (ArcBox-SQL: ~90% CPU, ~68% memory)
+- [ ] Utilisation data retrieved from SQL assessment (percentageCoresUtilization per instance — no false utilisation data gap)
 - [ ] Dependency Map API attempted first (no `Microsoft.DependencyMap/maps` resource found in scope)
 - [ ] Dependency CSV fallback prompt fired (ask_user triggered asking about CSV export)
 - [ ] Dependency noted as not enabled / no CSV provided
