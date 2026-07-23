@@ -70,7 +70,8 @@ docs/
   data-transparency.md              ← Data collection transparency
   example-prompts.md                 ← Example usage prompts
   testing/
-    Test-SecurityExposure.ps1        ← Runnable tests for the security-exposure helpers
+    Test-SecurityExposure.ps1        ← Runnable unit tests for the security-exposure helpers
+    Test-SecurityExposure.Live.ps1   ← Network-gated live MSRC/NVD provider validation
 README.md                            ← This file
 ```
 

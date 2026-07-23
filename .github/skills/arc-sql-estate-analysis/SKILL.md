@@ -597,9 +597,9 @@ SqlAssessment_CL
 
     e. **Provider and secret handling:** external lookups go through the provider abstraction
       (`MsrcSecurityUpdateProvider`, `NvdCveProvider`, `OptionalLocalCacheProvider`). API keys
-      come from environment variables or local config only (`MSRC_API_KEY`, `NVD_API_KEY`) —
-      never commit secrets. Apply throttling, retry with backoff, local caching, and offline
-      reuse.
+      come from environment variables or local config only (`NVD_API_KEY`; MSRC CVRF needs no
+      key) — never commit secrets. Apply throttling, retry with backoff, local caching, and
+      offline reuse.
 
     f. **Build `MachineSecurityExposure` per Arc machine** — missing patch / security / critical
       counts, mapped/critical/high CVE counts, max CVSS, oldest missing-patch age, unmapped

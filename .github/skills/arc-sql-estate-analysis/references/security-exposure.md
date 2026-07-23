@@ -157,13 +157,35 @@ A provider abstraction wraps external lookups. Providers:
 Provider requirements:
 
 - API keys via environment variables or local config only — **never commit secrets**
-  (`MSRC_API_KEY`, `NVD_API_KEY`).
+  (`NVD_API_KEY`; MSRC CVRF needs no key).
 - Request throttling, retry with backoff, local caching, and an offline mode that reuses
   cached data.
 - External API failures are logged and represented in output status — they must **not**
   fail the whole estate assessment.
 - Every mapping/enrichment result carries provenance: `source`, `sourceUrl` (where
   available), `matchMethod`, `confidence`, and `status`.
+
+### Concrete endpoints (live-validated)
+
+These are implemented in `scripts/ArcSqlSecurityExposure.psm1` and validated end-to-end by
+`docs/testing/Test-SecurityExposure.Live.ps1` (network-gated):
+
+- **MSRC KB→CVE** — `Get-MsrcKbCveMapping -KbId <kb> -PublishedDate <date>`. MSRC CVRF
+  documents are monthly; the document id is derived from the patch's published date
+  (`Get-MsrcDocumentId` → e.g. `2023-Oct`) and fetched from
+  `https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/{id}`. A KB is matched against each
+  vulnerability's `Remediations[].Description.Value`; every matching vulnerability's `CVE`
+  becomes a High-confidence `CveMapping` (`matchMethod = KbToCveMicrosoft`). Verified live:
+  `KB5031364` (2023-Oct) → 79 CVEs.
+- **NVD enrichment** — `Get-NvdCveEnrichment -CveId <cve>` against
+  `https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=<cve>`; reads CVSS v3.1/3.0/v2 in
+  preference order plus CWE, dates, references, exploitability/impact scores. Honours
+  `NVD_API_KEY` (higher rate limit) and an `-Offline` cache-replay mode. Verified live:
+  `CVE-2023-35349` → CVSS 9.8 CRITICAL.
+- **Local cache / offline** — `Invoke-VulnApiRequest` writes each response to
+  `cveEnrichment.cachePath` and serves it on subsequent calls; `-Offline` replays cache only
+  and reports `OfflineCacheMiss` (never throws) when absent. Network failures return
+  `status = Error` so one provider outage cannot fail the estate assessment.
 
 ---
 
