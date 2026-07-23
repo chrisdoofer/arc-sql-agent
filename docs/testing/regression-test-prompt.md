@@ -22,9 +22,9 @@ For this test run, use the following pre-defined answers for all interactive pro
 - Software Assurance: Yes
 - Standard SA-covered cores: 0
 - Enterprise SA-covered cores: 2
-- Azure Migrate project selection: Select the first project found (ArcBoxMigrate expected)
+- Azure Migrate project selection: OPTIONAL enrichment (off by default). For this regression run, enable it and select the first project found (ArcBoxMigrate expected) to exercise the optional utilisation/dependency path
 - Dependency data: No `Microsoft.DependencyMap` resource exists in scope, so the agent falls back to the portal CSV path. I do not have a CSV to provide (but confirm the fallback prompt WAS triggered)
-- Security Insights: Query `machinesinventoryinsightsresources` for the ArcBoxMigrate project scope. If the table returns zero rows or the resource types are not found (preview surface may not be populated), document as a data gap — do NOT fail the analysis.
+- Security exposure (core, no Azure Migrate required): Query Azure Update Manager assessment data via Resource Graph `patchassessmentresources` (Templates 12–14). Extract missing patches and KBs, map KBs to CVEs via MSRC, enrich via NVD. If the table returns zero rows (Update Manager assessment not enabled), document as a Patch Assessment Coverage gap — do NOT fail the analysis. Assessment-only: do NOT install patches or create maintenance configurations.
 - BPA alignment scan: Yes — run alignment scan
 - All Arc Run Command script approvals: Approve for all listed machines
 - Tier 3 BPA scan (if offered): Yes — run full scan via Arc Run Command
@@ -37,11 +37,12 @@ IMPORTANT: Even though answers are pre-defined, you MUST still execute every pha
 - Azure Migrate SQL assessment primary path: attempt `sqlAssessments?api-version=2024-03-03-preview` list; if list fails, try direct GET on `allapplications-sql`; retrieve `assessedSqlInstances` for any Finished assessment
 - Azure Migrate utilisation data extraction (from assessedSqlInstances; do NOT fall back to ARM-synced skuRecommendationResults when a Finished SQL assessment exists)
 - Azure Migrate dependency extraction: first attempt the direct Dependency Map API (list `Microsoft.DependencyMap/maps` via Template 7); when none exists, the CSV fallback ask_user MUST still fire — just use the pre-defined answer
-- Azure Migrate Security Insights ARG query (both severity summary and per-machine detail queries)
+- Security exposure (core): Azure Update Manager assessment ARG queries (`patchassessmentresources` summary + missing software patches, Templates 12–14), KB extraction, MSRC KB→CVE mapping, NVD enrichment. Assessment-only — no patch installation, no maintenance configuration
+- Azure Migrate Security Insights ARG query is OPTIONAL enrichment only (run here because Migrate is enabled for this regression); it must never be required for the security section
 - Enterprise downgrade DMV audit via Arc Run Command
 - Enterprise downgrade runtime validation via Arc Run Command
 - BPA alignment scan (Tier 1 + Tier 2 + Tier 3 if needed)
-- Full analysis output with all sections (including Security posture when data or data-gap note is present)
+- Full analysis output with all sections (including Security exposure — patch assessment and CVE mapping, always present; report the coverage gap if no assessment data)
 - HTML export with validation
 ```
 
@@ -74,8 +75,13 @@ After a successful run, the following should all be true:
 - [ ] Dependency Map API attempted first (no `Microsoft.DependencyMap/maps` resource found in scope)
 - [ ] Dependency CSV fallback prompt fired (ask_user triggered asking about CSV export)
 - [ ] Dependency noted as not enabled / no CSV provided
-- [ ] Security Insights ARG queries executed (severity summary + per-machine detail) against ArcBoxMigrate project scope
-- [ ] Security posture section present in report — either with CVE data OR with explicit data-gap note referencing preview surface
+- [ ] Azure Update Manager assessment summary queried (`patchassessmentresources`, `type !has "softwarepatches"`, Template 12) — per-machine coverage
+- [ ] Azure Update Manager missing software patches queried (`patchassessmentresources`, `type has "softwarepatches"`, Template 13) — Windows + Linux
+- [ ] KB identifiers extracted from missing-patch titles/`kbId` (multiple KBs supported; no-KB records retained as Unmapped)
+- [ ] KBs mapped to CVEs via MSRC (primary); NVD used only to enrich identified CVEs
+- [ ] Assessment-only: NO patch installation, maintenance configuration, or update deployment attempted
+- [ ] Security exposure section present with five subsections (Patch Assessment Coverage, Missing Patch Exposure, CVE Exposure from Missing Patches, Migration Pressure Findings, Evidence and Limitations); if no assessment data, coverage gap reported
+- [ ] (Optional) Azure Migrate Security Insights ARG queries executed only because Migrate enrichment was enabled — not required for the section
 
 ### Phase 5: Enterprise Downgrade Audit
 - [ ] DMV audit executed on ArcBox-SQL (slot estate-audit-ArcBox-SQL-01)

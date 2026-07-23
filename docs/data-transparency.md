@@ -23,6 +23,8 @@ This document provides full transparency on the data collected, accessed, and re
 | `microsoft.azurearcdata/sqlserverinstances` | name, resourceGroup, subscriptionId, location, version, edition, vCore, cores, licenseType, status, currentVersion, patchLevel, instanceName, serviceType, isHadrEnabled, alwaysOnRole, backupPolicy, azureDefenderStatus, monitoring, migration.assessment | Instance inventory, version/edition analysis, security posture, migration readiness |
 | `microsoft.azurearcdata/sqlserverinstances/databases` | name, sizeMB, recoveryMode, state, isReadOnly, isEncrypted, compatibilityLevel, collationName, backupInformation, databaseOptions, databaseCreationDate | Database inventory, backup compliance, encryption status |
 | `microsoft.hybridcompute/machines` | name, location, osName, osVersion, osSku, status, detectedProperties (cores, RAM, hypervisor, processor) | Host platform analysis, sizing assessment |
+| `patchassessmentresources` (Azure Update Manager, summary — `type !has "softwarepatches"`) | machineResourceId, osType, assessmentState, lastModifiedDateTime, availablePatchCountByClassification (security, critical, other) | Patch assessment coverage; missing security/critical patch counts per machine (assessment-only) |
+| `patchassessmentresources` (Azure Update Manager, missing patches — `type has "softwarepatches"`) | patchName, kbId, classifications, osType, version, rebootBehavior, lastModifiedDateTime | Missing-patch detail, KB extraction for CVE mapping (assessment-only; read-only) |
 
 > **Migration assessment note:** If ARM summary fields such as `skuRecommendationResults` or `serverAssessments` are populated, that assessment evidence should be used even when `assessmentUploadTime = null`; the missing timestamp is a freshness caveat, not an extraction blocker. Only treat the result as **sync-pending** (not "no assessment") when `assessment.enabled = true` and the recommendation summary fields are still empty. In that case, users should check the Azure portal assessment blade or trigger **Run Assessment** to refresh sync.
 
@@ -43,6 +45,22 @@ This document provides full transparency on the data collected, accessed, and re
 | Data | Purpose |
 |------|---------|
 | Subscription ID, display name, state, tenant ID | Scope resolution and validation |
+
+### From external CVE intelligence sources (outbound HTTPS, read-only)
+
+| Source | Data sent | Data received | Purpose |
+|--------|-----------|---------------|---------|
+| Microsoft Security Update Guide / MSRC | KB / CVE identifiers only (no estate or customer data) | KB→CVE mappings | Primary KB→CVE mapping for missing patches |
+| NVD (CVE API 2.0) | CVE identifiers only | CVSS score/severity/vector, dates, CWE, references | CVE metadata enrichment |
+
+> Only KB and CVE identifiers are sent to external sources — never machine names, resource IDs,
+> or any customer/estate data. API keys (if configured) are read from environment variables or
+> local config and are never committed. External lookups can be cached and run in offline mode;
+> external failures are recorded in the report and do not fail the analysis.
+
+> **Security exposure is assessment-only.** The solution reads Azure Update Manager assessment
+> data (`patchassessmentresources`) but never installs patches, creates maintenance
+> configurations, or schedules update deployments.
 
 ---
 

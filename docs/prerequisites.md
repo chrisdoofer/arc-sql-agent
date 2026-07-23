@@ -46,6 +46,21 @@ If the operator has access to multiple tenants, the correct tenant **must** be s
 
 > **Note:** The Enterprise downgrade audit executes read-only DMV/metadata queries via Arc Run Command, including `sys.dm_db_persisted_sku_features` and runtime validation queries (Always On AG, Resource Governor, partitioning, and `ONLINE=ON` SQL Agent job checks). These queries have no side effects on the target SQL Server.
 
+### Additional permissions for security exposure (Azure Update Manager, assessment-only)
+
+| Scope | Role / Permission | Purpose |
+|-------|-------------------|---------|
+| Subscription(s) | `Microsoft.ResourceGraph/resources/read` | Read Azure Update Manager assessment data (`patchassessmentresources`) via Resource Graph |
+| Resource Group(s) with Arc machines | `Microsoft.HybridCompute/machines/patchAssessmentResults/read` | Read per-machine patch assessment results and missing software patches |
+| Resource Group(s) with Arc machines | `Microsoft.HybridCompute/machines/assessPatches/action` _(optional)_ | Trigger an on-demand **assessment** only (never installation) if fresh assessment data is required |
+
+> **Assessment-only:** the security-exposure feature reads missing-patch assessment data and
+> never installs patches, creates maintenance configurations, or schedules update deployments.
+> No `installPatches` / maintenance-configuration write permissions are required or used. To
+> populate assessment data, enable Azure Update Manager **periodic assessment** on the Arc
+> machines (assessment-only); assessment records are retained in Resource Graph for ~7 days.
+> External CVE lookups (MSRC / NVD) are outbound HTTPS calls that use no Azure RBAC.
+
 ### Recommended built-in roles
 
 | Scenario | Recommended Role | Scope |

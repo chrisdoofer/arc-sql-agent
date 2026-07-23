@@ -35,12 +35,12 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 2. The initial prompt must also supply these required decisions explicitly:
    - tenant identifier (tenant ID or tenant DNS name)
    - subscription scope
-   - Azure Migrate project decision
    - Software Assurance declaration (`Yes`, `No`, or `Unsure`); if `Yes`, include both Standard and Enterprise SA-covered core counts to keep the run fully unattended
    - SQL on Azure VM best-practices alignment scan decision (`Yes` or `No`)
    - export format decision (`HTML`, `PDF`, or no export) and output destination if not using the current working directory defaults
 
 3. The initial prompt should also pre-answer any other interactive gate it wants to suppress, including:
+   - the optional Azure Migrate enrichment decision (default: not used — `azureMigrate.enabled = false`); Azure Migrate is optional enrichment only and is never required for the core security-exposure path
    - whether to run the Tier 3 full Arc Run Command alignment scan if Tier 1 / Tier 2 evidence is incomplete
    - the dependency-data path decision (direct Dependency Map API only, classic portal CSV fallback, or continue without dependency data if unavailable)
 
@@ -553,76 +553,78 @@ SqlAssessment_CL
      - Informational = context-only findings
    - if the scan is skipped or unavailable, still include the report section and mark it as `Not assessed`
 
-10. Azure Migrate Security Insights — vulnerability exposure (conditional, when an Azure Migrate project is in scope):
+10. Security exposure — patch assessment and CVE mapping (core path, no Azure Migrate required):
 
-    a. **When to run:** execute this step whenever an Azure Migrate project was selected in Phase 1, regardless of whether utilisation or dependency data was successfully retrieved.
+    This is a **core** step. It runs for every live-scope analysis and does **not** depend on
+    Azure Migrate. It is **assessment-only** — it never installs patches, creates maintenance
+    configurations, or schedules update deployments (see the Assessment-only guardrail). The
+    full design, data models, provider abstraction, confidence rules, and configuration are in
+    `references/security-exposure.md`.
 
-    b. **Query vulnerability records from Azure Resource Graph:**
+    Pipeline: Arc-enabled servers → Azure Update Manager assessment data → Azure Resource Graph
+    (`patchassessmentresources`) → missing-patch extraction → KB extraction → MSRC KB→CVE
+    mapping → NVD enrichment → report-ready and dashboard-ready outputs.
 
-       Run the following two ARG queries using `az graph query` scoped to the subscription(s) containing the Azure Migrate project:
+    a. **Collect patch assessment data from Azure Resource Graph** (see `references/command-templates.md` Templates 12–14):
+      - Template 12 — per-machine assessment summary (`type !has "softwarepatches"`): build a
+        `PatchAssessmentSummary` per machine (available/critical/security counts by
+        classification, `osType`, `lastModifiedDateTime`, assessment state).
+      - Template 13 — individual missing software patches (`type has "softwarepatches"`): build
+        a `MissingPatch` per row. Support **both Windows and Linux**; do NOT assume every row
+        has a `kbId`.
+      - Template 14 — missing security/critical patches only, for top-machines-by-patch-debt.
+      - Assessment data is retained in Resource Graph for ~7 days. If the table returns zero
+        rows for the scope, treat this as "no assessment data / Azure Update Manager not
+        enabled" and surface it in Patch Assessment Coverage and Data gaps — do NOT fail.
 
-       **Query A — Severity summary (executive headline):**
-       ```kql
-       machinesinventoryinsightsresources
-       | where type in~ (
-           "Microsoft.OffAzure/vmwareSites/machines/inventoryInsights/vulnerabilities",
-           "Microsoft.OffAzure/hypervSites/machines/inventoryInsights/vulnerabilities",
-           "Microsoft.OffAzure/serverSites/machines/inventoryInsights/vulnerabilities"
-       )
-       | extend
-           cve = tostring(properties.cve),
-           severity = tostring(properties.baseSeverity),
-           cvss = todouble(properties.baseScore)
-       | summarize
-           vulnerabilityCount = count(),
-           distinctCves = dcount(cve),
-           maxCvss = max(cvss)
-           by severity
-       | order by maxCvss desc
-       ```
+    b. **Extract KB identifiers** from each missing update's `patchName`, `kbId`, and `patchId`
+      using a case-insensitive `KB\d{4,}` match that captures **multiple** KBs per title
+      (`Get-KbIdFromText` in `references/scripts/ArcSqlSecurityExposure.psm1`). If no KB is
+      found, keep the record and set CVE mapping status to `Unmapped` (never `Failed`). Linux
+      package updates without a KB remain visible as patch debt.
 
-       **Query B — Per-machine vulnerability detail (top 20 by CVSS score):**
-       ```kql
-       machinesinventoryinsightsresources
-       | where type in~ (
-           "Microsoft.OffAzure/vmwareSites/machines/inventoryInsights/vulnerabilities",
-           "Microsoft.OffAzure/hypervSites/machines/inventoryInsights/vulnerabilities",
-           "Microsoft.OffAzure/serverSites/machines/inventoryInsights/vulnerabilities"
-       )
-       | extend
-           machineResourceId = tostring(split(id, "/inventoryInsights/")[0]),
-           cve = tostring(properties.cve),
-           cvss = todouble(properties.baseScore),
-           severity = tostring(properties.baseSeverity),
-           publishedOn = tostring(properties.publishedOn),
-           scope = tostring(properties.vulnerabilityScopeId)
-       | project machineResourceId, cve, cvss, severity, publishedOn, scope
-       | order by cvss desc
-       | limit 20
-       ```
+    c. **Map KBs to CVEs** using Microsoft Security Update Guide / MSRC data as the **primary**
+      mapping source (KB/update-driven). Do NOT use NVD as the first mapping lookup. Record a
+      `CveMapping` per KB→CVE with `source`, `sourceUrl`, `matchMethod`, `confidence`, and
+      `mappingStatus`. Confidence: High = direct MSRC KB→CVE; Medium = trusted advisory with
+      explicit KB; Low = title/product/version match only; None = no mapping.
 
-    c. **Handle empty results gracefully:**
-       - if either query returns zero rows (no appliance, no discoveries, or table not populated), do NOT treat this as an error
-       - record that Security Insights data is unavailable for this scope
-       - surface in "Data gaps / follow-up questions": "Azure Migrate Security Insights data not found for the selected project scope. Ensure the Azure Migrate appliance is deployed and discovery has been completed, or that the appliance version supports Security Insights (preview feature)."
-       - **important caveat:** the `machinesinventoryinsightsresources` ARG table and `inventoryInsights/vulnerabilities` resource types are a **preview/undocumented surface** — if the ARG query fails with a schema or resource-type error, treat this as the feature not being available in the current environment and record as a data gap rather than failing the analysis
+    d. **Enrich mapped CVEs from NVD** (CVE API 2.0) — CVSS base score/severity/vector,
+      published/modified dates, CWE, references, exploitability/impact scores. NVD is used only
+      to enrich already-identified CVEs, never to infer mappings. Record a `CveEnrichment` per
+      CVE. External API failures are logged and reflected in output status — they must NOT fail
+      the estate assessment (use cached/offline data where available).
 
-    d. **Correlate machines to the Arc-enabled SQL estate:**
-       - parse the `machineResourceId` field (prefix of the vulnerability record `id` before `/inventoryInsights/`) to extract the discovered machine resource ID
-       - match discovered machine resource IDs or names (case-insensitive, strip domain suffix) to the Arc-enabled SQL machines collected in Phase 4
-       - for correlated machines, record total vulnerability count, Critical/High count, and top CVSS score alongside the machine record
-       - for machines that cannot be correlated (discovery machine names differ from Arc machine names), surface in "Data gaps / follow-up questions" with the unmatched names for manual reconciliation
+    e. **Provider and secret handling:** external lookups go through the provider abstraction
+      (`MsrcSecurityUpdateProvider`, `NvdCveProvider`, `OptionalLocalCacheProvider`). API keys
+      come from environment variables or local config only (`MSRC_API_KEY`, `NVD_API_KEY`) —
+      never commit secrets. Apply throttling, retry with backoff, local caching, and offline
+      reuse.
 
-    e. **Store Security Insights results for use in Phase 6:**
-       - severity distribution: count per severity band (Critical, High, Medium, Low), total distinct CVEs, overall max CVSS
-       - top CVEs: list of CVE IDs with CVSS score, severity, publication date, and software scope (from Query B output)
-       - per-machine summary: for each correlated machine — total vulnerability count, Critical count, High count, max CVSS
-       - data provenance note (preview ARG surface, not a committed public API)
+    f. **Build `MachineSecurityExposure` per Arc machine** — missing patch / security / critical
+      counts, mapped/critical/high CVE counts, max CVSS, oldest missing-patch age, unmapped
+      security patch count, evidence confidence, and a labelled risk narrative. **Score patch
+      evidence separately from CVE evidence:** a machine with many missing security patches but
+      zero mapped CVEs is patch-debt-risky but must NOT be described as having confirmed CVE
+      exposure.
 
-    f. **If no Azure Migrate project was selected in Phase 1:**
-       - skip this step entirely
-       - do not add a Security posture section to the report; omit the section rather than producing empty placeholders
-       - if the user asks about vulnerability data, refer them to deploying an Azure Migrate appliance
+    g. **Headline rule:** executive summary and dashboard headline metrics use only **High** and
+      **Medium** confidence mappings by default. **Low** mappings are retained in detail /
+      appendix only and must not inflate headline numbers unless
+      `cveEnrichment.allowLowConfidenceMatches = true`.
+
+    h. **Optional Azure Migrate enrichment (off by default):** only when
+      `azureMigrate.enabled = true` **and** an Azure Migrate project is in scope, additionally
+      query Azure Migrate Security Insights as a supplementary source and merge its findings,
+      clearly attributed. This is a preview/undocumented ARG surface
+      (`machinesinventoryinsightsresources`, `inventoryInsights/vulnerabilities`) and is never
+      required. If it is disabled, absent, empty, or errors, continue with the Update Manager
+      path only.
+
+    i. **Store results for Phase 6** — the five report sections (Patch Assessment Coverage,
+      Missing Patch Exposure, CVE Exposure from Missing Patches, Migration Pressure Findings,
+      Evidence and Limitations) plus the dashboard-friendly outputs (machine patch exposure,
+      missing patch detail, patch-to-CVE mappings, CVE enrichment, executive summary metrics).
 
 
 ## Phase 5 - Enterprise downgrade audit
@@ -1066,32 +1068,67 @@ SqlAssessment_CL
    - surface any unexpected dependencies in Risks and blockers (e.g. SQL instance connecting to external non-Azure endpoints, undocumented application connections)
    - flag SQL-to-SQL dependencies explicitly — these affect migration wave planning and downtime windows
 
-10. When Azure Migrate Security Insights data is available (collected in Phase 4 step 10):
+10. Security exposure — patch assessment and CVE mapping (core; built from Phase 4 step 10):
 
-    a. **Executive Summary headline:** include a one-line security posture headline, for example:
-       - "Security posture: {N} Critical and {N} High CVEs identified across the estate (max CVSS: {score}) — {N} machines with Critical exposure flagged for priority migration."
-       - only include this line when vulnerability data was retrieved; omit when no Security Insights data is available
+    Produce this section for every live-scope analysis. It is built from Azure Update Manager
+    assessment data (confirmed), MSRC KB→CVE mapping (mapped), and NVD enrichment (metadata).
+    Azure Migrate is not required. Follow the structure in `references/output-template.md` and
+    the confidence/labelling rules in `references/security-exposure.md`.
 
-    b. **Security posture — vulnerability exposure section:** produce this section using the template in `references/output-template.md`. Include:
-       - severity distribution summary (Critical / High / Medium / Low counts, distinct CVE count, max CVSS)
-       - top CVEs by CVSS score (table: CVE ID, CVSS, severity, age in days from publishedOn, affected software scope)
-       - per-machine vulnerability summary (correlated Arc-enabled SQL machines only)
-       - patch/remediation guidance by affected component family, using authoritative Microsoft URLs where available (for example SQL Server builds, SQL Server end-of-support/ESU guidance, or Microsoft Security Update Guide)
-       - data provenance note: _"Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data."_
+    a. **Executive Summary headline** (use only High + Medium confidence mappings by default):
+       - with mapped CVEs: "Security exposure: {N} machines with missing security/critical
+         updates; {N} High/Medium-confidence CVEs mapped from missing patches (max CVSS:
+         {score})."
+       - patch debt without mappings: "Security exposure: {N} machines carry missing security
+         updates (patch debt); CVE mapping incomplete — see CVE Exposure section."
+       - no assessment data: "Security exposure: patch assessment data unavailable for {N}
+         machines — Azure Update Manager assessment not enabled (operational visibility gap)."
+
+    b. **Security section** — produce the five subsections from the template:
+       - **Patch Assessment Coverage** — total Arc machines in scope, machines with recent
+         assessment data, machines with none, last assessment timestamp per machine, and any
+         unsupported/unknown assessment states.
+       - **Missing Patch Exposure** — missing updates by machine, missing security updates by
+         machine, missing critical updates by machine, top machines by patch debt.
+       - **CVE Exposure from Missing Patches** — CVEs mapped from missing patches, critical
+         CVEs, high CVEs, max CVSS by machine, and unmapped security patches. Headline counts
+         use High + Medium only; Low-confidence matches go to the appendix and are excluded
+         unless `cveEnrichment.allowLowConfidenceMatches = true`.
+       - **Migration Pressure Findings** — customer-ready statements per machine, e.g.:
+         - "This server has missing security updates associated with known CVEs."
+         - "This server has patch assessment data but missing CVE mapping, indicating patch
+           debt without vulnerability enrichment."
+         - "This server has no recent patch assessment, which is an operational visibility gap."
+         - "This server has missing critical or security updates and should be prioritised for
+           remediation or migration planning."
+       - **Evidence and Limitations** — data source, query timestamp, assessment timestamp,
+         mapping source, confidence level, known limitations, unmapped records count, and any
+         external API failures.
 
     c. **Azure target recommendations — migration priority adjustment:**
-       - flag any Arc-enabled SQL machine with one or more Critical or High CVEs as **higher priority for migration or remediation** in the Azure target recommendations section
-       - append a migration priority note to affected machines, for example: "Priority: elevated — {N} Critical CVE(s) identified (max CVSS: {score}). Recommend accelerating migration or applying outstanding patches before migration window."
-       - machines with no CVE data or only Medium/Low CVEs should not have their priority artificially lowered
+       - flag machines with mapped Critical/High CVEs (High/Medium confidence) **or** with
+         missing critical/security patches (patch debt) as **higher priority for migration or
+         remediation**.
+       - separate the two justifications: cite confirmed CVE exposure only where a trusted
+         mapping exists; otherwise cite patch debt. Do not describe patch debt as confirmed CVE
+         exposure.
 
-    d. **Risks and blockers — unpatched vulnerabilities:**
-       - if any Critical CVEs are present in the estate, add a risk entry: "Unpatched critical vulnerabilities ({N} Critical CVE(s), max CVSS {score}) identified on machines in the migration scope. These increase exposure during any extended migration timeline and should be treated as a migration risk factor."
-       - if no Critical CVEs but High CVEs are present, add a lower-severity risk entry referencing the High CVE count
+    d. **Risks and blockers:**
+       - if High/Medium-confidence Critical CVEs are mapped, add: "Unpatched critical
+         vulnerabilities ({N} Critical CVE(s), max CVSS {score}) mapped from missing patches on
+         machines in scope — treat as a migration risk factor."
+       - if only patch debt is present (no mapped CVEs), add: "Significant patch debt ({N}
+         missing security/critical updates) on {N} machines — indicates unmanaged update posture
+         and operational risk."
+       - if assessment data is missing for machines, add an operational-visibility risk entry.
 
     e. **Confidence and evidence guardrail:**
-       - always disclose that the Security Insights data comes from a preview ARG surface
-       - do not claim definitive patch status — only report what the Security Insights data shows
-       - if correlation between discovered machines and Arc SQL machines was partial or failed, note the correlation coverage in the section and in "Data gaps / follow-up questions"
+       - distinguish confirmed facts (ARG / Update Manager) from mapped CVEs (MSRC / advisory),
+         from CVE metadata (NVD), from generated risk narratives.
+       - do not fabricate CVEs or infer them from product/version alone (Low confidence only,
+         excluded from headline by default).
+       - disclose any external API failures and unmapped-record counts in Evidence and
+         Limitations.
 
 11. Separate confirmed findings from assumptions, unknowns, or missing fields.
 
@@ -1251,7 +1288,7 @@ SqlAssessment_CL
    - validate that generated HTML is non-empty and contains required section headings before attempting conversion; if validation fails, report the HTML validation error instead of attempting PDF conversion
    - required headings for Part 1: `Executive Summary`, `Estate at a glance`, `Key risks and issues`, `Strategic migration and modernisation opportunities`, `Recommended Azure direction`
    - required headings for Part 2: `Estate summary`, `Key optimisation opportunities`, `Enterprise downgrade audit`, `SQL on Azure VM best practices alignment`, `Quick wins`, `Strategic moves`, `Azure target recommendations`, `Risks and blockers`, `Data gaps / follow-up questions`
-     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section; include `Security posture — vulnerability exposure` only when an Azure Migrate project was selected and Security Insights data was queried — omit the section entirely if no Azure Migrate project was in scope)
+     (include `SQL on Azure VM best practices alignment` even when the scan is skipped, and state `Not assessed` in that section; always include `Security exposure — patch assessment and CVE mapping` — it is a core section built from Azure Update Manager assessment data and does not depend on Azure Migrate. When Azure Update Manager assessment data is unavailable for the scope, still render the section and report the coverage gap in Patch Assessment Coverage rather than omitting it)
    - failure response format:
      - `PDF export status: Failed`
      - `Reason: {error_detail}`
@@ -1420,6 +1457,53 @@ SqlAssessment_CL
 
 - Do not claim that "Run Assessment" can be automated through a documented public API unless explicit public documentation is provided in the current session evidence.
 
+## Security exposure guardrails (assessment-only)
+
+The security-exposure feature (Phase 4 step 10 / Phase 6 step 10) is **assessment-only**. See
+`references/security-exposure.md` for the full design.
+
+- **Never install patches.** Do not install patches, create maintenance configurations for
+  patch installation, schedule update deployments, or call `installPatches` or any equivalent
+  update-installation API. Do not PUT/POST against `patchinstallationresources` or create a
+  `Microsoft.Maintenance/maintenanceConfigurations` resource for installation.
+- Use only read-only Azure Resource Graph queries against `patchassessmentresources` (Templates
+  12–14) and read-only external CVE lookups (MSRC, NVD).
+- **Fail-fast guardrail:** if this agent ever attempts to trigger patch installation, create a
+  patch deployment, or create a maintenance configuration for installation, it must fail fast
+  with this exact message: `Patch installation is disabled for this agent. Assessment-only mode is enforced.`
+  Route any such operation through `Assert-AssessmentOnly` in
+  `references/scripts/ArcSqlSecurityExposure.psm1`. Any pre-existing patch-deployment logic must
+  be preserved only if unrelated to this feature and must not be reachable from it.
+- **Azure Update Manager is the source of truth** for missing-patch data. Azure Migrate is
+  optional enrichment only (`azureMigrate.enabled = false` by default) and must never be
+  required for patch, CVE, vulnerability, or security-risk reporting.
+- **MSRC is the primary KB→CVE mapping source; NVD is enrichment only.** Do not use NVD as the
+  first lookup to map Microsoft KBs to CVEs. Do not fabricate CVEs or infer them from a product
+  name/version alone (Low confidence only, excluded from headline metrics by default).
+- **Separate patch evidence from CVE evidence.** Missing security patches without a mapped CVE
+  are patch debt, not confirmed CVE exposure. Only claim CVE exposure where a trusted mapping
+  exists.
+- **Headline metrics use only High + Medium confidence mappings** unless
+  `cveEnrichment.allowLowConfidenceMatches = true`. Keep unmapped security patches visible as
+  patch debt — never hide them.
+- **External API resilience:** MSRC/NVD failures are logged and reflected in the Evidence and
+  Limitations section; they must not fail the estate assessment. Never commit API keys — read
+  them from environment variables or local config only.
+
+### Security-exposure configuration (defaults)
+
+The feature is controlled by these settings (defaults shown; full detail in
+`references/security-exposure.md` §10):
+
+- `cveEnrichment.enabled = true`, `cveEnrichment.providers = [MsrcSecurityUpdateProvider,
+  NvdCveProvider, OptionalLocalCacheProvider]`, `cveEnrichment.cachePath`,
+  `cveEnrichment.allowLowConfidenceMatches = false`
+- `updateManager.assessmentOnly = true`, `updateManager.enablePeriodicAssessment = false`,
+  `updateManager.excludePatchInstallation = true`
+- `azureMigrate.enabled = false`, `azureMigrate.optionalOnly = true`
+
+The agent must work if Azure Migrate is not configured at all.
+
 ## Azure Migrate integration guardrails
 
 - Azure Migrate integration is additive — if no Azure Migrate project exists or the user skips project selection, the analysis continues without error using existing data sources. Do not treat the absence of Azure Migrate data as a blocker.
@@ -1492,7 +1576,7 @@ Standard no-URL note (use this exact wording when needed): `No authoritative Mic
 7. Key optimisation opportunities (detailed, with confidence levels)
 8. Enterprise downgrade audit (DMV + runtime validation detail, classification — Tier 1/2/3 formatting applies)
 9. SQL on Azure VM best practices alignment (when executed, or state Not assessed if skipped)
-10. Security posture — vulnerability exposure (when Azure Migrate project in scope; omit entirely otherwise)
+10. Security exposure — patch assessment and CVE mapping (core; always included). Built from Azure Update Manager assessment data (via Resource Graph `patchassessmentresources`), MSRC KB→CVE mapping, and NVD enrichment. Five subsections: Patch Assessment Coverage, Missing Patch Exposure, CVE Exposure from Missing Patches, Migration Pressure Findings, Evidence and Limitations. Azure Migrate is optional enrichment only.
 11. Quick wins
 12. Strategic moves
 13. Azure target recommendations (per-instance SKU, sequencing, TCO — Tier 1/2/3 formatting applies)

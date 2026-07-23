@@ -32,6 +32,7 @@ cd arc-sql-estate-analysis
 | [Prerequisites](docs/prerequisites.md) | Required software, RBAC permissions, Arc requirements |
 | [Workflow Flowchart](docs/workflow-flowchart.md) | Step-by-step execution flow with decision points |
 | [Data Transparency](docs/data-transparency.md) | Exactly what data is collected, where it goes, and what is NOT accessed |
+| [Security exposure pipeline](.github/skills/arc-sql-estate-analysis/references/security-exposure.md) | Azure Update Manager + external CVE intelligence design (assessment-only) |
 | [Example Prompts](docs/example-prompts.md) | Sample prompts for different analysis scenarios |
 
 ## Key Technologies
@@ -39,9 +40,11 @@ cd arc-sql-estate-analysis
 | Technology | Role |
 |-----------|------|
 | GitHub Copilot CLI | Agent runtime and orchestration |
-| Azure Resource Graph | Primary data source for inventory queries |
+| Azure Resource Graph | Primary data source for inventory queries and Azure Update Manager patch-assessment data |
 | Azure CLI | Fallback query execution and scope validation |
 | Arc Run Command | Remote T-SQL execution for Enterprise downgrade audit |
+| Azure Update Manager | Assessment-only source of missing-patch data (via Resource Graph); core of the security-exposure path |
+| Microsoft Security Update Guide (MSRC) + NVD | External CVE intelligence — KB→CVE mapping and CVE metadata enrichment |
 | Azure Arc-enabled SQL Server | Source estate being analysed |
 
 ## Repository Structure
@@ -57,13 +60,17 @@ cd arc-sql-estate-analysis
         output-template.md           ← Canonical report structure
         branded-report-template.md   ← Branded self-contained HTML template for PDF export
         command-templates.md         ← PowerShell command templates for Arc Run Command execution
+        security-exposure.md         ← Azure Update Manager + external CVE intelligence design (assessment-only)
+        scripts/
+          ArcSqlSecurityExposure.psm1 ← Deterministic helpers (KB extraction, confidence, assessment-only guardrail)
 docs/
   architecture.md                    ← Solution architecture
   prerequisites.md                   ← Setup and RBAC requirements
   workflow-flowchart.md              ← Execution flowchart
   data-transparency.md              ← Data collection transparency
   example-prompts.md                 ← Example usage prompts
-  test-prompts.md                    ← Test scenarios
+  testing/
+    Test-SecurityExposure.ps1        ← Runnable tests for the security-exposure helpers
 README.md                            ← This file
 ```
 

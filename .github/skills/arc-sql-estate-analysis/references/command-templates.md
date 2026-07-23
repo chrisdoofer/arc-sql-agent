@@ -582,6 +582,68 @@ az rest --method GET --url "https://management.azure.com/subscriptions/{subscrip
 
 ---
 
+## Azure Update Manager — security exposure query templates (assessment-only)
+
+These templates back the **core security-exposure path** (see `security-exposure.md`). They
+read Azure Update Manager assessment data from Azure Resource Graph. They are **read-only /
+assessment-only** — they never install patches, create maintenance configurations, or query
+installation records for the purpose of triggering installs. Do **not** adapt these into
+`patchinstallationresources` writes or `maintenanceresources` installation calls.
+
+> **Prerequisite:** the Arc-enabled machines must have Azure Update Manager **periodic
+> assessment** enabled (assessment-only; no patch installation). Assessment data is retained
+> in Resource Graph for ~7 days. Machines with no assessment record are reported as an
+> operational visibility gap, not silently dropped.
+
+### 12. Update Manager — per-machine assessment summary
+
+**Purpose:** Retrieve one assessment summary row per machine (available patch counts by
+classification, OS type, last assessment time). Populates `PatchAssessmentSummary`.
+
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az graph query -q "patchassessmentresources | where type !has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend byClass = prop.availablePatchCountByClassification | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = name, osType = tostring(prop.osType), assessmentState = tostring(prop.assessmentState), assessmentTime = tostring(prop.lastModifiedDateTime), securityCount = toint(byClass.security), criticalCount = toint(byClass.critical), otherCount = toint(byClass.other), subscriptionId, resourceGroup, tenantId" --subscriptions {subscriptionIds} --first 1000 -o json
+```
+
+- Works for **both Windows and Linux** Arc machines (the `!has 'softwarepatches'` filter
+  keeps only summary records).
+- If the table returns zero rows, treat as "no assessment data for scope" (a data gap / AUM
+  not enabled), not an error.
+- Parse each row with `ConvertFrom-AumSummary` (see `scripts/ArcSqlSecurityExposure.psm1`).
+
+### 13. Update Manager — individual missing software patches (Windows + Linux)
+
+**Purpose:** Retrieve one row per missing update. Populates `MissingPatch`. Do **not** assume
+every row has a `kbId` (Linux packages and some Windows updates have none).
+
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az graph query -q "patchassessmentresources | where type has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = tostring(split(id, '/', 8)[0]), patchId = name, patchName = tostring(prop.patchName), kbId = tostring(prop.kbId), classification = tostring(prop.classifications), osType = tostring(prop.osType), packageVersion = tostring(prop.version), rebootBehavior = tostring(prop.rebootBehavior), assessmentTime = tostring(prop.lastModifiedDateTime), subscriptionId, resourceGroup, tenantId, properties" --subscriptions {subscriptionIds} --first 1000 -o json
+```
+
+- **KB extraction:** apply `Get-KbIdFromText` to `patchName`, `kbId`, and `patchId`; a title
+  may contain multiple KBs. Records with no KB are retained and marked `Unmapped`.
+- **Pagination:** for large estates check the response for a `skip_token` and re-issue with
+  `--skip-token {skipToken}` until absent (same pattern as Template 5).
+- Parse each row with `ConvertFrom-AumSoftwarePatch`.
+
+### 14. Update Manager — missing security/critical patches only (headline scope)
+
+**Purpose:** Narrow Template 13 to the security-relevant classifications for headline patch
+debt metrics and top-machines-by-patch-debt.
+
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az graph query -q "patchassessmentresources | where type has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend classification = tostring(prop.classifications) | where classification in~ ('Security','Critical','Critical and Security Updates') | summarize missingSecurity = count() by machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]) | order by missingSecurity desc" --subscriptions {subscriptionIds} --first 1000 -o json
+```
+
+> **Guardrail:** none of Templates 12–14 may be modified to call `installPatches`, create a
+> `Microsoft.Maintenance/maintenanceConfigurations` resource, or PUT/POST against
+> `patchinstallationresources`. Route any such operation through `Assert-AssessmentOnly`,
+> which fails fast with: `Patch installation is disabled for this agent. Assessment-only mode is enforced.`
+
+---
+
 ## Usage Guidelines
 
 ### When to use each template:
@@ -597,6 +659,9 @@ az rest --method GET --url "https://management.azure.com/subscriptions/{subscrip
 9. **For single-machine dependency inspection:** Use Template 9 (Get Dependency View for a Focused Machine)
 10. **To discover SQL-specific assessments (primary utilisation path):** Use Template 10 (List/Get SQL Assessments) to find Finished `sqlAssessments` resources — try list first, fall back to direct GET on known names; always use `api-version=2024-03-03-preview`
 11. **To retrieve per-instance SQL data (primary utilisation path):** Use Template 11 (Get Assessed SQL Instances) to extract per-instance utilisation, readiness, SKU, cost, and Arc-machine linkage from a Finished SQL assessment; this supersedes ARM-synced `skuRecommendationResults`
+12. **For per-machine patch assessment coverage (core security path):** Use Template 12 (Update Manager assessment summary) to build `PatchAssessmentSummary` rows for every Arc machine — no Azure Migrate required
+13. **For missing-patch detail and KB extraction (core security path):** Use Template 13 (individual missing software patches) to build `MissingPatch` rows across Windows and Linux; extract KBs with `Get-KbIdFromText`
+14. **For headline patch-debt ranking:** Use Template 14 (missing security/critical patches only) to rank top machines by security patch debt for executive metrics
 
 ### Placeholder naming conventions:
 

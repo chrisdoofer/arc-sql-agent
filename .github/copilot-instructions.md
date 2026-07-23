@@ -26,7 +26,7 @@ docs/
 
 - Output must always follow the canonical two-part order defined in both `SKILL.md` and the output template:
   - **Part 1 — Executive Briefing:** Executive Summary → Estate at a glance → Key risks and issues → Strategic migration and modernisation opportunities → Recommended Azure direction
-  - **Part 2 — Technical Detail & Execution Guide:** Estate summary → Key optimisation opportunities → Enterprise downgrade audit → SQL on Azure VM best practices alignment → Security posture — vulnerability exposure → Quick wins → Strategic moves → Azure target recommendations → Risks and blockers → Data gaps / follow-up questions → Appendix (Tier 2/3)
+  - **Part 2 — Technical Detail & Execution Guide:** Estate summary → Key optimisation opportunities → Enterprise downgrade audit → SQL on Azure VM best practices alignment → Security exposure — patch assessment and CVE mapping → Quick wins → Strategic moves → Azure target recommendations → Risks and blockers → Data gaps / follow-up questions → Appendix (Tier 2/3)
 - Part 1 is decision-maker-facing and stays summary-level with no per-instance or per-database raw tables. Part 2 contains the full technical detail and execution guidance. Both parts are derived from the same evidence set.
 - Findings must be evidence-based. Never claim savings, utilisation, or migration suitability without supporting source data. Missing data goes in the "Data gaps" section.
 - The agent uses `claude-sonnet-4.5` as its model (set in agent frontmatter).

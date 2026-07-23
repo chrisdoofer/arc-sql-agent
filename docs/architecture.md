@@ -53,6 +53,9 @@ It connects directly to an Azure tenant, queries live infrastructure data via Az
 | **Azure Resource Graph** | Primary data source for inventory (SQL instances, databases, machines). Queried via MCP tools and Azure CLI. |
 | **Azure CLI** | Fallback data source when MCP scope validation fails. Also used for Arc Run Command execution. |
 | **Arc Run Command** | Remote execution mechanism for running T-SQL diagnostic queries (`sys.dm_db_persisted_sku_features` plus runtime validation queries) on Arc-enabled SQL hosts. |
+| **Azure Update Manager** | Assessment-only source of missing-patch data, surfaced through Azure Resource Graph (`patchassessmentresources`). Core of the security-exposure path — no Azure Migrate required. |
+| **MSRC + NVD** | External CVE intelligence. MSRC (Security Update Guide) is the primary KB→CVE mapping source; NVD enriches identified CVEs with CVSS/metadata. |
+| **security-exposure.md + ArcSqlSecurityExposure.psm1** | Reference design and deterministic helpers (KB extraction, confidence rules, assessment-only guardrail). |
 
 ---
 
@@ -87,6 +90,11 @@ User prompt (tenant ID)
 │ Acquisition         │──▶ Databases (size, recovery, backup, state)
 │                     │──▶ Host machines (OS, cores, RAM, hypervisor)
 │                     │──▶ Migration assessments (MI/VM readiness)
+│                     │──▶ Security exposure (assessment-only):
+│                     │      Azure Update Manager patchassessmentresources (ARG)
+│                     │      → missing patches → KB extraction
+│                     │      → MSRC KB→CVE mapping → NVD enrichment
+│                     │    (Azure Migrate optional enrichment, off by default)
 └─────────┬───────────┘
           │
           ▼

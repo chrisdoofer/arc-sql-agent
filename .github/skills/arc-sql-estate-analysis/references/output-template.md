@@ -8,7 +8,7 @@
 > |---|---|---|
 > | Enterprise→Standard downgrade (per-instance GREEN/AMBER/RED, DMV + runtime detail) | **Enterprise downgrade audit** | Exec Summary & Strategic opps: headline counts only; Key optimisation: one line + confidence |
 > | BPA config fixes (max memory, Query Store, auto-close/shrink, backup compression, storage layout, Defender) | **SQL on Azure VM BPA alignment** + its remediation checklist | Quick wins: reference the checklist, do **not** re-list; Risks: do not re-list |
-> | Vulnerabilities / CVEs | **Security posture — vulnerability exposure** | Exec/At a glance/Key risks: one-line headline; Azure target & Risks: single pointer |
+> | Vulnerabilities / CVEs / patch debt | **Security exposure — patch assessment and CVE mapping** | Exec/At a glance/Key risks: one-line headline; Azure target & Risks: single pointer |
 > | Azure target readiness, SKU, cost | **Azure target recommendations** (+ Appendix D) | Recommended direction (Part 1): exec-level; Estate summary groupings: light readiness table only |
 > | Licensing / SA / AHB cores | **Licensing position** (in Estate summary) | Exec & Strategic: one-line; Key optimisation: AHB as a single opportunity |
 > | Sizing confidence & assessment coverage caveats | **Data gaps / follow-up questions** | Others: brief "(see Data gaps)" only |
@@ -39,7 +39,7 @@ _Headline counts only — no per-instance or per-database tables. Full distribut
 - Total host machines:
 - Editions: {N} Enterprise | {N} Standard | {N} Express | {N} Other
 - End-of-support / end-of-life exposure: {N} instances on EoS versions (SQL 2014 / 2016 / 2017)
-- Security posture headline: {N} Critical CVEs | {N} High CVEs | Max CVSS: {score} (or: No Security Insights data available)
+- Security posture headline: {N} machines with missing security/critical updates | {N} High/Medium-confidence CVEs mapped (Max CVSS: {score}) (or: patch assessment data unavailable — Azure Update Manager not enabled)
 - Downgrade candidates: {N} Enterprise → Standard (GREEN: {N} | AMBER: {N} | RED: {N}) _(if applicable)_
 
 
@@ -386,45 +386,77 @@ _Use this section for Tier 1 (≤10 instances). For Tier 2/3, move per-machine d
    Reference: {authoritative Microsoft URL for the cited check}
 
 
-## Security posture — vulnerability exposure
+## Security exposure — patch assessment and CVE mapping
 
-_This section is present only when an Azure Migrate project was selected and Security Insights data was queried. Omit entirely if no Azure Migrate project is in scope._
+_Core section — always present. Built from Azure Update Manager assessment data (surfaced via Azure Resource Graph `patchassessmentresources`), Microsoft Security Update Guide (MSRC) KB→CVE mapping, and NVD CVE enrichment. Azure Migrate is **not** required (optional enrichment only). When Azure Update Manager assessment data is unavailable for the scope, still render this section and report the gap under Patch Assessment Coverage._
 
-**Data provenance:** _Security vulnerability data sourced from Azure Migrate Security Insights via the `machinesinventoryinsightsresources` Azure Resource Graph table (`inventoryInsights/vulnerabilities` resource types). This is a preview/undocumented surface — treat findings as indicative and validate via the Azure Migrate portal. Microsoft has not published a committed API schema for this data._
+**Evidence labelling:** _Confirmed facts_ come from Azure Resource Graph / Azure Update Manager. _Mapped CVEs_ come from MSRC or a trusted advisory. _CVE metadata_ (CVSS etc.) comes from NVD. _Risk narratives_ are generated interpretations. Headline counts use **High + Medium** confidence mappings only unless low-confidence matches are explicitly enabled.
 
-### Severity distribution summary
+### Patch Assessment Coverage
 
-| Severity | Vulnerability records | Distinct CVEs | Max CVSS |
-|----------|-----------------------|---------------|----------|
-| Critical |                       |               |          |
-| High     |                       |               |          |
-| Medium   |                       |               |          |
-| Low      |                       |               |          |
-| **Total**|                       |               |          |
+| Metric | Value |
+|--------|-------|
+| Total Arc machines in scope | |
+| Machines with recent assessment data | |
+| Machines with no assessment data | |
+| Unsupported / unknown assessment states | |
 
-### Top CVEs by CVSS score
+| Machine | OS | Last assessment timestamp | Assessment state |
+|---------|----|---------------------------|------------------|
+|         |    |                           |                  |
 
-| CVE ID | CVSS | Severity | Age (days) | Affected software scope |
-|--------|------|----------|------------|-------------------------|
-|        |      |          |            |                         |
+### Missing Patch Exposure
 
-### Per-machine vulnerability summary (correlated Arc-enabled SQL machines)
+| Machine | Missing updates (total) | Missing security | Missing critical |
+|---------|-------------------------|------------------|------------------|
+|         |                         |                  |                  |
 
-| Machine | Total CVEs | Critical | High | Max CVSS | Migration priority impact |
-|---------|------------|----------|------|----------|---------------------------|
-|         |            |          |      |          |                           |
+_Top machines by patch debt (missing security + critical):_
 
-_Machines with Critical or High CVEs are flagged as elevated priority in Azure target recommendations._
-_Machines that could not be correlated to discovered Security Insights records are listed in Data gaps / follow-up questions._
+| Rank | Machine | Missing security + critical |
+|------|---------|-----------------------------|
+| 1    |         |                             |
 
-### Patch/remediation guidance by affected component family
+### CVE Exposure from Missing Patches
 
-| Component family | Recommended remediation | Reference |
-|------------------|-------------------------|-----------|
-| SQL Server engine / shared components | Apply the latest supported cumulative update or GDR for the affected major version before migration, or accelerate upgrade/migration if the version is out of support. | https://learn.microsoft.com/en-us/troubleshoot/sql/releases/sqlserver-builds |
-| SQL Server out-of-support versions | Move to a supported SQL Server version or Azure target; if immediate migration is not possible, evaluate Extended Security Updates as a time-bound mitigation. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview |
-| Extended Security Updates (ESU) | Use ESU only as an interim risk-reduction step while the migration or upgrade plan is executed. | https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates |
-| Other Microsoft component families (for example Windows Server or .NET) | Filter the Microsoft Security Update Guide by CVE and affected product family, then apply the relevant Microsoft patch guidance for that component. | https://msrc.microsoft.com/update-guide/ |
+_Headline metrics below use High + Medium confidence mappings only. Low-confidence (title/product/version) matches, if any, are listed in the Appendix and excluded from these counts by default._
+
+| Metric | Value |
+|--------|-------|
+| CVEs mapped from missing patches (High + Medium) | |
+| Critical CVEs | |
+| High CVEs | |
+| Unmapped security patches (patch debt, no CVE mapping) | |
+
+| Machine | Mapped CVEs | Critical | High | Max CVSS | Unmapped security patches |
+|---------|-------------|----------|------|----------|---------------------------|
+|         |             |          |      |          |                           |
+
+### Migration Pressure Findings
+
+_Customer-ready statements per machine (labelled as generated interpretation of the evidence above):_
+
+| Machine | Finding |
+|---------|---------|
+| | This server has missing security updates associated with known CVEs. |
+| | This server has patch assessment data but missing CVE mapping, indicating patch debt without vulnerability enrichment. |
+| | This server has no recent patch assessment, which is an operational visibility gap. |
+| | This server has missing critical or security updates and should be prioritised for remediation or migration planning. |
+
+### Evidence and Limitations
+
+| Item | Detail |
+|------|--------|
+| Data source | Azure Update Manager assessment data via Azure Resource Graph `patchassessmentresources` (assessment-only) |
+| Query timestamp | {when the ARG query was run} |
+| Assessment timestamp | {machine assessment `lastModifiedDateTime` range} |
+| Mapping source | Microsoft Security Update Guide / MSRC (primary); NVD (CVE metadata enrichment) |
+| Confidence level | Headline uses High + Medium; Low retained in Appendix only |
+| Unmapped records | {count of missing patches with no CVE mapping — kept visible as patch debt} |
+| External API failures | {MSRC / NVD failures, if any — did not fail the estate assessment} |
+| Known limitations | Not every missing update maps cleanly to a CVE; Linux package updates often have no KB; assessment data is retained in Resource Graph for ~7 days. |
+
+_Machines with mapped Critical/High CVEs (High/Medium confidence) or with missing critical/security patches are flagged as elevated priority in Azure target recommendations — CVE exposure and patch debt are cited separately._
 
 
 ## Quick wins
