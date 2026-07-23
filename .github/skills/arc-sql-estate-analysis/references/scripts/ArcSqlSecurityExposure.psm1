@@ -387,7 +387,13 @@ function Get-MsrcKbCveMapping {
 
     $doc = $r.data
     $results = @()
-    $prop = { param($obj, $name) if ($obj -and $obj.PSObject.Properties.Name -contains $name) { $obj.$name } else { $null } }
+    $prop = {
+        param($obj, $name)
+        if ($null -eq $obj) { return $null }
+        if ($obj -is [System.Collections.IDictionary]) { if ($obj.Contains($name)) { return $obj[$name] } else { return $null } }
+        $pi = $obj.PSObject.Properties[$name]
+        if ($pi) { return $pi.Value } else { return $null }
+    }
 
     foreach ($v in (& $prop $doc 'Vulnerability')) {
         $hit = $false
@@ -452,7 +458,13 @@ function Get-NvdCveEnrichment {
     $vuln = $r.data.vulnerabilities | Select-Object -First 1
     if (-not $vuln) { $enrich.enrichmentStatus = 'NotFound'; return $enrich }
     $cve = $vuln.cve
-    $prop = { param($obj, $name) if ($obj -and $obj.PSObject.Properties.Name -contains $name) { $obj.$name } else { $null } }
+    $prop = {
+        param($obj, $name)
+        if ($null -eq $obj) { return $null }
+        if ($obj -is [System.Collections.IDictionary]) { if ($obj.Contains($name)) { return $obj[$name] } else { return $null } }
+        $pi = $obj.PSObject.Properties[$name]
+        if ($pi) { return $pi.Value } else { return $null }
+    }
 
     $metrics = & $prop $cve 'metrics'
     $metric = $null
