@@ -72,7 +72,7 @@ Records where `type has "softwarepatches"`, e.g.
 `microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches`. Collect:
 
 - machine resource ID (prefix of `id` before `/patchAssessmentResults/`), machine name
-- subscription ID, resource group, tenant ID, OS type
+- subscription ID, resource group, tenant ID
 - assessment timestamp (`lastModifiedDateTime`)
 - update title / `patchName`, update identifier (`name`)
 - `kbId` if present (Windows), package `name`/`version` if present (Linux)
@@ -80,6 +80,12 @@ Records where `type has "softwarepatches"`, e.g.
 - reboot behaviour if available (`rebootBehavior` / `rebootRequired`)
 - severity hint if present
 - raw update `properties` JSON
+
+> **OS type note (verified live):** softwarepatches rows do **not** carry `osType` in their
+> properties (0/249 rows in a live estate). Resolve `osType` by joining each patch to its
+> machine's summary record on `machineResourceId` (the summary carries `osType`), or pass an
+> `OsTypeLookup` to `ConvertFrom-AumSoftwarePatch`. When neither is available the parser
+> infers OS: KB present → `Windows`, package version present → `Linux`, otherwise `Unknown`.
 
 Windows records usually carry `kbId`; Linux records usually carry package `version` and no
 KB. Never drop a record because it lacks a KB.

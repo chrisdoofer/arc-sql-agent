@@ -81,6 +81,9 @@ function ConvertFrom-AumSummary {
         $props.availablePatchCountByClassification
     } else { $null }
 
+    $machineResourceId = ($Record.id -split '/patchAssessmentResults/')[0]
+    $machineName = ($machineResourceId -split '/')[-1]
+
     $get = {
         param($obj, $name)
         if ($obj -and $obj.PSObject.Properties.Name -contains $name) { [int]$obj.$name } else { 0 }
@@ -93,8 +96,8 @@ function ConvertFrom-AumSummary {
     if ($null -eq $available) { $available = 0 }
 
     return [ordered]@{
-        machineResourceId   = ($Record.id -split '/patchAssessmentResults/')[0]
-        machineName         = $Record.name
+        machineResourceId   = $machineResourceId
+        machineName         = $machineName
         resourceType        = $Record.type
         subscriptionId      = $Record.subscriptionId
         resourceGroup       = $Record.resourceGroup
@@ -116,8 +119,16 @@ function ConvertFrom-AumSoftwarePatch {
     .SYNOPSIS
         Parse a softwarepatches record (type has "softwarepatches") into a MissingPatch
         hashtable. Never drops KB-less records.
+    .PARAMETER OsTypeLookup
+        Optional hashtable keyed by machineResourceId (case-insensitive) mapping to osType,
+        built from the summary pass (ConvertFrom-AumSummary). softwarepatches records do NOT
+        carry osType, so it is resolved here from the summary; if absent, it is inferred
+        (KB present -> Windows; package version present -> Linux; otherwise Unknown).
     #>
-    param([Parameter(Mandatory)] $Record)
+    param(
+        [Parameter(Mandatory)] $Record,
+        [hashtable] $OsTypeLookup
+    )
 
     $props = $Record.properties
     if ($props -is [string]) { $props = $props | ConvertFrom-Json }
@@ -127,19 +138,33 @@ function ConvertFrom-AumSoftwarePatch {
         if ($props -and $props.PSObject.Properties.Name -contains $name) { [string]$props.$name } else { $null }
     }
 
+    $machineResourceId = ($Record.id -split '/patchAssessmentResults/')[0]
     $patchName = & $field 'patchName'
     $kbFromProp = & $field 'kbId'
     $kbIds = Get-KbIdFromText $patchName $kbFromProp $Record.name
 
     $reboot = @((& $field 'rebootBehavior'), (& $field 'rebootRequired')) | Where-Object { $_ } | Select-Object -First 1
 
+    $packageVersion = & $field 'version'
+    $osType = & $field 'osType'
+    if (-not $osType -and $OsTypeLookup) {
+        foreach ($k in $OsTypeLookup.Keys) {
+            if ($k -and $k -ieq $machineResourceId) { $osType = $OsTypeLookup[$k]; break }
+        }
+    }
+    if (-not $osType) {
+        if ($kbIds.Count -gt 0)       { $osType = 'Windows' }
+        elseif ($packageVersion)      { $osType = 'Linux' }
+        else                          { $osType = 'Unknown' }
+    }
+
     return [ordered]@{
-        machineResourceId   = ($Record.id -split '/patchAssessmentResults/')[0]
+        machineResourceId   = $machineResourceId
         machineName         = ($Record.id -split '/')[8]
         subscriptionId      = $Record.subscriptionId
         resourceGroup       = $Record.resourceGroup
         tenantId            = $Record.tenantId
-        osType              = & $field 'osType'
+        osType              = $osType
         assessmentTime      = & $field 'lastModifiedDateTime'
         patchName           = $patchName
         patchId             = $Record.name
@@ -148,7 +173,7 @@ function ConvertFrom-AumSoftwarePatch {
         severityHint        = & $field 'severity'
         rebootRequiredHint  = $reboot
         packageName         = & $field 'name'
-        packageVersion      = & $field 'version'
+        packageVersion      = $packageVersion
         rawUpdateProperties = $props
         source              = 'AzureUpdateManagerResourceGraph'
     }

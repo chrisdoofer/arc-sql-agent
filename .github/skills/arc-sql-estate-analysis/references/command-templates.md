@@ -602,11 +602,13 @@ classification, OS type, last assessment time). Populates `PatchAssessmentSummar
 
 ```powershell
 $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
-az graph query -q "patchassessmentresources | where type !has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend byClass = prop.availablePatchCountByClassification | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = name, osType = tostring(prop.osType), assessmentState = tostring(prop.assessmentState), assessmentTime = tostring(prop.lastModifiedDateTime), securityCount = toint(byClass.security), criticalCount = toint(byClass.critical), otherCount = toint(byClass.other), subscriptionId, resourceGroup, tenantId" --subscriptions {subscriptionIds} --first 1000 -o json
+az graph query -q "patchassessmentresources | where type !has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend byClass = prop.availablePatchCountByClassification | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = tostring(split(id, '/', 8)[0]), osType = tostring(prop.osType), assessmentState = tostring(prop.assessmentState), assessmentTime = tostring(prop.lastModifiedDateTime), securityCount = toint(byClass.security), criticalCount = toint(byClass.critical), otherCount = toint(byClass.other), subscriptionId, resourceGroup, tenantId" --subscriptions {subscriptionIds} --first 1000 -o json
 ```
 
 - Works for **both Windows and Linux** Arc machines (the `!has 'softwarepatches'` filter
   keeps only summary records).
+- The record `name` is always `latest` (the id ends `/patchAssessmentResults/latest`), so the
+  machine name is taken from the id path (`split(id, '/', 8)[0]`), not from `name`.
 - If the table returns zero rows, treat as "no assessment data for scope" (a data gap / AUM
   not enabled), not an error.
 - Parse each row with `ConvertFrom-AumSummary` (see `scripts/ArcSqlSecurityExposure.psm1`).
@@ -618,9 +620,14 @@ every row has a `kbId` (Linux packages and some Windows updates have none).
 
 ```powershell
 $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
-az graph query -q "patchassessmentresources | where type has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = tostring(split(id, '/', 8)[0]), patchId = name, patchName = tostring(prop.patchName), kbId = tostring(prop.kbId), classification = tostring(prop.classifications), osType = tostring(prop.osType), packageVersion = tostring(prop.version), rebootBehavior = tostring(prop.rebootBehavior), assessmentTime = tostring(prop.lastModifiedDateTime), subscriptionId, resourceGroup, tenantId, properties" --subscriptions {subscriptionIds} --first 1000 -o json
+az graph query -q "patchassessmentresources | where type has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]) | join kind=leftouter (patchassessmentresources | where type !has 'softwarepatches' | extend sprop = parse_json(properties) | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), osType = tostring(sprop.osType)) on machineResourceId | project machineResourceId, machineName = tostring(split(id, '/', 8)[0]), patchId = name, patchName = tostring(prop.patchName), kbId = tostring(prop.kbId), classification = tostring(prop.classifications), osType, packageVersion = tostring(prop.version), rebootBehavior = tostring(prop.rebootBehavior), assessmentTime = tostring(prop.lastModifiedDateTime), subscriptionId, resourceGroup, tenantId, properties" --subscriptions {subscriptionIds} --first 1000 -o json
 ```
 
+- **OS type:** softwarepatches rows do **not** carry `osType` in their properties (verified
+  live: 0/249 rows). It is resolved by the `leftouter` join to the summary record above. When
+  parsing rows without the join, pass `ConvertFrom-AumSoftwarePatch -OsTypeLookup` (built from
+  the summary pass); the parser falls back to inference (KB present → Windows, package version
+  present → Linux, else `Unknown`).
 - **KB extraction:** apply `Get-KbIdFromText` to `patchName`, `kbId`, and `patchId`; a title
   may contain multiple KBs. Records with no KB are retained and marked `Unmapped`.
 - **Pagination:** for large estates check the response for a `skip_token` and re-issue with

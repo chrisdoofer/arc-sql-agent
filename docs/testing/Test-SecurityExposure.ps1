@@ -57,8 +57,8 @@ Assert-Equal 'duplicate KB across fields deduped' 'KB5031364' ($dup -join ',')
 Write-Host "`n== Assessment summary parsing (Windows Arc) ==" -ForegroundColor Cyan
 
 $summaryRecord = [pscustomobject]@{
-    id             = '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/SQL01/providers/microsoft.hybridcompute/machines/SQL01/patchAssessmentResults/latest'
-    name           = 'SQL01'
+    id             = '/subscriptions/s1/resourceGroups/rg1/providers/Microsoft.HybridCompute/machines/SQL01/patchAssessmentResults/latest'
+    name           = 'latest'
     type           = 'microsoft.hybridcompute/machines/patchassessmentresults'
     subscriptionId = 's1'
     resourceGroup  = 'rg1'
@@ -76,7 +76,8 @@ Assert-Equal 'summary securityPatchCount' 5 $summary.securityPatchCount
 Assert-Equal 'summary criticalPatchCount' 2 $summary.criticalPatchCount
 Assert-Equal 'summary availablePatchCount (sum of classifications)' 8 $summary.availablePatchCount
 Assert-Equal 'summary source label' 'AzureUpdateManagerResourceGraph' $summary.source
-Assert-Equal 'summary machineResourceId trims patchAssessmentResults' '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/SQL01/providers/microsoft.hybridcompute/machines/SQL01' $summary.machineResourceId
+Assert-Equal 'summary machineName from id path (not "latest")' 'SQL01' $summary.machineName
+Assert-Equal 'summary machineResourceId trims patchAssessmentResults' '/subscriptions/s1/resourceGroups/rg1/providers/Microsoft.HybridCompute/machines/SQL01' $summary.machineResourceId
 
 Write-Host "`n== Assessment summary parsing (properties as JSON string) ==" -ForegroundColor Cyan
 $summaryRecord2 = [pscustomobject]@{
@@ -111,6 +112,44 @@ $lp = ConvertFrom-AumSoftwarePatch $linuxPatch
 Assert-Equal 'linux patch has no KB' 0 $lp.kbIds.Count
 Assert-Equal 'linux patch retained (packageVersion present)' '3.0.2-0ubuntu1.10' $lp.packageVersion
 Assert-True  'linux security patch is unmapped candidate but retained' (($lp.kbIds.Count -eq 0) -and ($lp.classification -eq 'Security'))
+
+Write-Host "`n== osType derivation (softwarepatches rows carry no osType) ==" -ForegroundColor Cyan
+# Real AUM softwarepatches rows do NOT include osType in properties; it must be resolved
+# from the summary pass (OsTypeLookup) or inferred.
+$winNoOs = [pscustomobject]@{
+    id = '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/SQL01/patchAssessmentResults/latest/softwarePatches/1'
+    name = '1'; type = 'microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches'
+    subscriptionId='s1'; resourceGroup='rg1'; tenantId='t1'
+    properties = [pscustomobject]@{ patchName='Security Update for SQL Server 2022 (KB5102334)'; classifications='Security'; lastModifiedDateTime='2026-07-20T02:00:00Z' }
+}
+$lookup = @{ '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/SQL01' = 'Windows' }
+$mpLookup = ConvertFrom-AumSoftwarePatch $winNoOs -OsTypeLookup $lookup
+Assert-Equal 'osType resolved from summary lookup' 'Windows' $mpLookup.osType
+Assert-Equal 'KB still extracted without kbId prop' 'KB5102334' ($mpLookup.kbIds -join ',')
+
+# No lookup, KB present -> infer Windows.
+$mpInferWin = ConvertFrom-AumSoftwarePatch $winNoOs
+Assert-Equal 'osType inferred Windows when KB present' 'Windows' $mpInferWin.osType
+
+# No lookup, no KB, package version present -> infer Linux.
+$linNoOs = [pscustomobject]@{
+    id = '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/PG01/patchAssessmentResults/latest/softwarePatches/apport'
+    name = 'apport'; type = 'microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches'
+    subscriptionId='s1'; resourceGroup='rg1'; tenantId='t1'
+    properties = [pscustomobject]@{ patchName='apport'; version='2.20.11'; classifications='Other'; lastModifiedDateTime='2026-07-19T00:00:00Z' }
+}
+$mpInferLin = ConvertFrom-AumSoftwarePatch $linNoOs
+Assert-Equal 'osType inferred Linux when only version present' 'Linux' $mpInferLin.osType
+
+# No lookup, no KB, no version -> Unknown (not blank).
+$unkNoOs = [pscustomobject]@{
+    id = '/subscriptions/s1/resourceGroups/rg1/providers/microsoft.hybridcompute/machines/X01/patchAssessmentResults/latest/softwarePatches/z'
+    name = 'z'; type = 'microsoft.hybridcompute/machines/patchassessmentresults/softwarepatches'
+    subscriptionId='s1'; resourceGroup='rg1'; tenantId='t1'
+    properties = [pscustomobject]@{ patchName='mystery'; classifications='Other'; lastModifiedDateTime='2026-07-19T00:00:00Z' }
+}
+$mpUnk = ConvertFrom-AumSoftwarePatch $unkNoOs
+Assert-Equal 'osType Unknown when undeterminable' 'Unknown' $mpUnk.osType
 
 Write-Host "`n== Confidence classification ==" -ForegroundColor Cyan
 Assert-Equal 'direct MSRC KB->CVE = High' 'High'   (Get-CveMappingConfidence 'KbToCveMicrosoft')
