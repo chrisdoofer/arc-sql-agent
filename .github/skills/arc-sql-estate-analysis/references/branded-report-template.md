@@ -145,6 +145,14 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     .status-badge.fail { background: #d13438; }
     .status-badge.warning { background: #ffb900; color: #1f2937; }
     .status-badge.notassessed { background: #6b7280; }
+    .table-wrap { overflow-x: auto; margin: 10px 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    th, td { border: 1px solid var(--border); padding: 6px 9px; text-align: left; vertical-align: top; }
+    th { background: #f0f6fc; font-weight: 600; color: #0f2b46; }
+    tbody tr:nth-child(even) { background: #fafcfe; }
+    td.sev-critical { background: #fdecea; color: #a4262c; font-weight: 700; }
+    td.sev-high { background: #fff6e5; color: #8a6d00; font-weight: 700; }
+    @media print { section { page-break-inside: avoid; } .part-divider { page-break-before: always; } }
     footer {
       position: fixed;
       left: 0;
@@ -244,3 +252,8 @@ Status badge usage for SQL on Azure VM best-practices checks:
 - Fail: `<span class="status-badge fail">Fail</span>`
 - Warning: `<span class="status-badge warning">Warning</span>`
 - NotAssessed: `<span class="status-badge notassessed">NotAssessed</span>`
+
+Severity cell usage for table outputs:
+
+- In **Security exposure** and **Key risks and issues** tables, mark `CRITICAL` cells as `<td class="sev-critical">CRITICAL</td>`.
+- In **Security exposure** and **Key risks and issues** tables, mark `HIGH` cells as `<td class="sev-high">HIGH</td>`.
