@@ -263,7 +263,7 @@ resources
 
 **Data NOT in Resource Graph (requires separate justified API calls):**
 - Azure Migrate assessed machine utilisation metrics (CPU/memory baselines, confidence scores) — Migrate API
-- Dependency connection data — `Microsoft.DependencyMap` REST API (primary; graph datastore, not in Resource Graph) or classic agentless portal CSV export (fallback)
+- Application dependency data — Log Analytics workspace queries over VM Insights tables (`VMConnection`, `VMProcess`, `VMComputer`, `VMBoundPort`) when the customer has pre-enabled the prerequisite; optional Azure Migrate `Microsoft.DependencyMap` REST API enrichment; or classic Azure Migrate portal CSV export (fallback)
 
 **Post-query local processing:**
 1. Split rows by `type` field into four groups: instances, databases, machines, Migrate projects
@@ -328,9 +328,107 @@ These queries are executed directly via Azure CLI or GitHub Copilot MCP tools an
 
 ---
 
+## Azure Monitor VM Insights — dependency query path (preferred optional source)
+
+> **Consumer-managed prerequisite only:** the queries below assume the customer has already enabled
+> VM Insights dependency monitoring on the Arc-enabled SQL machines and allowed it to collect for
+> roughly **24 hours**. The analysis agent may query this data, but must **never** deploy the
+> workspace, AMA / Dependency Agent extensions, DCR, or DCR associations itself.
+
+**Detect-and-guide rule:** if the prerequisite check returns no `VMConnection` data in scope, print
+`references/templates/dependency-monitoring/README.md` plus the deployment/teardown templates and
+note that about **24 hours of collection** is required before dependency analysis is usable.
+
+### Workspace prerequisite / data-availability check
+
+**Purpose:** confirm that VM Insights dependency tables are populated before attempting dependency
+analysis. This is the primary dependency-data check in Phase 4 step 8.
+
+```kusto
+VMConnection
+| where TimeGenerated >= ago(7d)
+| summarize totalConnections = count(), firstSeen = min(TimeGenerated), lastSeen = max(TimeGenerated), sourceMachines = dcount(Computer), destinationMachines = dcount(RemoteIp)
+```
+
+**Azure CLI equivalent:**
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az monitor log-analytics query -w {workspaceId} --analytics-query "VMConnection | where TimeGenerated >= ago(7d) | summarize totalConnections = count(), firstSeen = min(TimeGenerated), lastSeen = max(TimeGenerated), sourceMachines = dcount(Computer), destinationMachines = dcount(RemoteIp)" -o json
+```
+
+**Expected output:** one row with connection counts and the effective collection window. If
+`totalConnections = 0` (or no row is returned), dependency monitoring is not ready in this scope.
+
+### SQL-focused dependency topology query
+
+**Purpose:** extract the SQL-relevant inbound/outbound dependency graph from VM Insights using the
+connection table, with optional process and machine context.
+
+```kusto
+let sqlHosts = dynamic([{sqlHostNames}]);
+let recentMachines = materialize(
+    VMComputer
+    | summarize arg_max(TimeGenerated, *) by _ResourceId
+    | project Computer, AzureResourceName, _ResourceId, Ipv4Addresses, DnsNames
+);
+VMConnection
+| where TimeGenerated >= ago(7d)
+| where Direction in ('inbound', 'outbound')
+| where Computer in~ (sqlHosts)
+   or DestinationPort in (1433, 1434, 4022)
+   or ProcessName contains_cs 'sql'
+| summarize Observations = count(), BytesSent = sum(BytesSent), BytesReceived = sum(BytesReceived), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by Computer, Direction, ProcessName, SourceIp, DestinationIp, DestinationPort, Protocol, RemoteIp
+| join kind=leftouter recentMachines on Computer
+| order by Observations desc
+```
+
+**Interpretation:** use this as the main dependency-map extraction query. The output identifies top
+SQL-relevant flows, inbound/outbound direction, active ports, and the observation window.
+
+### Supporting process inventory query
+
+**Purpose:** validate SQL-related executables and supporting services seen on the monitored hosts.
+
+```kusto
+let sqlHosts = dynamic([{sqlHostNames}]);
+VMProcess
+| where TimeGenerated >= ago(7d)
+| where Computer in~ (sqlHosts)
+| where ExecutableName has_cs 'sql' or CommandLine contains_cs 'sql' or CompanyName has_cs 'Microsoft'
+| summarize arg_max(TimeGenerated, *) by _ResourceId
+| project Computer, ExecutableName, DisplayName, CommandLine, CompanyName, StartTime
+| order by Computer asc, ExecutableName asc
+```
+
+### Supporting machine / bound-port query
+
+**Purpose:** confirm machine identity, DNS/IP evidence, and open listener ports for correlated SQL
+machines.
+
+```kusto
+let sqlHosts = dynamic([{sqlHostNames}]);
+let machines =
+    VMComputer
+    | summarize arg_max(TimeGenerated, *) by _ResourceId
+    | where Computer in~ (sqlHosts) or AzureResourceName in~ (sqlHosts)
+    | project Computer, AzureResourceName, OperatingSystemFullName, DnsNames, Ipv4Addresses;
+let ports =
+    VMBoundPort
+    | where TimeGenerated >= ago(7d)
+    | where Computer in~ (sqlHosts)
+    | where Ip != '127.0.0.1'
+    | summarize arg_max(TimeGenerated, LinksLive) by PortId
+    | project Computer, ProcessName, Port, Ip, Protocol, IsWildcardBind, LinksLive;
+machines
+| join kind=leftouter ports on Computer
+| order by Computer asc, Port asc
+```
+
+---
+
 ### 7. List Azure Migrate Dependency Map Resources
 
-**Purpose:** Discover `Microsoft.DependencyMap/maps` resources in scope and resolve the `{mapName}` required by the dependency view and export operations. Use this in Phase 4 before issuing a dependency view or export call.
+**Purpose:** Discover optional `Microsoft.DependencyMap/maps` resources in scope and resolve the `{mapName}` required by the dependency view and export operations. Use this only for the optional Azure Migrate dependency-enrichment path in Phase 4 after the VM Insights path has been checked.
 
 **Why direct API:** Dependency connection data is held in a graph-based datastore that is **not** queryable via Azure Resource Graph. The `Microsoft.DependencyMap` resource provider is the supported programmatic path. This is distinct from classic agentless Azure Migrate appliance dependency analysis (which has no API — portal CSV export only).
 
@@ -351,13 +449,13 @@ az rest --method GET --url "https://management.azure.com/subscriptions/{subscrip
 - `{resourceGroup}` — Resource group containing the Dependency Map resource
 - `{dependencyMapApiVersion}` — Dependency Map API version. Default `2025-05-01-preview`. Confirm the tenant accepts this version before relying on it; `2025-07-01-preview` is the latest published version. If a version is rejected, fall back to `2025-07-01-preview` then `2025-01-31-preview`.
 
-**Expected output:** JSON `value[]` of map resources. Use `value[].name` as `{mapName}` for templates 8 and 9. If no maps are returned, the new Dependency Map service is not in use in this scope — fall back to the classic agentless portal CSV export path (SKILL Phase 4 step 8c).
+**Expected output:** JSON `value[]` of map resources. Use `value[].name` as `{mapName}` for templates 8 and 9. If no maps are returned, the optional Dependency Map service is not in use in this scope — fall back to the classic agentless portal CSV export path (SKILL Phase 4 step 8e) or continue with VM Insights-only evidence if that is already available.
 
 ---
 
 ### 8. Export Dependencies via Direct API (Bulk CSV)
 
-**Purpose:** Bulk-export observed dependencies from a Dependency Map to CSV programmatically — the direct-API equivalent of the portal **Manage Dependencies → Export dependencies** action. This is the **primary** dependency-data path when a `Microsoft.DependencyMap/maps` resource exists.
+**Purpose:** Bulk-export observed dependencies from a Dependency Map to CSV programmatically — the direct-API equivalent of the portal **Manage Dependencies → Export dependencies** action. This is an **optional Azure Migrate enrichment** path when a `Microsoft.DependencyMap/maps` resource exists.
 
 **Why direct API over the bundled PowerShell helper script:** the direct `az rest` call keeps every request/response auditable, requires only the Azure CLI (already a prerequisite — no extra PowerShell 5.1+ dependency), avoids opaque external-script logic and uncontrolled file-download side effects, and lets us version the exact call inline here. Convenience features of the helper script (auth, async polling, CSV download) are reproduced by this template.
 
@@ -420,7 +518,7 @@ The downloaded CSV uses the same column structure as the portal export (`Source 
 
 ### 9. Get Dependency View for a Focused Machine (Single Machine)
 
-**Purpose:** Retrieve the dependency view for a single machine — the direct-API equivalent of the portal focused-machine dependency visualization. Use for targeted, per-SQL-instance dependency inspection rather than bulk export.
+**Purpose:** Retrieve the dependency view for a single machine — the direct-API equivalent of the portal focused-machine dependency visualization. Use for targeted, per-SQL-instance optional Azure Migrate dependency inspection rather than bulk export.
 
 **Operation:** `Maps_GetDependencyViewForFocusedMachine` — `POST .../providers/Microsoft.DependencyMap/maps/{mapName}/getDependencyViewForFocusedMachine`. Async: returns `202` with a `Location` header; poll until terminal, then read the result.
 
@@ -661,14 +759,15 @@ az graph query -q "patchassessmentresources | where type has 'softwarepatches' |
 4. **Only when quota exhausted:** Use Template 4 (Delete) for cleanup, but prefer updating slots
 5. **For all estate inventory queries:** Use Template 5 (Consolidated Estate ARG Query) — one call for all resource types
 6. **Before the full estate query:** Use Template 6 (Scope Validation Query) as a lightweight pre-check in Phase 2
-7. **To discover Dependency Map resources:** Use Template 7 (List Dependency Map Resources) to resolve `{mapName}` before any dependency call
-8. **For bulk dependency data (primary path):** Use Template 8 (Export Dependencies via Direct API) when a `Microsoft.DependencyMap/maps` resource exists; download and parse the resulting CSV
-9. **For single-machine dependency inspection:** Use Template 9 (Get Dependency View for a Focused Machine)
-10. **To discover SQL-specific assessments (primary utilisation path):** Use Template 10 (List/Get SQL Assessments) to find Finished `sqlAssessments` resources — try list first, fall back to direct GET on known names; always use `api-version=2024-03-03-preview`
-11. **To retrieve per-instance SQL data (primary utilisation path):** Use Template 11 (Get Assessed SQL Instances) to extract per-instance utilisation, readiness, SKU, cost, and Arc-machine linkage from a Finished SQL assessment; this supersedes ARM-synced `skuRecommendationResults`
-12. **For per-machine patch assessment coverage (core security path):** Use Template 12 (Update Manager assessment summary) to build `PatchAssessmentSummary` rows for every Arc machine — no Azure Migrate required
-13. **For missing-patch detail and KB extraction (core security path):** Use Template 13 (individual missing software patches) to build `MissingPatch` rows across Windows and Linux; extract KBs with `Get-KbIdFromText`
-14. **For headline patch-debt ranking:** Use Template 14 (missing security/critical patches only) to rank top machines by security patch debt for executive metrics
+7. **For dependency analysis, check VM Insights first:** use the Azure Monitor VM Insights prerequisite / topology queries above to confirm `VMConnection` data exists in the selected workspace
+8. **Only for optional Azure Migrate enrichment:** use Template 7 (List Azure Migrate Dependency Map Resources) to resolve `{mapName}` before any direct Dependency Map API call
+9. **For bulk optional Azure Migrate dependency data:** use Template 8 (Export Dependencies via Direct API) when a `Microsoft.DependencyMap/maps` resource exists; download and parse the resulting CSV
+10. **For single-machine optional Azure Migrate dependency inspection:** use Template 9 (Get Dependency View for a Focused Machine)
+11. **To discover SQL-specific assessments (primary utilisation path):** Use Template 10 (List/Get SQL Assessments) to find Finished `sqlAssessments` resources — try list first, fall back to direct GET on known names; always use `api-version=2024-03-03-preview`
+12. **To retrieve per-instance SQL data (primary utilisation path):** Use Template 11 (Get Assessed SQL Instances) to extract per-instance utilisation, readiness, SKU, cost, and Arc-machine linkage from a Finished SQL assessment; this supersedes ARM-synced `skuRecommendationResults`
+13. **For per-machine patch assessment coverage (core security path):** Use Template 12 (Update Manager assessment summary) to build `PatchAssessmentSummary` rows for every Arc machine — no Azure Migrate required
+14. **For missing-patch detail and KB extraction (core security path):** Use Template 13 (individual missing software patches) to build `MissingPatch` rows across Windows and Linux; extract KBs with `Get-KbIdFromText`
+15. **For headline patch-debt ranking:** Use Template 14 (missing security/critical patches only) to rank top machines by security patch debt for executive metrics
 
 ### Placeholder naming conventions:
 
@@ -679,6 +778,8 @@ All templates use consistent placeholder naming:
 - `{location}` — Azure region (e.g., `eastus`)
 - `{slotName}` — Run command slot name (use pattern: `estate-audit-{machineName}-{slotNumber}`)
 - `{scriptContent}` — Full PowerShell script to execute
+- `{workspaceId}` — Log Analytics workspace ID (GUID or full resource ID accepted by `az monitor log-analytics query`) containing VM Insights dependency data
+- `{sqlHostNames}` — comma-separated, quoted Arc SQL machine names for VM Insights filtering, e.g. `"SQL01","SQL02"`
 - `{mapName}` — Azure Migrate Dependency Map resource name (`Microsoft.DependencyMap/maps`), resolved via Template 7
 - `{dependencyMapApiVersion}` — Dependency Map API version (default `2025-05-01-preview`; fall back to `2025-07-01-preview` then `2025-01-31-preview`)
 - `{focusedMachineId}` — machine node ID within the Dependency Map, correlated to the Arc SQL machine by name

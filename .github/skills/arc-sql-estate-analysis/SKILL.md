@@ -42,7 +42,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 3. The initial prompt should also pre-answer any other interactive gate it wants to suppress, including:
    - the optional Azure Migrate enrichment decision (default: not used — `azureMigrate.enabled = false`); Azure Migrate is optional enrichment only and is never required for the core security-exposure path
    - whether to run the Tier 3 full Arc Run Command alignment scan if Tier 1 / Tier 2 evidence is incomplete
-   - the dependency-data path decision (direct Dependency Map API only, classic portal CSV fallback, or continue without dependency data if unavailable)
+   - the dependency-data path decision (use existing Azure Monitor VM Insights data if present, optionally use Azure Migrate dependency data if present, or continue without dependency data if unavailable)
 
 4. When Unattended mode is valid:
    - treat the Phase 1 tenant / scope / project selections, Phase 3 Software Assurance declaration, Phase 4 alignment / dependency / export gates, and the documented Phase 5 write approvals as pre-answered from the initial prompt
@@ -104,7 +104,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 8. If no Azure Migrate projects are found:
    - note internally that Azure Migrate data is unavailable
    - continue with the existing analysis flow
-   - surface the absence in "Data gaps / follow-up questions" with guidance: "No Azure Migrate project detected in scope — deploying an Azure Migrate appliance with dependency analysis would provide workload utilisation baselines and application dependency mapping"
+   - surface the absence in "Data gaps / follow-up questions" with guidance: "No Azure Migrate project detected in scope — Azure Migrate utilisation enrichment is unavailable. Application dependency mapping can still use pre-enabled Azure Monitor VM Insights data, or optional Azure Migrate dependency exports if you already have them."
 
 ## Phase 2 - Validate live Azure scope before analysis
 
@@ -237,7 +237,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    **NOT available in Resource Graph (separate API calls are required and justified):**
    - Azure Migrate SQL assessment data — per-instance utilisation, readiness, SKU, and cost from `sqlAssessments/{name}/assessedSqlInstances` (api-version `2024-03-03-preview`); see Phase 4 step 7a
    - Azure Migrate VM/group-scoped assessed machine metrics (CPU/memory baselines, confidence scores); see Phase 4 step 7b (fallback)
-   - Agentless dependency analysis data — via the `Microsoft.DependencyMap` REST API (primary, see Phase 4 step 8b) or portal CSV export for classic agentless appliance data (fallback, see Phase 4 step 8c)
+   - Application dependency data — via Log Analytics workspace queries over Azure Monitor VM Insights tables (primary optional path when pre-enabled), the `Microsoft.DependencyMap` REST API (optional Azure Migrate enrichment), or portal CSV export for classic Azure Migrate appliance data (fallback)
 
    **Post-query local processing (perform locally — no additional network calls):**
    1. Filter results by `type` field to separate: SQL instances, databases, machines, and Migrate projects
@@ -366,29 +366,45 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
           - if automatic correlation confidence is below 80% (e.g. name mismatch, IP mismatch), surface the attempted match for user confirmation rather than assuming
           - surface unmatched machines in "Data gaps / follow-up questions" with both the Arc machine name and Migrate machine name for manual reconciliation
 
-8. Azure Migrate dependency data extraction (when an Azure Migrate project was selected in Phase 1):
+8. Application dependency analysis (optional):
 
-   a. Determine dependency data access path. There are two distinct dependency data sources — check for the newer one first:
-      - **Azure Migrate Dependency Map (`Microsoft.DependencyMap/maps`)** — the newer dependency mapping service. Connection data is held in a graph-based datastore that is NOT queryable via Azure Resource Graph, but IS retrievable programmatically via the `Microsoft.DependencyMap` REST API. **This is the primary, preferred path.** See step 8b.
-      - **Classic agentless Azure Migrate appliance dependency analysis** — the older appliance-based feature. This data is NOT accessible via REST API or PowerShell; it lives in the Azure Migrate service layer and is only available via portal CSV export. Use this only as a fallback when no Dependency Map resource exists. See step 8c.
-      - do NOT recommend agent-based dependency analysis as an alternative — deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen
+   a. Determine which optional dependency-data sources are already available. Check them in this order:
+      - **Azure Monitor VM Insights (Map) on Arc-enabled servers** — the preferred path when the customer has already enabled dependency monitoring as a prerequisite and the Log Analytics workspace contains `VMConnection`, `VMProcess`, `VMComputer`, and `VMBoundPort` data. This is a **consumer-managed prerequisite enabled at least ~24 hours before the engagement**. See the VM Insights queries in `references/command-templates.md`.
+      - **Azure Migrate Dependency Map (`Microsoft.DependencyMap/maps`)** — optional enrichment when the newer Azure Migrate Dependency Map service is already present. Use the direct REST API templates (7–9).
+      - **Classic agentless Azure Migrate appliance dependency analysis** — optional fallback when the customer already has classic Azure Migrate dependency analysis and can export the portal CSV.
+      - dependency analysis is optional overall. If none of these sources exist, continue the estate assessment without dependency data and disclose the gap.
 
-   b. Direct Dependency Map API extraction (primary path):
-      - resolve the Dependency Map resource(s) in scope using command-templates.md **Template 7 (List Dependency Map Resources)** — this returns the `{mapName}` needed for export
-      - if one or more maps are found, bulk-export dependencies using command-templates.md **Template 8 (Export Dependencies via Direct API)**:
+   b. Azure Monitor VM Insights dependency query path (primary path when data exists):
+      - identify the Log Analytics workspace that contains the VM Insights dependency data; if multiple candidate workspaces exist and the prompt does not pre-answer the choice, ask the user which workspace should be queried
+      - run the VM Insights prerequisite/data-availability query from `references/command-templates.md` to check whether `VMConnection` data exists in scope
+      - if `VMConnection` rows are present, build the dependency view from the workspace tables:
+        - `VMConnection` — connection topology, inbound/outbound flows, SQL-relevant ports, and top talkers
+        - `VMProcess` — process inventory and SQL-related executables / command lines
+        - `VMComputer` — latest machine identity, DNS, IPs, and Arc resource correlation
+        - `VMBoundPort` — active listening ports, custom SQL ports, and validation of inbound exposure
+      - limit analysis to SQL-relevant flows (for example port 1433, 1434, 4022, listener/custom SQL ports, or source/destination matches to Arc SQL machines)
+      - disclose the effective collection window (`firstSeen` / `lastSeen`) and note explicitly if less than ~24 hours of dependency data is available
+
+   c. Detect-and-guide behaviour when VM Insights dependency data is absent or not yet warm:
+      - if no `VMConnection` data is found for the selected scope, do **not** deploy monitoring, install extensions, create a workspace, create a DCR, or create a DCR association
+      - instead **print** the consumer-run prerequisite guidance from `references/templates/dependency-monitoring/README.md` together with the Azure Policy path, targeted Bicep + `az` path, teardown script, and this note: `Azure Monitor VM Insights dependency data needs about 24 hours of collection before it is usable for analysis.`
+      - if a valid Unattended mode prompt already says to continue without dependency data when the prerequisite is missing, honour that and record the gap without additional prompting
+
+   d. Optional Azure Migrate Dependency Map API enrichment:
+      - resolve Dependency Map resource(s) in scope using command-templates.md **Template 7 (List Azure Migrate Dependency Map Resources)**
+      - if one or more maps are found, bulk-export dependencies using **Template 8 (Export Dependencies via Direct API)**:
         - resolve `{focusedMachineId}` from the map's discovered machines, correlating to each Arc-enabled SQL machine by name (case-insensitive, strip domain suffix); if a machine cannot be correlated, surface it in "Data gaps / follow-up questions" rather than guessing
         - use a **28-day** collection window (the API rejects start dates older than 30 days; 28 days stays safely inside this hard limit) and the default (resolvable) process filter unless the user requests otherwise
         - the operation is async — poll the `Location` header until `status` is `Succeeded`, then download the CSV from `properties.exportedDataSasUri`
         - if the result reports `statusCode: PartialMatch` with `availableDaysCount`, disclose that fewer days of data were available than requested as a data-freshness note
-      - for targeted single-machine inspection, use command-templates.md **Template 9 (Get Dependency View for a Focused Machine)**
-      - **API version:** default to `2025-05-01-preview`; if rejected, fall back to `2025-07-01-preview` then `2025-01-31-preview`. If all versions fail, surface the API error and fall back to the portal CSV export path (step 8c)
-      - the exported CSV uses the same column structure as the portal export — parse it using the dependency-CSV correlation rules in step 8d
-      - if no Dependency Map resource is returned by Template 7, the new service is not in use in this scope — fall back to step 8c
+      - for targeted single-machine inspection, use **Template 9 (Get Dependency View for a Focused Machine)**
+      - **API version:** default to `2025-05-01-preview`; if rejected, fall back to `2025-07-01-preview` then `2025-01-31-preview`
+      - treat Azure Migrate dependency data as **optional enrichment** alongside VM Insights, not as a required or primary dependency source
 
-   c. Classic agentless dependency CSV export (fallback — only when no Dependency Map resource exists or the API is unavailable):
+   e. Classic agentless Azure Migrate dependency CSV export (fallback — only when the user already relies on classic Azure Migrate dependency analysis):
       - classic agentless dependency connection data cannot be retrieved programmatically
       - if a valid Unattended mode prompt already says to continue without the portal CSV fallback, do not prompt; continue the analysis and note the dependency gap
-      - otherwise prompt the user via `ask_user`: "Azure Migrate agentless dependency analysis is enabled but no Dependency Map resource was found, so the data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
+      - otherwise prompt the user via `ask_user`: "No VM Insights dependency data was found, and the optional Azure Migrate classic dependency data is only accessible via the Azure portal. Would you like to export the dependency data as CSV so I can include it in the analysis?"
       - provide export instructions:
         1. In the Azure portal, navigate to the Azure Migrate project
         2. Go to **All inventory** or **Infrastructure inventory** view
@@ -397,7 +413,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
         5. Set process type to **Resolvable** (default) for clearest results
         6. Select **Generate**, then **Download** the CSV when ready
 
-   d. Parse the dependency CSV (from either step 8b or step 8c) — the exported CSV contains one row per observed dependency with these fields:
+   f. Parse the dependency CSV (from either step 8d or step 8e) — the exported CSV contains one row per observed dependency with these fields:
         - `Timeslot` — 6-hour window when the dependency was observed
         - `Source server name`
         - `Source application`
@@ -413,18 +429,15 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
         - summarise inbound and outbound connections per SQL instance
         - identify SQL-to-SQL dependencies for migration sequencing
 
-   e. Build a dependency map per Arc-enabled SQL machine:
+   g. Build a dependency map per Arc-enabled SQL machine from whichever optional source is available:
       - which other machines/services connect to each SQL instance (inbound on port 1433 or custom SQL ports)
       - which external services each SQL machine connects to (outbound)
       - flag any SQL-to-SQL dependencies (important for migration sequencing)
+      - always disclose whether the evidence came from Azure Monitor VM Insights, Azure Migrate Dependency Map API, classic Azure Migrate CSV export, or a mixture of optional sources
 
-   f. If dependency analysis is not enabled (no Dependency Map resource and classic dependency analysis disabled):
-      - note that dependency data is unavailable
-      - surface this in "Data gaps / follow-up questions" with guidance: "Azure Migrate dependency analysis is not enabled — enabling it (Dependency Map or the agentless appliance) would provide application dependency mapping for migration sequencing"
-
-   g. If the API path fails and the user declines to export or cannot provide the CSV:
+   h. If no dependency data source is available, or an optional Azure Migrate path fails and the user declines export:
       - continue the analysis without dependency data
-      - note in "Data gaps / follow-up questions": "Dependency data available in Azure Migrate but not retrieved — retry the Dependency Map API export or export the dependency CSV from the Azure Migrate portal to include application dependency mapping in future analysis"
+      - surface this in "Data gaps / follow-up questions" with guidance: "Application dependency mapping not available — enable Azure Monitor VM Insights (Map) on the Arc-enabled SQL machines at least 24 hours before the engagement, or provide optional Azure Migrate dependency data, to inform migration sequencing."
 
 9. SQL on Azure VM best practices alignment (optional, additive):
    - offer this scan during analysis when either:
@@ -1060,7 +1073,7 @@ SqlAssessment_CL
    - if utilisation data is available for some machines but not others, clearly distinguish which recommendations are utilisation-validated and which are configuration-based only
    - when SQL assessment readiness is available, use it (with the readiness mapping in Phase 4 step 7a iv) as the primary readiness signal for Azure target recommendations; do not report a utilisation data gap when `percentageCoresUtilization` is populated in the SQL assessment
 
-9. When Azure Migrate dependency data is available:
+9. When application dependency data is available (from Azure Monitor VM Insights or optional Azure Migrate sources):
    - include an application dependency summary in Estate summary showing key inbound and outbound connections per SQL instance
    - use dependency data to inform migration sequencing in Azure target recommendations:
      - identify SQL instances with no inbound SQL dependencies as candidates for early migration waves
@@ -1531,9 +1544,11 @@ The agent must work if Azure Migrate is not configured at all.
   - do NOT query `migrateProjects` for assessments; doing so returns `NoRegisteredProviderFound` for any version later than `2020-06-01-preview`.
   - if the `assessmentProjects` api-version `2023-03-15` is not accepted for VM assessment fallback, fall back to `2019-10-01` then `2018-02-02`; if all versions fail, surface the API error and continue without Migrate data
 
-- Dependency data has two sources with different access paths. The newer **Azure Migrate Dependency Map** (`Microsoft.DependencyMap/maps`) IS retrievable programmatically via the `Microsoft.DependencyMap` REST API (connection data lives in a graph datastore that is not in Resource Graph, but the export/view actions return it) — this is the primary path; use command-templates.md Templates 7–9. The older **classic agentless Azure Migrate appliance** dependency data is NOT accessible via REST API or PowerShell and can only be exported as CSV via portal **Manage Dependencies > Export dependencies** — use this only as a fallback when no Dependency Map resource exists. Confirm the Dependency Map API version (`2025-05-01-preview`, falling back to `2025-07-01-preview` then `2025-01-31-preview`).
+- Dependency analysis is optional and now has **three** access paths. The preferred path is **pre-enabled Azure Monitor VM Insights (Map)** queried from the Log Analytics workspace (`VMConnection`, `VMProcess`, `VMComputer`, `VMBoundPort`) after roughly 24 hours of collection. The optional Azure Migrate Dependency Map service (`Microsoft.DependencyMap/maps`) remains retrievable programmatically via the `Microsoft.DependencyMap` REST API — use command-templates.md Templates 7–9 when it exists. The older classic Azure Migrate appliance dependency data is still portal-CSV-only fallback.
 
-- Do not recommend agent-based dependency analysis as an alternative to the agentless CSV export. Deploying additional agents introduces friction and is not aligned with the agentless approach customers have already chosen.
+- **Detect-and-guide only:** this agent may detect missing VM Insights dependency data and print the consumer-run prerequisite templates, but it must never deploy monitoring, install Azure Monitor Agent / Dependency Agent, create a Log Analytics workspace, create a DCR, or create a DCR association as part of analysis.
+
+- **Fail-fast guardrail:** if this agent ever attempts to deploy VM Insights dependency monitoring or equivalent infrastructure, it must fail fast with this exact message: `Dependency monitoring deployment is disabled for this agent. Detect-and-guide only; customer-managed prerequisite provisioning is required.`
 
 - When parsing an Azure Migrate dependency CSV export:
   - validate that the CSV contains the expected columns: `Timeslot`, `Source server name`, `Source application`, `Source process`, `Destination server name`, `Destination IP`, `Destination application`, `Destination process`, `Destination port`
