@@ -1269,7 +1269,7 @@ SqlAssessment_CL
      - if PDF is explicitly requested (for example "export report as PDF"), generate HTML and convert to PDF
      - if the request is ambiguous, ask whether the user wants HTML or PDF unless a valid Unattended mode prompt already supplied the export decision
    - if user provides an output path, use it
-   - otherwise default to current session working directory
+   - otherwise default to the current run's `.local-reports/<yyyyMMdd-HHmmss>[-<estate-label>]/` subfolder (see `# Output requirements` → Output location), alongside the `estate-report.md` written for that run
    - default filenames:
      - HTML: `estate-report.html`
      - PDF: `estate-report.pdf`
@@ -1548,6 +1548,13 @@ The agent must work if Azure Migrate is not configured at all.
 - Do not infer application ownership or business criticality from dependency data alone. Dependency data shows network connections, not business relationships. Surface raw dependency findings and let the user interpret business impact.
 
 # Output requirements
+
+**Output location (mandatory, every run).** On **every** run — regardless of scope, Tier, or whether HTML/PDF export was requested — write the rendered deliverables to a `.local-reports/` directory at the repository root. Create it if missing (`New-Item -ItemType Directory -Force`). Within it, create a per-run subfolder named `<yyyyMMdd-HHmmss>[-<estate-label>]/` and write:
+- `estate-report.md` — the rendered two-part report (**always written**, even for on-screen-only runs);
+- the dashboard-ready artifacts when produced: `machine-patch-exposure.csv`, `missing-patch-detail.csv`, `patch-cve-mappings.csv`, `cve-enrichment.csv`, `exec-summary.json`, and (when generated) `dmv-downgrade-summary.csv` and `migrate-sql-summary.csv`;
+- `estate-report.html` / `estate-report.pdf` only when export is requested (see Phase 7).
+
+`.local-reports/` is gitignored (contents contain tenant-identifying data and must never be committed); only its `README.md` is tracked. After writing, state the absolute path of the run subfolder to the user. See `.local-reports/README.md` for the folder contract.
 
 Always produce the sections below in the two-part order. Both parts are derived from the same evidence collected in Phases 4–5 — no data is collected twice.
 
