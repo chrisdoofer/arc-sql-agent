@@ -47,6 +47,11 @@ cd arc-sql-estate-analysis
 | Microsoft Security Update Guide (MSRC) + NVD | External CVE intelligence — KB→CVE mapping and CVE metadata enrichment |
 | Azure Arc-enabled SQL Server | Source estate being analysed |
 
+> **CVE enrichment is optional and needs no setup to start** — MSRC (the primary KB→CVE source)
+> needs no API key, and NVD works keyless. An optional free NVD API key only raises the NVD rate
+> limit for faster enrichment on large estates. See [CVE enrichment & secrets](docs/prerequisites.md#cve-enrichment--secrets-optional)
+> for how to obtain and safely store a key (env var, SecretManagement vault, or GitHub secret).
+
 ## Repository Structure
 
 ```
