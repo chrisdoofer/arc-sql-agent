@@ -4,6 +4,12 @@
 estate-report.*
 Arc-SQL-Estate-Analysis-Report.*
 
+# Local, uncommitted estate analysis outputs (contain tenant-identifying data).
+# Every agent run writes the rendered report + dashboard artifacts here.
+# The folder itself is tracked (via its README) but its generated contents are never committed.
+/.local-reports/*
+!/.local-reports/README.md
+
 # Secrets and local CVE-enrichment cache - never commit
 .env
 *.env
