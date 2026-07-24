@@ -61,12 +61,126 @@ If the operator has access to multiple tenants, the correct tenant **must** be s
 > machines (assessment-only); assessment records are retained in Resource Graph for ~7 days.
 > External CVE lookups (MSRC / NVD) are outbound HTTPS calls that use no Azure RBAC.
 
+### Optional enrichment permissions
+
+These permissions are only required if you enable optional enrichment paths (Azure Migrate assessment data, Dependency Map, or telemetry probing). All are in addition to the core permissions above.
+
+| Scope | Role / Permission | Purpose | Required? |
+|-------|-------------------|---------|-----------|
+| Subscription | `Microsoft.Migrate/assessmentProjects/*/read` | Azure Migrate SQL assessment enrichment (readiness, utilisation, cost) | Optional — covered by **Reader** |
+| RG with Dependency Map | `Microsoft.DependencyMap/maps/read` | Discover dependency maps | Optional — covered by **Reader** |
+| RG with Dependency Map | `Microsoft.DependencyMap/maps/exportDependencies/action` | Run dependency export | Optional — **NOT covered by Reader** (POST action) |
+| RG with Dependency Map | `Microsoft.DependencyMap/maps/getDependencyViewForFocusedMachine/action` | Run focused-machine dependency view | Optional — **NOT covered by Reader** (POST action) |
+| RG with Arc SQL | `Microsoft.AzureArcData/sqlServerInstances/getTelemetry/action` | Migration-assessment telemetry probe | Optional — probe only; often returns 400 if telemetry not collected |
+
+> **Dependency Map POST actions:** `exportDependencies` and `getDependencyViewForFocusedMachine` are
+> ARM POST actions. A pure **Reader** role cannot execute them. If you need dependency-map export or
+> focused-machine views, you must grant these two actions explicitly — they are not inherited from
+> any built-in read-only role.
+
+### Permissions the agent must NOT be granted
+
+The agent operates in **assessment-only** mode. The following permissions must never be granted and are not required for any analysis function. Granting them would permit actions that are explicitly out of scope.
+
+| Permission that must never be granted | Why |
+|---------------------------------------|-----|
+| `Microsoft.Maintenance/maintenanceConfigurations/write` | Would enable patch-install scheduling — blocked by design; assessment-only mode forbids it |
+| `Microsoft.HybridCompute/machines/installPatches/action` | Patch installation — explicitly out of scope for an assessment-only agent |
+
+> These exclusions reinforce the assessment-only patch guardrail at the RBAC layer. If you are
+> deploying the custom role below, verify neither permission appears in the `actions` list.
+
 ### Recommended built-in roles
 
 | Scenario | Recommended Role | Scope |
 |----------|-----------------|-------|
 | Inventory only (no audit) | **Reader** | Subscription |
 | Full analysis with audit | **Reader** + **Azure Connected Machine Resource Administrator** | Subscription + Resource Group |
+
+> **Note:** **Azure Connected Machine Resource Administrator** is a broad built-in role. For a
+> tighter least-privilege fit, use the custom role definition below instead.
+
+### Least-privilege custom role (recommended alternative)
+
+The following custom role grants exactly the permissions the agent needs and nothing more. It is the recommended alternative to the broad built-in **Azure Connected Machine Resource Administrator**.
+
+**Role definition (JSON):**
+
+```json
+{
+  "Name": "Arc SQL Estate Analyser",
+  "IsCustom": true,
+  "Description": "Least-privilege role for the Arc SQL estate analysis agent. Assessment-only; no patch install or maintenance scheduling.",
+  "Actions": [
+    "Microsoft.HybridCompute/machines/read",
+    "Microsoft.HybridCompute/machines/runcommands/read",
+    "Microsoft.HybridCompute/machines/runcommands/write",
+    "Microsoft.HybridCompute/machines/runcommands/delete",
+    "Microsoft.HybridCompute/machines/patchAssessmentResults/read",
+    "Microsoft.HybridCompute/machines/assessPatches/action",
+    "Microsoft.AzureArcData/sqlServerInstances/read",
+    "Microsoft.AzureArcData/sqlServerInstances/databases/read",
+    "Microsoft.ResourceGraph/resources/read"
+  ],
+  "NotActions": [
+    "Microsoft.Maintenance/maintenanceConfigurations/write",
+    "Microsoft.HybridCompute/machines/installPatches/action"
+  ],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/<subscription-id>"
+  ]
+}
+```
+
+**Deploy with Azure CLI:**
+
+```bash
+# Save the JSON above as arc-sql-analyser-role.json, then:
+az role definition create --role-definition arc-sql-analyser-role.json
+
+# Assign to the operator identity scoped to the target resource group(s):
+az role assignment create \
+  --assignee <user-or-sp-object-id> \
+  --role "Arc SQL Estate Analyser" \
+  --scope /subscriptions/<subscription-id>/resourceGroups/<rg-name>
+
+# For inventory-only (Reader is sufficient), assign Reader at subscription level separately:
+az role assignment create \
+  --assignee <user-or-sp-object-id> \
+  --role "Reader" \
+  --scope /subscriptions/<subscription-id>
+```
+
+> The `NotActions` block explicitly excludes patch-installation and maintenance-configuration write
+> permissions as a defence-in-depth measure, reinforcing the assessment-only guardrail.
+
+---
+
+## Identity & authentication model
+
+Choose the identity type that matches how you run the agent:
+
+| Run context | Recommended identity | Rationale |
+|-------------|---------------------|-----------|
+| **Interactive / consulting on a workstation** (common case) | Operator Entra ID user via `az login`; least-privilege role granted just-in-time via Entra PIM, scoped to specific subs/RGs | Named-user audit trail; MFA + Conditional Access enforced; time-bound elevation for the write-capable audit role. Managed identity is not available on a laptop. |
+| **Unattended, hosted in Azure** (VM / Container App / Cloud Shell) | Managed identity (system- or user-assigned) with the custom role | No secret to store or rotate; only works when the agent runs on an Azure resource |
+| **CI / GitHub Actions / Copilot coding agent** | Workload identity federation (OIDC) — service principal with no stored secret | Secretless, short-lived federated tokens; no rotation burden |
+| ❌ **Avoid** | Long-lived service principal client secret | Standing credential = rotation burden + leak risk; prefer certificate or federated credential instead |
+
+**Recommendation:** For interactive field and consulting runs, use the operator's own user context (`az login`). Managed identity is unreachable from a workstation. Apply least privilege via Entra PIM just-in-time elevation so that the write permissions the DMV audit requires (Run Command create/delete) exist only for the duration of the engagement. Reserve managed identity and workload identity federation for Azure-hosted or automated runs.
+
+```bash
+# Interactive login (workstation):
+az login --tenant <tenant-id>
+
+# Verify the active identity and subscription:
+az account show
+
+# If using PIM, activate the "Arc SQL Estate Analyser" role assignment before running:
+# (Portal: Entra ID → Privileged Identity Management → My roles → Activate)
+```
 
 ---
 
