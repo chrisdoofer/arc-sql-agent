@@ -156,6 +156,94 @@ az role assignment create \
 > The `NotActions` block explicitly excludes patch-installation and maintenance-configuration write
 > permissions as a defence-in-depth measure, reinforcing the assessment-only guardrail.
 
+### Setting up PIM eligibility (one-time, admin)
+
+This section covers **step 2** of the three-step PIM workflow — creating a PIM *eligible* assignment for the `Arc SQL Estate Analyser` role. Step 1 (role definition) is the `az role definition create` above; step 3 (operator self-activation) is covered in the [Identity & authentication model](#identity--authentication-model) section below.
+
+> **Prerequisites**
+> - **Entra ID P2** license (or Entra Suite / Microsoft 365 E5) — required for Azure resource PIM. Verify via Entra admin center → Licenses.
+> - An admin with the **Privileged Role Administrator** or **Owner** role at the target subscription or resource group scope, to create the eligible assignment.
+> - The `Arc SQL Estate Analyser` role definition from the section above must already exist in the subscription.
+
+#### Option A — Portal (simplest)
+
+1. Open **Entra admin center** → **Privileged Identity Management** → **Azure resources**.
+2. Select the target scope (subscription or resource group).
+3. Choose **Roles** → **Add assignments**.
+4. Select **Arc SQL Estate Analyser** as the role.
+5. Set assignment type to **Eligible** (not Active).
+6. Select the operator (user, group, or service principal).
+7. Set the maximum eligibility duration (e.g. 6 or 12 months) and click **Assign**.
+
+The operator can now self-activate just-in-time from **PIM → My roles** (see [activation snippet below](#identity--authentication-model)).
+
+#### Option B — PowerShell (`Az.Resources`)
+
+> There is **no first-class core `az` CLI command** for Azure-resource PIM eligibility. Use the Az.Resources PowerShell module or the `az rest` path below.
+
+```powershell
+# Install / import the module if not already present:
+Install-Module Az.Resources -Scope CurrentUser -Force
+Import-Module Az.Resources
+
+# Resolve the role definition ID:
+$role = Get-AzRoleDefinition -Name "Arc SQL Estate Analyser"
+
+# Scope: subscription or resource group:
+$scope = "/subscriptions/<subscription-id>/resourceGroups/<rg-name>"
+
+# Operator object ID (user, group, or service principal):
+$principalId = "<operator-object-id>"
+
+# Eligibility window — 12-month expiry from now:
+$scheduleInfo = New-Object Microsoft.Azure.Commands.Resources.Models.Authorization.PSRoleEligibilityScheduleRequestPropertiesScheduleInfo
+$scheduleInfo.StartDateTime = [System.DateTime]::UtcNow
+$scheduleInfo.Expiration = New-Object Microsoft.Azure.Commands.Resources.Models.Authorization.PSRoleEligibilityScheduleRequestPropertiesScheduleInfoExpiration
+$scheduleInfo.Expiration.Type = "AfterDuration"
+$scheduleInfo.Expiration.Duration = "P365D"
+
+New-AzRoleEligibilityScheduleRequest `
+  -Name (New-Guid).Guid `
+  -Scope $scope `
+  -PrincipalId $principalId `
+  -RoleDefinitionId $role.Id `
+  -RequestType "AdminAssign" `
+  -ScheduleInfo $scheduleInfo
+```
+
+#### Option C — Azure CLI (`az rest`)
+
+> There is **no first-class core `az` CLI command** for Azure-resource PIM eligibility. This `az rest` call hits the ARM `roleEligibilityScheduleRequests` API directly.
+
+```bash
+SCOPE="/subscriptions/<subscription-id>/resourceGroups/<rg-name>"
+ROLE_DEF_ID=$(az role definition list --name "Arc SQL Estate Analyser" --query "[0].name" -o tsv)
+PRINCIPAL_ID="<operator-object-id>"
+REQUEST_GUID=$(python3 -c "import uuid; print(uuid.uuid4())")
+
+az rest \
+  --method PUT \
+  --url "https://management.azure.com${SCOPE}/providers/Microsoft.Authorization/roleEligibilityScheduleRequests/${REQUEST_GUID}?api-version=2020-10-01" \
+  --body "{
+    \"properties\": {
+      \"roleDefinitionId\": \"${SCOPE}/providers/Microsoft.Authorization/roleDefinitions/${ROLE_DEF_ID}\",
+      \"principalId\": \"${PRINCIPAL_ID}\",
+      \"requestType\": \"AdminAssign\",
+      \"scheduleInfo\": {
+        \"startDateTime\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+        \"expiration\": {
+          \"type\": \"AfterDuration\",
+          \"duration\": \"P365D\"
+        }
+      }
+    }
+  }"
+```
+
+#### Fallback — standing assignment (no PIM / no Entra ID P2)
+
+If Entra ID P2 licensing or PIM is unavailable, use a **standing least-privilege assignment** of the same `Arc SQL Estate Analyser` custom role via the `az role assignment create` command already documented above. This is less ideal than JIT elevation (the role is permanently active rather than time-boxed), but the scope is still narrow and the permissions remain assessment-only.
+
 ---
 
 ## Identity & authentication model
