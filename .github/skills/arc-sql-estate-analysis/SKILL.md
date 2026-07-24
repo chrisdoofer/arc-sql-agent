@@ -1257,6 +1257,7 @@ SqlAssessment_CL
    - Azure Arc pill/badge with `SQL Server Estate Analysis` label
    - Blue gradient header bar (`#0078d4` to `#005a9e`)
    - Fluent UI / Segoe UI styling with colour-coded readiness badges (`GREEN`, `AMBER`, `RED`)
+   - render all markdown tables as styled HTML tables wrapped in `<div class="table-wrap">`; apply `sev-critical` / `sev-high` cell classes to severity values in the Security exposure and Key risks tables
    - Confidential watermark and footer with generation date
    - no external image, font, or CDN dependencies
 
@@ -1404,6 +1405,7 @@ SqlAssessment_CL
 - Keep exported HTML self-contained (inline SVG/CSS only; no external image dependencies).
 - Preserve section order from `references/output-template.md` in both HTML and PDF outputs.
 - Apply GREEN / AMBER / RED badges exactly for downgrade readiness states where present.
+- All data tables must use the template's table styling and be wrapped in `.table-wrap`; severity values in security tables must be colour-coded (`sev-critical` / `sev-high`).
 - Include generation date in footer and keep `Confidential` watermark/footer text in exported output.
 
 ## Tool reliability guardrails
