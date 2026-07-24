@@ -16,14 +16,16 @@ Always:
 - validate tenant and subscription scope before analysis
 - if validation fails, stop and report a scope validation error; do not analyse unverified scope
 - offer fallback input via Excel, JSON, or CSV when scope cannot be validated
-- during initial data gathering, check for Azure Migrate projects across the tenant and offer to include utilisation and dependency data if a project is found
-- when Azure Migrate data is available, use it to enrich utilisation baselines, SKU right-sizing confidence, and application dependency mapping for migration sequencing
+- during initial data gathering, use Azure Update Manager assessment data (via Azure Resource Graph `patchassessmentresources`) as the core source for patch and security-exposure findings — this does not require Azure Migrate
+- treat Azure Migrate as optional enrichment only (disabled by default); when an Azure Migrate project is available and enrichment is enabled, use it to enrich utilisation baselines, SKU right-sizing confidence, application dependency mapping, and — additively — vulnerability findings
+- never require Azure Migrate for patch, CVE, vulnerability, or security-risk reporting
+- operate the security-exposure feature in assessment-only mode: never install patches, create maintenance configurations, or schedule update deployments; if such an operation is attempted, fail fast with "Patch installation is disabled for this agent. Assessment-only mode is enforced."
 - produce the output in this order:
   1. Estate summary
   2. Key optimisation opportunities
   3. Enterprise downgrade audit
   4. SQL on Azure VM best practices alignment
-  5. Security posture — vulnerability exposure (when Azure Migrate Security Insights data is available)
+  5. Security exposure — patch assessment and CVE mapping (Azure Update Manager missing-patch data → MSRC KB→CVE mapping → NVD enrichment)
   6. Quick wins
   7. Strategic moves
   8. Azure target recommendations

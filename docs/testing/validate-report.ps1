@@ -151,16 +151,19 @@ $results += Test-Assertion -Name "#72: No BPA parsing failure language" -Categor
 # These assertions define the DESIRED state after each fix is merged.
 # They SHOULD FAIL today. When they pass, the issue is resolved.
 
-# Issue #82: Security posture section — when Azure Migrate is selected, the report must include
-# a "Security posture" section with vulnerability data or an explicit data-gap note.
-# After fix: report should contain "Security posture" heading AND either CVE data or a note that
-# Security Insights data was not available (no appliance / preview surface).
-$securityPostureSection = $reportContent -match '(?i)(security posture|vulnerability exposure)'
-$results += Test-Assertion -Name "#82-TDD: Security posture section present" -Category "TDD (open issues)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a 'Security posture' or 'vulnerability exposure' section. Expected when an Azure Migrate project is in scope." } else { "" })
+# Issue #82: Security exposure section — the report must include a security-exposure section
+# built from Azure Update Manager assessment data (no Azure Migrate required), with a source
+# chain referencing Update Manager missing patches, MSRC KB→CVE mapping, and NVD enrichment.
+$securityPostureSection = $reportContent -match '(?i)(security exposure|patch assessment|vulnerability exposure|missing patch)'
+$results += Test-Assertion -Name "#82-TDD: Security exposure section present" -Category "TDD (open issues)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a security-exposure / patch-assessment section. This is a core section built from Azure Update Manager assessment data." } else { "" })
 
-# Issue #82 (secondary): section must include data provenance note referencing preview surface.
-$securityProvenance = $reportContent -match '(?i)(machinesinventoryinsightsresources|inventoryInsights/vulnerabilities|preview.{0,30}undocumented)'
-$results += Test-Assertion -Name "#82-TDD: Security posture data provenance note present" -Category "TDD (open issues)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not contain the required data provenance note for Security Insights (preview ARG surface)." } else { "" })
+# Issue #82 (secondary): section must reference the new source chain (Update Manager / MSRC / NVD).
+$securityProvenance = $reportContent -match '(?i)(patchassessmentresources|update manager|security update guide|\bMSRC\b|\bNVD\b)'
+$results += Test-Assertion -Name "#82-TDD: Security exposure source chain referenced" -Category "TDD (open issues)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not reference the Azure Update Manager + MSRC/NVD source chain for security exposure." } else { "" })
+
+# Issue #82 (assessment-only): report must not claim/perform patch installation.
+$patchInstallLanguage = $reportContent -match '(?i)(installed the .* patch|deployed .* update|scheduled .* update deployment|created .* maintenance configuration)'
+$results += Test-Assertion -Name "#82-TDD: Assessment-only — no patch installation claimed" -Category "TDD (open issues)" -Passed (-not $patchInstallLanguage) -Detail $(if ($patchInstallLanguage) { "Report contains patch-installation/deployment language. The security-exposure feature is assessment-only." } else { "" })
 
 # Issue #71 (strict): The dependency prompt must result in user-response language
 # Current bug: prompt doesn't fire at all — report just says "not enabled" generically

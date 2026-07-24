@@ -3,3 +3,11 @@
 *.html
 estate-report.*
 Arc-SQL-Estate-Analysis-Report.*
+
+# Secrets and local CVE-enrichment cache - never commit
+.env
+*.env
+NVD_API_KEY*
+**/.cache/
+**/cve-cache/
+**/security-exposure-run/
