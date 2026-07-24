@@ -63,13 +63,14 @@ If the operator has access to multiple tenants, the correct tenant **must** be s
 
 ### Optional enrichment permissions
 
-These permissions are only required if you enable optional enrichment paths (Azure Migrate assessment data, Dependency Map, or telemetry probing). All are in addition to the core permissions above.
+These permissions are only required if you enable optional enrichment paths (Azure Migrate assessment data, Azure Monitor VM Insights dependency queries, optional Azure Migrate Dependency Map, or telemetry probing). All are in addition to the core permissions above.
 
 | Scope | Role / Permission | Purpose | Required? |
 |-------|-------------------|---------|-----------|
 | Subscription | `Microsoft.Migrate/assessmentProjects/*/read` | Azure Migrate SQL assessment enrichment (readiness, utilisation, cost) | Optional — covered by **Reader** |
+| Log Analytics workspace | **Log Analytics Reader** or `Microsoft.OperationalInsights/workspaces/query/read` | Query VM Insights dependency tables (`VMConnection`, `VMProcess`, `VMComputer`, `VMBoundPort`) | Optional — scope narrowly to the workspace used for dependency capture |
 | RG with Dependency Map | `Microsoft.DependencyMap/maps/read` | Discover dependency maps | Optional — covered by **Reader** |
-| RG with Dependency Map | `Microsoft.DependencyMap/maps/exportDependencies/action` | Run dependency export | Optional — **NOT covered by Reader** (POST action) |
+| RG with Dependency Map | `Microsoft.DependencyMap/maps/exportDependencies/action` | Run focused Azure Migrate dependency export | Optional — **NOT covered by Reader** (POST action) |
 | RG with Dependency Map | `Microsoft.DependencyMap/maps/getDependencyViewForFocusedMachine/action` | Run focused-machine dependency view | Optional — **NOT covered by Reader** (POST action) |
 | RG with Arc SQL | `Microsoft.AzureArcData/sqlServerInstances/getTelemetry/action` | Migration-assessment telemetry probe | Optional — probe only; often returns 400 if telemetry not collected |
 
@@ -86,6 +87,10 @@ The agent operates in **assessment-only** mode. The following permissions must n
 |---------------------------------------|-----|
 | `Microsoft.Maintenance/maintenanceConfigurations/write` | Would enable patch-install scheduling — blocked by design; assessment-only mode forbids it |
 | `Microsoft.HybridCompute/machines/installPatches/action` | Patch installation — explicitly out of scope for an assessment-only agent |
+| `Microsoft.HybridCompute/machines/extensions/write` | Would let the agent install Azure Monitor Agent / Dependency Agent extensions instead of remaining assessment-only |
+| `Microsoft.Insights/dataCollectionRules/write` | Would let the agent create or modify VM Insights data collection rules, which is a customer-managed prerequisite |
+| `Microsoft.Insights/dataCollectionRuleAssociations/write` | Would let the agent attach dependency monitoring to machines instead of only consuming existing data |
+| `Microsoft.OperationalInsights/workspaces/write` | Would let the agent create or modify Log Analytics workspaces, breaking the read/query-only posture |
 
 > These exclusions reinforce the assessment-only patch guardrail at the RBAC layer. If you are
 > deploying the custom role below, verify neither permission appears in the `actions` list.
@@ -154,7 +159,10 @@ az role assignment create \
 ```
 
 > The `NotActions` block explicitly excludes patch-installation and maintenance-configuration write
-> permissions as a defence-in-depth measure, reinforcing the assessment-only guardrail.
+> permissions as a defence-in-depth measure, reinforcing the assessment-only guardrail. For optional
+> VM Insights dependency analysis, keep Log Analytics query rights separate by assigning **Log
+> Analytics Reader** at the workspace scope rather than broadening this custom role with monitoring
+> deployment permissions.
 
 ### Setting up PIM eligibility (one-time, admin)
 
@@ -368,6 +376,72 @@ The target estate must have:
 | PowerShell `SqlServer` module | Must be installed on the Arc-enabled host |
 | SQL Server connectivity | `Invoke-Sqlcmd` must be able to connect to `localhost` using Windows Authentication |
 | Run Command handler | `microsoft.cplat.core.runcommandhandlerwindows` extension must be present |
+
+---
+
+## Application dependency analysis (optional)
+
+Application dependency mapping is **optional**. When a customer wants migration-wave sequencing or
+application-topology evidence, the preferred path is to pre-enable **Azure Monitor VM Insights
+(Map)** on the Arc-enabled servers that host SQL workloads and let it collect for **at least 24
+hours before** the engagement. The agent then reads the resulting Log Analytics data; it **never**
+deploys monitoring itself.
+
+### Why this is a customer-managed prerequisite
+
+- **24-hour warm-up:** dependency data must accumulate for roughly a day before it is useful, so it
+  cannot be deployed and analysed in the same interactive session.
+- **Least privilege:** keeping deployment out of scope means the agent only needs read/query access
+  to the workspace instead of extension, DCR, or workspace write permissions.
+- **Consent and cost control:** enabling dependency capture installs agents and generates billable
+  ingestion, so the customer must opt in explicitly.
+- **Safe teardown:** the paired teardown template removes collection promptly after the 24-hour
+  snapshot to avoid ongoing cost.
+
+### Cost model (UK South, 19 connected machines, Map-only capture)
+
+- **Only real cost:** Log Analytics ingestion. AMA, Dependency Agent, DCR, and the workspace itself
+  have no fixed charge. The first **31 days of retention are free**, so a one-off 24-hour capture
+  never reaches paid retention.
+- **Reference ingestion pricing:** **$2.30/GB Analytics** and **$0.50/GB Basic** in UK South.
+- **Typical data volume:** dependency / Map data is about **60–150 MB per VM per day** (roughly
+  **100 MB/VM/day** typical). Performance-only data is much smaller (1–3 MB/day), which is why the
+  templates below intentionally exclude `InsightsMetrics` / perf counters.
+
+| Scenario (24h capture, 19 machines) | Estimated volume | Analytics ingestion cost |
+|---|---:|---:|
+| Low | 1.11 GB | ~$2.56 |
+| Mid (typical) | 1.86 GB | **~$4.27** |
+| High | 2.78 GB | ~$6.40 |
+
+- **Per machine:** about **$0.22/VM/day** at the mid scenario.
+- **Headline:** in practice this is often **effectively $0** because every scenario above stays
+  inside the **5 GB/month free ingestion grant per workspace** when you use a **dedicated workspace**
+  for a single 24-hour capture. The $2.56–$6.40 figures only apply when that free grant has already
+  been consumed by a shared workspace.
+- **Linear scale reference:** ~100 servers for 24 hours is about **10 GB** of data — roughly
+  **$23**, or about **$11.50 after the first 5 GB free grant**.
+- **Guardrail:** if left running continuously, the mid scenario is about **$4.27/day** or roughly
+  **$128/month** for this 19-machine estate. Always remove the collection after the one-off 24-hour
+  snapshot.
+
+### Consumer-run deployment options (Map-only, no perf counters)
+
+Use the templates in
+[`/.github/skills/arc-sql-estate-analysis/references/templates/dependency-monitoring/`](../.github/skills/arc-sql-estate-analysis/references/templates/dependency-monitoring/):
+
+1. **Azure Policy path** — assign the built-in **Enable Azure Monitor for Hybrid/Arc VMs** VM
+   Insights initiative at the resource-group scope to deploy AMA, Dependency Agent, and DCR
+   associations at scale.
+2. **Targeted Bicep + `az` path** — deploy a **dedicated Log Analytics workspace** plus a
+   **Map-only DCR** (`Microsoft-ServiceMap` only; no `InsightsMetrics`) and then install/associate
+   the extensions only on the selected Arc machines.
+3. **Teardown** — after the 24-hour capture, remove DCR associations plus AMA / Dependency Agent
+   extensions and optionally delete the dedicated workspace.
+
+> **Assessment-only guardrail:** these templates are for the customer or operator to run **before**
+> the engagement. During analysis, the agent may point to them and explain the 24-hour prerequisite,
+> but it must never execute them or any equivalent deployment itself.
 
 ---
 

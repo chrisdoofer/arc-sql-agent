@@ -117,8 +117,8 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline insta
   |---------|-----------|--------------|-------------|
   |         |           |              | Azure Migrate |
 
-- Application dependency summary (from Azure Migrate, if available):
-  - Dependency analysis type: Dependency Map API / Agentless (portal CSV) / Not available
+- Application dependency summary (from Azure Monitor VM Insights or optional Azure Migrate data, if available):
+  - Dependency analysis type: VM Insights (Log Analytics) / Dependency Map API / Agentless (portal CSV) / Not available
   - Collection period: last 30 days
 
   | SQL Instance | Inbound connections (top 5) | Outbound connections (top 5) |
@@ -525,11 +525,11 @@ Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AH
   - If Yes: sizing recommendation validated against {collection period} performance baselines
   - If No: sizing based on configuration only — recommend deploying Azure Migrate for utilisation-based validation
 
-- Migration sequencing recommendation (when Azure Migrate dependency data is available):
+- Migration sequencing recommendation (when application dependency data is available):
   - Migration wave 1: {instances with no inbound SQL dependencies — safe to migrate first}
   - Migration wave 2: {instances dependent on wave 1 targets}
   - Cross-instance dependencies: {SQL-to-SQL dependencies that require coordinated migration}
-  - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Migrate dependency analysis to inform migration sequencing"
+  - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Monitor VM Insights (Map) at least 24 hours before the engagement, or providing optional Azure Migrate dependency data, to inform migration sequencing"
 
 
 ## Risks and blockers
