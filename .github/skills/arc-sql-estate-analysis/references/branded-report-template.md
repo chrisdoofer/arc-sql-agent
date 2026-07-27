@@ -206,9 +206,7 @@ Use this self-contained template when `/export-pdf` (or equivalent export prompt
     <section><h2>Key optimisation opportunities</h2>{{keyOptimisationsHtml}}</section>
     <section><h2>Enterprise downgrade audit</h2>{{enterpriseDowngradeAuditHtml}}</section>
     <section><h2>SQL on Azure VM best practices alignment</h2>{{sqlVmBestPracticesAlignmentHtml}}</section>
-    {{#if includeSecurityPosture}}
     <section><h2>Security exposure — patch assessment and CVE mapping</h2>{{securityPostureHtml}}</section>
-    {{/if}}
     <section><h2>Quick wins</h2>{{quickWinsHtml}}</section>
     <section><h2>Strategic moves</h2>{{strategicMovesHtml}}</section>
     <section><h2>Azure target recommendations</h2>{{azureTargetsHtml}}</section>

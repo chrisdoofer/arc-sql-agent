@@ -109,7 +109,12 @@ function ConvertFrom-AumSummary {
         osType              = if ($props) { [string]$props.osType } else { '' }
         assessmentTime      = if ($props) { [string]$props.lastModifiedDateTime } else { '' }
         lastModifiedTime    = if ($props) { [string]$props.lastModifiedDateTime } else { '' }
-        assessmentStatus    = if ($props -and $props.PSObject.Properties.Name -contains 'assessmentState') { [string]$props.assessmentState } else { 'Unknown' }
+        assessmentStatus    = if ($props) {
+            if ($props.PSObject.Properties.Name -contains 'status' -and $props.status) { [string]$props.status }
+            elseif ($props.configurationStatus -and $props.configurationStatus.assessmentModeConfiguration -and $props.configurationStatus.assessmentModeConfiguration.status) { [string]$props.configurationStatus.assessmentModeConfiguration.status }
+            elseif ($props.PSObject.Properties.Name -contains 'assessmentState' -and $props.assessmentState) { [string]$props.assessmentState }
+            else { 'Unknown' }
+        } else { 'Unknown' }
         availablePatchCount = [int]$available
         criticalPatchCount  = [int]$critical
         securityPatchCount  = [int]$security
