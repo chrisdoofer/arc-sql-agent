@@ -108,16 +108,18 @@ _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** replace inline insta
 
 - Backup / monitoring / security posture:
 
-- Workload utilisation baselines (from Azure Migrate, if available):
-  - Source: Azure Migrate project "{projectName}" — assessment "{assessmentName}"
+- Workload utilisation baselines:
+  - **Primary (core path):** Azure Monitor VM Insights performance metrics (`InsightsMetrics`), when VM Insights is configured for performance collection (not Map-only).
+  - **Azure Migrate baseline — include only when `azureMigrate.enabled = true`.** If the flag is `false` (default), do **not** emit Migrate utilisation figures; if utilisation telemetry is absent, record it under "Data gaps / follow-up questions" instead.
+  - Source: {VM Insights workspace / — when enabled — Azure Migrate project "{projectName}", assessment "{assessmentName}"}
   - Collection period: {startDate} to {endDate}
-  - Confidence rating: {confidenceRating}%
+  - Confidence rating: {confidenceRating}% (Azure Migrate only)
 
   | Machine | Avg CPU % | Avg Memory % | Data source |
   |---------|-----------|--------------|-------------|
-  |         |           |              | Azure Migrate |
+  |         |           |              | VM Insights / Azure Migrate (only if `azureMigrate.enabled = true`) |
 
-- Application dependency summary (from Azure Monitor VM Insights or optional Azure Migrate data, if available):
+- Application dependency summary (from Azure Monitor VM Insights; Azure Migrate dependency data only when `azureMigrate.enabled = true`):
   - Dependency analysis type: VM Insights (Log Analytics) / Dependency Map API / Agentless (portal CSV) / Not available
   - Collection period: last 30 days
 
@@ -479,6 +481,8 @@ _Higher-effort moves already detailed in their home sections. One line each — 
 
 ## Azure target recommendations
 
+_**Data-source guardrail:** Azure target recommendations are derived from **core-path evidence** — the Enterprise downgrade audit (runtime complexity), estate composition, security/patch posture, and Azure Monitor VM Insights dependency and performance data. **Do not include any Azure Migrate–sourced SKU, cost, readiness score, or utilisation figure unless `azureMigrate.enabled = true`.** When utilisation telemetry is unavailable, omit compute SKU and cost and record the gap under "Data gaps / follow-up questions" — never substitute Azure Migrate data by default._
+
 _**Tier 1 (≤10 instances):** use full per-instance narrative as shown below._
 _**Tier 2 (11–50 instances) and Tier 3 (51+ instances):** open with the action-grouped summary table, then follow with migration sequencing and SKU right-sizing at a group level. Per-instance TCO and licensing notes move to Appendix D._
 
@@ -520,16 +524,17 @@ Include Azure Hybrid Benefit references in the licensing / TCO notes wherever AH
 
 - Preferred target and rationale:
 
-- SKU right-sizing confidence (when Azure Migrate utilisation data is available):
+- SKU right-sizing confidence:
   - Utilisation data available: Yes / No
+  - **Source of utilisation data:** Azure Monitor VM Insights performance metrics (core path). Azure Migrate utilisation may be used **only when `azureMigrate.enabled = true`**.
   - If Yes: sizing recommendation validated against {collection period} performance baselines
-  - If No: sizing based on configuration only — recommend deploying Azure Migrate for utilisation-based validation
+  - If No: **do not quote a compute SKU or cost.** State that sizing requires utilisation telemetry and record it under "Data gaps / follow-up questions" — recommend enabling Azure Monitor VM Insights performance collection (not Map-only). Do **not** recommend deploying Azure Migrate unless `azureMigrate.enabled = true`.
 
 - Migration sequencing recommendation (when application dependency data is available):
   - Migration wave 1: {instances with no inbound SQL dependencies — safe to migrate first}
   - Migration wave 2: {instances dependent on wave 1 targets}
   - Cross-instance dependencies: {SQL-to-SQL dependencies that require coordinated migration}
-  - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Monitor VM Insights (Map) at least 24 hours before the engagement, or providing optional Azure Migrate dependency data, to inform migration sequencing"
+  - If dependency data not available: "Application dependency mapping not available — recommend enabling Azure Monitor VM Insights (Map) at least 24 hours before the engagement to inform migration sequencing" (Azure Migrate dependency data may substitute only when `azureMigrate.enabled = true`)
 
 
 ## Risks and blockers
