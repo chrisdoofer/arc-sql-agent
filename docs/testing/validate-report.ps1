@@ -279,16 +279,24 @@ $results += Test-Assertion -Name "#104-TDD: Arc machine name correlated via link
 $estateTierDeclared = $reportContent -match '(?i)(estate size|tier 1|tier 2|tier 3|aggregated report format|instances across.*machines)'
 $results += Test-Assertion -Name "#78-TDD: Estate size/tier declaration present" -Category "TDD (adaptive formatting)" -Passed $estateTierDeclared -Detail $(if (-not $estateTierDeclared) { "Report does not contain an estate size or tier declaration. Expected: 'Estate size: N instances' or 'Tier 1/2/3' label in Estate summary." } else { "" })
 
-# #78-TDD (Tier 1 enforcement): 2-instance regression estate MUST NOT produce an Appendix section
-$appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|^#\s+Appendix'
-$results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
+# Tier detection: the Tier-1 enforcement assertions below only apply to a Tier 1 (<=10 instance)
+# estate. A Tier 2/3 estate legitimately uses aggregated structures and an Appendix (see
+# references/output-template.md), so only enforce "no appendix / no action-grouped table" when the
+# report actually declares Tier 1 and does not declare Tier 2/3.
+$isTier1 = ($reportContent -match '(?i)tier\s*1') -and -not ($reportContent -match '(?i)tier\s*[23]')
 
-# #78-TDD (Tier 1 enforcement): 2-instance estate MUST NOT use action-grouped migration target table
-# Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
-# This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
-# false positives from general narrative text that mentions "Migration target" or "Machines".
-$actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
-$results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
+if ($isTier1) {
+    # #78-TDD (Tier 1 enforcement): small estate MUST NOT produce an Appendix section
+    $appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|(?m)^#{1,6}\s+Appendix'
+    $results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
+
+    # #78-TDD (Tier 1 enforcement): small estate MUST NOT use action-grouped migration target table
+    # Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
+    # This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
+    # false positives from general narrative text that mentions "Migration target" or "Machines".
+    $actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
+    $results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
+}
 
 # --- Section 9: Branding/Formatting ---
 $results += Test-ContentContains -Content $reportContent -Pattern "Microsoft" -Name "Branding: Microsoft wordmark" -Category "Formatting"
