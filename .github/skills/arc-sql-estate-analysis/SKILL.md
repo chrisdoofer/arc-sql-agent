@@ -91,15 +91,16 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
 6. Azure Migrate project discovery is performed as part of the consolidated estate query in Phase 4 (the `microsoft.migrate/migrateprojects` type is included in that query). There is no need to run a separate project discovery query at this point. Once the consolidated query result is available in Phase 4, extract Migrate project rows from it and proceed as follows:
 
 7. If one or more Azure Migrate projects are found:
+   - **`azureMigrate.enabled` defaults to `false`. Only set it to `true` if the user (or a valid Unattended prompt) explicitly opts in by selecting a project below. When it remains `false`, no Azure Migrate utilisation, SKU, cost, readiness, or dependency data may appear anywhere in the output.**
    - if a valid Unattended mode prompt already supplied the Azure Migrate project decision, honour it without an `ask_user` prompt:
-     - if the prompt names a project and that project is found in scope, store its resource ID for use in Phase 4 data acquisition
-     - if the prompt says to auto-select the only project in scope, do so only when exactly one project exists; otherwise stop and report that the project decision is ambiguous in the validated scope
-     - if the prompt says to continue without Azure Migrate data when no matching project is found, continue and note that decision
+     - if the prompt names a project and that project is found in scope, store its resource ID for use in Phase 4 data acquisition **and set `azureMigrate.enabled = true`**
+     - if the prompt says to auto-select the only project in scope, do so only when exactly one project exists **and set `azureMigrate.enabled = true`**; otherwise stop and report that the project decision is ambiguous in the validated scope
+     - if the prompt says to continue without Azure Migrate data when no matching project is found, continue with `azureMigrate.enabled = false` and note that decision
      - if the prompt names a project that is not found and does not explicitly allow continuing without Azure Migrate data, stop and report that the requested project could not be resolved in the validated scope
    - otherwise present the list to the user via `ask_user`
-   - prompt: "I found the following Azure Migrate project(s) in your tenant. Would you like me to include utilisation and dependency data from one of these in the analysis?"
-   - choices: list of project names (with subscription and resource group context) + "Skip — don't use Azure Migrate data"
-   - if the user selects a project, store the project resource ID for use in Phase 4 data acquisition
+   - prompt: "I found the following Azure Migrate project(s) in your tenant. Would you like me to include utilisation and dependency data from one of these in the analysis? (Not required — the core analysis uses Azure Update Manager and Azure Monitor VM Insights.)"
+   - choices: "Skip — don't use Azure Migrate data (recommended)" + list of project names (with subscription and resource group context)
+   - if the user selects a project, store the project resource ID for use in Phase 4 data acquisition **and set `azureMigrate.enabled = true`**; if the user skips, keep `azureMigrate.enabled = false`
 
 8. If no Azure Migrate projects are found:
    - note internally that Azure Migrate data is unavailable
@@ -280,7 +281,7 @@ Unattended mode is the single sanctioned way to run this skill end to end withou
    - map fields to the analysis model where possible
    - clearly state any missing columns or unsupported inputs
 
-7. Azure Migrate utilisation data extraction (when an Azure Migrate project was selected in Phase 1):
+7. Azure Migrate utilisation data extraction (**only when `azureMigrate.enabled = true`** and an Azure Migrate project was selected in Phase 1; if the flag is `false` — the default — skip this step entirely and treat any absent utilisation telemetry as a data gap to be filled by Azure Monitor VM Insights performance collection):
 
    > **Resource type note:** `Microsoft.Migrate/migrateProjects` is the project *container* resource used for discovery (returned by the consolidated ARG query). Assessment and utilisation data lives under a **different resource type**: `Microsoft.Migrate/assessmentProjects`. Do not query `migrateProjects` for assessments — it only supports api-versions up to `2020-06-01-preview` and has no assessment sub-resources.
 
@@ -1048,6 +1049,7 @@ SqlAssessment_CL
    - Azure SQL Managed Instance
    - SQL Server on Azure Virtual Machines
    - Arc-enabled SQL Server PAYG as an interim transition option
+   - **Data-source guardrail:** derive target recommendations from **core-path evidence** (Enterprise downgrade audit runtime complexity, estate composition, security/patch posture, and Azure Monitor VM Insights dependency/performance data). **Do not include any Azure Migrate–sourced SKU, cost, readiness score, or utilisation figure unless `azureMigrate.enabled = true`.** When utilisation telemetry is unavailable, omit compute SKU and cost and record the gap under "Data gaps / follow-up questions" — never substitute Azure Migrate data by default.
    - explicitly state whether Azure Hybrid Benefit appears eligible based on the declared SA-covered cores
    - reflect the declared SA position in TCO comparisons and PAYG versus licence-included guidance
    - include authoritative Microsoft URLs for target-specific remediation guidance where applicable:
@@ -1061,7 +1063,7 @@ SqlAssessment_CL
      - provide concise remediation steps tied to the evidenced blocker
      - if blocker detail is not available, state that clearly and add it to Data gaps / follow-up questions instead of inferring a reason
 
-8. When Azure Migrate utilisation data is available:
+8. When Azure Migrate utilisation data is available **and `azureMigrate.enabled = true`** (otherwise skip this entire step — do not emit any Azure Migrate utilisation, SKU, cost, or readiness figure):
    - include workload utilisation baselines in Estate summary with source attribution:
      - for SQL assessment data: "Azure Migrate SQL assessment: {assessment name}, updated {lastUpdatedTime}"
      - for VM assessment data: "Azure Migrate project: {name}"
