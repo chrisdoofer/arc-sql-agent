@@ -18,29 +18,41 @@ Analyse this Arc-enabled SQL estate and include a security-exposure section. Use
 ## Prompt 6 - patch debt and CVE headline
 Assess this SQL Server estate and tell me which machines carry the most patch debt (missing security/critical updates) and which have High/Medium-confidence CVEs mapped from those missing patches. Keep unmapped security patches visible as patch debt.
 
-## Prompt 7 - optional Azure Migrate utilisation and dependency enrichment
-Analyse this Arc-enabled SQL estate. Azure Migrate is optional here — if there's a project in the tenant, additionally include utilisation baselines and application dependency mapping, but the core security-exposure findings should come from Azure Update Manager, not Azure Migrate.
+## Prompt 7 - application dependency mapping via Azure Monitor VM Insights (core path)
+Analyse this Arc-enabled SQL estate and include application dependency mapping. Use pre-enabled Azure Monitor VM Insights (Log Analytics `VMConnection`/`VMProcess`/`VMComputer`) as the dependency source, and recommend migration wave sequencing from it. Do not use Azure Migrate — dependency data should come from VM Insights.
 
-## Prompt 8 - migration sequencing with dependency analysis
-Assess this SQL Server estate for Azure migration. I have Azure Migrate deployed with dependency analysis — please use that data to recommend migration wave sequencing based on application dependencies.
+## Prompt 8 - SKU right-sizing from VM Insights performance metrics (core path)
+Review this Arc-enabled SQL estate and validate SKU right-sizing using Azure Monitor VM Insights performance metrics (CPU/memory from `InsightsMetrics`). If VM Insights is configured Map-only (no performance counters), record sizing as a data gap and recommend enabling VM Insights performance collection — do not substitute Azure Migrate or guess a SKU.
 
-## Prompt 9 - right-sizing validation with Azure Migrate
-Review this Arc-enabled SQL estate and validate SKU right-sizing recommendations using Azure Migrate performance data. I want to see actual CPU and memory utilisation alongside the sizing recommendations.
+## Prompt 9 - migration sequencing from dependencies
+Assess this SQL Server estate for Azure migration and recommend migration wave sequencing based on application dependencies from Azure Monitor VM Insights. Flag SQL-to-SQL dependencies that must move together.
 
-## Prompt 10 - include dependency CSV export from Azure Migrate
-Analyse this Arc-enabled SQL estate. I've exported the dependency data from Azure Migrate as a CSV — here it is. Please include application dependency mapping in the analysis and recommend migration wave sequencing.
+---
 
-## Prompt 11 - retrieve dependencies directly via the Dependency Map API
-Analyse this Arc-enabled SQL estate. I have an Azure Migrate Dependency Map set up — pull the dependency data directly via the `Microsoft.DependencyMap` API (no portal CSV export) and use it to recommend migration wave sequencing.
+### Optional Azure Migrate enrichment (opt-in — sets `azureMigrate.enabled = true`)
 
-## Prompt 12 - unattended end-to-end analysis (zero further interaction)
+> Azure Migrate is **optional enrichment and off by default**. The prompts below explicitly opt in; without them, **no Azure Migrate utilisation, SKU, cost, readiness, or dependency data appears in the output**. Core security-exposure findings always come from Azure Update Manager regardless.
+
+## Prompt 10 - opt in to Azure Migrate utilisation and dependency enrichment
+Analyse this Arc-enabled SQL estate and enable Azure Migrate enrichment. If there's a project in the tenant, additionally include utilisation baselines and application dependency mapping from it. Core security-exposure findings must still come from Azure Update Manager, not Azure Migrate.
+
+## Prompt 11 - right-sizing validation with Azure Migrate performance data
+Review this Arc-enabled SQL estate and enable Azure Migrate enrichment to validate SKU right-sizing using Azure Migrate performance data. I want to see actual CPU and memory utilisation alongside the sizing recommendations.
+
+## Prompt 12 - include dependency CSV export from Azure Migrate
+Analyse this Arc-enabled SQL estate with Azure Migrate enrichment enabled. I've exported the dependency data from Azure Migrate as a CSV — here it is. Please include application dependency mapping in the analysis and recommend migration wave sequencing.
+
+## Prompt 13 - retrieve dependencies directly via the Dependency Map API
+Analyse this Arc-enabled SQL estate with Azure Migrate enrichment enabled. I have an Azure Migrate Dependency Map set up — pull the dependency data directly via the `Microsoft.DependencyMap` API (no portal CSV export) and use it to recommend migration wave sequencing.
+
+## Prompt 14 - unattended end-to-end analysis (zero further interaction)
 
 > ⚠️ **WARNING — use with care.** This prompt grants **standing approval** for the skill to make **write changes to your Arc-enabled machines without asking again**: it installs/upgrades the Arc Run Command extension and creates, updates, and deletes Run Command resources (the reusable `estate-audit-*` slots), and executes the built-in DMV and runtime audit scripts against your SQL instances.
 > There are **no per-step confirmations** once it starts.
 > - Only use against an estate you **own and are authorized to audit**.
 > - Confirm the **tenant and subscription scope** are correct before submitting — scope validation still runs, but standing approval means mistakes execute automatically within the validated scope.
 > - Runs against **all** in-scope Enterprise DB-engine instances.
-> - Prefer the interactive prompts (Prompts 1–9) for production estates or when you want to review each script first.
+> - Prefer the interactive prompts (Prompts 1–13) for production estates or when you want to review each script first.
 >
 > Replace the `<...>` placeholders with your values.
 
@@ -48,12 +60,12 @@ Run the Arc-enabled SQL estate analysis unattended, end to end, with no further 
 
 - Tenant: <tenant-id-or-dns>
 - Subscription scope: <all subscriptions | these subscription IDs: ...>
-- Azure Migrate (optional enrichment, off by default): use project <project-name> (or auto-select the only project in scope; if none, continue without it). If enabled, include utilisation baseline and application dependency mapping via the Microsoft.DependencyMap API. Core security-exposure findings come from Azure Update Manager regardless of this decision.
+- Azure Migrate (optional enrichment, `azureMigrate.enabled = false` by default): leave disabled unless you set it here — use project <project-name> (or auto-select the only project in scope; if none, continue without it). If enabled, include utilisation baseline and application dependency mapping from Azure Migrate. If left disabled, no Azure Migrate data appears in the output. Core security-exposure findings come from Azure Update Manager regardless of this decision.
 - Security exposure: use Azure Update Manager assessment data (Resource Graph `patchassessmentresources`) → MSRC KB→CVE mapping → NVD enrichment. Assessment-only — do not install patches.
 - Software Assurance: <Yes|No|Unsure> — Standard SA-covered cores: <n>, Enterprise SA-covered cores: <n>.
 - Run the SQL on Azure VM best-practices alignment scan: yes, including the full Arc Run Command scan if Resource Graph/BPA coverage is incomplete.
 - Enterprise downgrade audit: I pre-authorize all required Arc Run Command write operations on the in-scope machines — extension install/upgrade, and create/update/delete of the reusable estate-audit-* command slots — using the skill's built-in Pattern 1 (DMV) and Pattern 2 (runtime) reference scripts only. Run both stages across all Enterprise DB-engine instances. Do not ask me to approve individual machines or scripts; instead list every write operation you performed in the final report.
-- Dependency data: pull directly via the Microsoft.DependencyMap API (no portal CSV prompt); if unavailable, note as a data gap and continue.
+- Dependency data: use pre-enabled Azure Monitor VM Insights (Log Analytics `VMConnection`/`VMProcess`) as the primary source; only if Azure Migrate is enabled above, pull via the Microsoft.DependencyMap API instead. If no dependency data is available, note as a data gap and continue.
 - Output: produce the full two-part report and export the branded HTML report to the working directory.
 
 Standing-authorization phrase: "Run unattended — I pre-authorize all Arc Run Command write operations described in Phase 5 using the skill's built-in reference scripts."
