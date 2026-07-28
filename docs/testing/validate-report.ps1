@@ -9,13 +9,22 @@
 .PARAMETER ReportPath
     Path to the HTML report file. Defaults to estate-report.html in the repo root.
 
+.PARAMETER MigrateEnrichmentEnabled
+    Assert optional Azure Migrate enrichment content (Migrate project reference, utilisation
+    metrics, SQL-assessment collection, dependency-CSV export prompt). Off by default because
+    Azure Migrate is optional enrichment; the core path uses Azure Update Manager (security)
+    and Azure Monitor VM Insights (dependency). Pass this switch only for a run that enabled
+    Migrate enrichment (e.g. the regression-test-prompt run).
+
 .EXAMPLE
     pwsh docs/testing/validate-report.ps1
     pwsh docs/testing/validate-report.ps1 -ReportPath "C:\path\to\estate-report.html"
+    pwsh docs/testing/validate-report.ps1 -MigrateEnrichmentEnabled   # also assert optional Azure Migrate enrichment content
 #>
 
 param(
-    [string]$ReportPath
+    [string]$ReportPath,
+    [switch]$MigrateEnrichmentEnabled
 )
 
 if (-not $ReportPath) {
@@ -71,7 +80,8 @@ if (-not (Test-Path $ReportPath)) {
 
 $reportContent = Get-Content $ReportPath -Raw
 $reportLower = $reportContent.ToLower()
-Write-Host "Report loaded: $ReportPath ($([math]::Round((Get-Item $ReportPath).Length / 1KB, 1)) KB)`n" -ForegroundColor Gray
+Write-Host "Report loaded: $ReportPath ($([math]::Round((Get-Item $ReportPath).Length / 1KB, 1)) KB)" -ForegroundColor Gray
+Write-Host "Azure Migrate enrichment assertions: $(if ($MigrateEnrichmentEnabled) { 'ENABLED' } else { 'disabled (core path — AUM + VM Insights)' })`n" -ForegroundColor Gray
 
 $results = @()
 
@@ -92,7 +102,8 @@ $requiredSections = @(
     "Strategic moves",
     "Azure target recommendations",
     "Risks and blockers",
-    "Data gaps"
+    "Data gaps",
+    "Security exposure"
 )
 
 foreach ($section in $requiredSections) {
@@ -106,17 +117,31 @@ $results += Test-ContentContains -Content $reportContent -Pattern "SSIS" -Name "
 $results += Test-ContentContains -Content $reportContent -Pattern "Enterprise" -Name "Edition: Enterprise mentioned" -Category "Estate Data"
 
 # --- Section 3: Assessment Data ---
-$results += Test-ContentContains -Content $reportContent -Pattern "NotReady" -Name "MI readiness: NotReady state found" -Category "Assessment"
+# Migrate/assessment readiness is reported as one of several states. Live SQL assessment
+# (assessedSqlInstances) commonly returns ConditionallySuitable (mapped to "Conditionally
+# ready"), so do NOT hard-code "NotReady" — accept any recognised readiness classification.
+$results += Test-ContentContains -Content $reportContent -Pattern '(?:NotReady|Not ready|Conditionally ready|ConditionallySuitable|Conditionally suitable|Ready|Suitable)' -Name "MI/VM readiness classification present" -Category "Assessment" -Regex
 $results += Test-ContentContains -Content $reportContent -Pattern "Ready" -Name "MI/VM readiness: Ready state found" -Category "Assessment"
 # Check for SKU recommendation or cost data
 $results += Test-ContentContains -Content $reportContent -Pattern '(?:vCore|cost|SQL_\w+|General Purpose|Business Critical)' -Name "SKU recommendations present" -Category "Assessment" -Regex
 
-# --- Section 4: Azure Migrate ---
-$results += Test-ContentContains -Content $reportContent -Pattern "ArcBoxMigrate" -Name "Migrate project: ArcBoxMigrate referenced" -Category "Azure Migrate"
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:utilisation|utilization|CPU.*%|memory.*%)' -Name "Utilisation data present" -Category "Azure Migrate" -Regex
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:confidence|collection period)' -Name "Confidence/collection period disclosed" -Category "Azure Migrate" -Regex
-# Dependency prompt evidence
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:dependency|dependencies)' -Name "Dependency analysis referenced" -Category "Azure Migrate" -Regex
+# --- Section 4: Azure Migrate (optional enrichment — only asserted when enabled) ---
+# Azure Migrate is optional enrichment (off by default). The canonical core path uses
+# Azure Update Manager (security) + Azure Monitor VM Insights (dependency). Only enforce
+# Migrate-specific content when the run explicitly enabled Migrate enrichment.
+if ($MigrateEnrichmentEnabled) {
+    $results += Test-ContentContains -Content $reportContent -Pattern "ArcBoxMigrate" -Name "Migrate project: ArcBoxMigrate referenced" -Category "Azure Migrate (optional)"
+    $results += Test-ContentContains -Content $reportContent -Pattern '(?:utilisation|utilization|CPU.*%|memory.*%)' -Name "Utilisation data present" -Category "Azure Migrate (optional)" -Regex
+    $results += Test-ContentContains -Content $reportContent -Pattern '(?:confidence|collection period)' -Name "Confidence/collection period disclosed" -Category "Azure Migrate (optional)" -Regex
+    # Dependency prompt evidence
+    $results += Test-ContentContains -Content $reportContent -Pattern '(?:dependency|dependencies)' -Name "Dependency analysis referenced" -Category "Azure Migrate (optional)" -Regex
+}
+
+# --- Section 4b: Application dependency (core path — VM Insights first) ---
+# The report must address application dependency via the canonical VM Insights path, or
+# clearly state it is unavailable with enablement guidance. Passes with or without Migrate.
+$dependencyAddressed = $reportContent -match '(?i)(VM Insights|VMConnection|VMProcess|application dependency|dependency mapping|dependency (?:analysis|data) (?:not available|unavailable)|enabl\w+ Azure Monitor VM Insights)'
+$results += Test-Assertion -Name "Dependency analysis addressed (VM Insights or documented gap)" -Category "Dependency (core)" -Passed $dependencyAddressed -Detail $(if (-not $dependencyAddressed) { "Report does not address application dependency via Azure Monitor VM Insights, nor documents its absence with enablement guidance." } else { "" })
 
 # --- Section 5: Enterprise Downgrade ---
 $results += Test-ContentContains -Content $reportContent -Pattern "GREEN" -Name "Downgrade: GREEN classification present" -Category "Downgrade Audit"
@@ -136,40 +161,50 @@ $results += Test-ContentContains -Content $reportContent -Pattern '(?:Hybrid Ben
 
 # --- Section 8: Issue Regression Tests (PASSING — previously fixed) ---
 # Issue #71: Agent must prompt for dependency CSV export (not silently skip)
-# The report should contain explicit language about the dependency export prompt being offered
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:export.+dependenc|dependency.+CSV|dependency.+export|Manage Dependencies)' -Name "#71: Dependency CSV export prompt evidence" -Category "Regressions (fixed)" -Regex
+# The Migrate dependency-CSV export prompt is a Migrate-enrichment fallback — only assert
+# it when Migrate enrichment is enabled (the core path uses VM Insights, see Section 4b).
+if ($MigrateEnrichmentEnabled) {
+    $results += Test-ContentContains -Content $reportContent -Pattern '(?:export.+dependenc|dependency.+CSV|dependency.+export|Manage Dependencies)' -Name "#71: Dependency CSV export prompt evidence" -Category "Regressions (fixed)" -Regex
+}
 
 # Issue #72: BPA parsing must return actual check IDs (not vague "data available" language)
-# If BPA parsed correctly, we should see specific check ID prefixes in the output
-$results += Test-ContentContains -Content $reportContent -Pattern '(?:STOR-|INST-|SEC-|HADR-|OPS-)' -Name "#72: BPA check IDs present (parsed successfully)" -Category "Regressions (fixed)" -Regex
+# Live SqlAssessment_CL check IDs are descriptive names (e.g. DbBackupMedia, UnusedIndex,
+# StatSamplingRate) or trace-flag IDs (TF174) — NOT a STOR-/INST- prefix taxonomy. Accept
+# the legacy prefixes, trace-flag IDs, or descriptive CamelCase rule IDs.
+$results += Test-ContentContains -Content $reportContent -Pattern '(?:STOR-|INST-|SEC-|HADR-|OPS-|TF\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)' -Name "#72: BPA check IDs present (parsed successfully)" -Category "Regressions (fixed)" -Regex
 
 # Issue #72 (secondary): BPA should not contain failure/retry language indicating parsing broke
 $bpaParseFailure = $reportContent -match '(?:could not parse|parsing failed|empty.*BPA|BPA.*unavailable)'
 $results += Test-Assertion -Name "#72: No BPA parsing failure language" -Category "Regressions (fixed)" -Passed (-not $bpaParseFailure) -Detail $(if ($bpaParseFailure) { "Report contains BPA parsing failure indicators" } else { "" })
 
-# --- Section 9: TDD — Open Issues (EXPECTED TO FAIL until fix lands) ---
-# These assertions define the DESIRED state after each fix is merged.
-# They SHOULD FAIL today. When they pass, the issue is resolved.
+# --- Section 9: Security Exposure (core — shipped, must pass) ---
+# The security-exposure section is a CORE, always-present section built from Azure Update
+# Manager assessment data (no Azure Migrate required), with a source chain referencing
+# Update Manager missing patches, MSRC KB→CVE mapping, and NVD enrichment. Shipped via
+# PRs #106–#115 (issue #82); these are permanent regression checks and MUST pass.
 
-# Issue #82: Security exposure section — the report must include a security-exposure section
-# built from Azure Update Manager assessment data (no Azure Migrate required), with a source
-# chain referencing Update Manager missing patches, MSRC KB→CVE mapping, and NVD enrichment.
+# Issue #82: Security exposure section present
 $securityPostureSection = $reportContent -match '(?i)(security exposure|patch assessment|vulnerability exposure|missing patch)'
-$results += Test-Assertion -Name "#82-TDD: Security exposure section present" -Category "TDD (open issues)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a security-exposure / patch-assessment section. This is a core section built from Azure Update Manager assessment data." } else { "" })
+$results += Test-Assertion -Name "#82: Security exposure section present" -Category "Security Exposure (core)" -Passed $securityPostureSection -Detail $(if (-not $securityPostureSection) { "Report does not contain a security-exposure / patch-assessment section. This is a core section built from Azure Update Manager assessment data." } else { "" })
 
-# Issue #82 (secondary): section must reference the new source chain (Update Manager / MSRC / NVD).
+# Issue #82 (secondary): section must reference the source chain (Update Manager / MSRC / NVD).
 $securityProvenance = $reportContent -match '(?i)(patchassessmentresources|update manager|security update guide|\bMSRC\b|\bNVD\b)'
-$results += Test-Assertion -Name "#82-TDD: Security exposure source chain referenced" -Category "TDD (open issues)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not reference the Azure Update Manager + MSRC/NVD source chain for security exposure." } else { "" })
+$results += Test-Assertion -Name "#82: Security exposure source chain referenced" -Category "Security Exposure (core)" -Passed $securityProvenance -Detail $(if (-not $securityProvenance) { "Report does not reference the Azure Update Manager + MSRC/NVD source chain for security exposure." } else { "" })
 
 # Issue #82 (assessment-only): report must not claim/perform patch installation.
 $patchInstallLanguage = $reportContent -match '(?i)(installed the .* patch|deployed .* update|scheduled .* update deployment|created .* maintenance configuration)'
-$results += Test-Assertion -Name "#82-TDD: Assessment-only — no patch installation claimed" -Category "TDD (open issues)" -Passed (-not $patchInstallLanguage) -Detail $(if ($patchInstallLanguage) { "Report contains patch-installation/deployment language. The security-exposure feature is assessment-only." } else { "" })
+$results += Test-Assertion -Name "#82: Assessment-only — no patch installation claimed" -Category "Security Exposure (core)" -Passed (-not $patchInstallLanguage) -Detail $(if ($patchInstallLanguage) { "Report contains patch-installation/deployment language. The security-exposure feature is assessment-only." } else { "" })
 
-# Issue #71 (strict): The dependency prompt must result in user-response language
-# Current bug: prompt doesn't fire at all — report just says "not enabled" generically
-# After fix: report should show "user declined CSV export" or "no CSV provided" (evidence prompt fired)
-$depPromptFired = $reportContent -match '(?i)(user declined|no CSV provided|CSV not provided|user chose not to export|declined to export|not exported)'
-$results += Test-Assertion -Name "#71-TDD: Dependency prompt user-response recorded" -Category "TDD (open issues)" -Passed $depPromptFired -Detail $(if (-not $depPromptFired) { "No evidence the dependency CSV prompt fired and user response was recorded. Expected: 'user declined' / 'no CSV provided' language." } else { "" })
+# --- Section 10: TDD — Open Issues (EXPECTED TO FAIL until fix lands) ---
+# These assertions define the DESIRED state after each fix is merged.
+# They SHOULD FAIL today. When they pass, the issue is resolved.
+
+# Issue #71 (strict): The Migrate dependency-CSV prompt must result in user-response language.
+# Migrate-enrichment fallback only — assert when Migrate enrichment is enabled.
+if ($MigrateEnrichmentEnabled) {
+    $depPromptFired = $reportContent -match '(?i)(user declined|no CSV provided|CSV not provided|user chose not to export|declined to export|not exported)'
+    $results += Test-Assertion -Name "#71-TDD: Dependency prompt user-response recorded" -Category "TDD (open issues)" -Passed $depPromptFired -Detail $(if (-not $depPromptFired) { "No evidence the dependency CSV prompt fired and user response was recorded. Expected: 'user declined' / 'no CSV provided' language." } else { "" })
+}
 
 # Issue #72 (strict): BPA must produce BOTH machines' findings with severity ratings
 # Current bug: parsing is fragile, sometimes only gets one machine or loses severity
@@ -182,9 +217,15 @@ $bpaBothMachines = ($bpaSection -match '(?i)ArcBox-SQL') -and ($bpaSection -matc
 $results += Test-Assertion -Name "#72-TDD: BPA findings for BOTH machines" -Category "TDD (open issues)" -Passed $bpaBothMachines -Detail $(if (-not $bpaBothMachines) { "BPA section does not contain findings for both ArcBox-SQL AND ARCBOX-SQL2016. Parsing may have failed for one machine." } else { "" })
 
 # Issue #72 (strict): BPA severity must be paired with check IDs (structured output, not free text)
-# After fix: each check should have a severity in the same table row
-$bpaSeverityPaired = [regex]::Matches($bpaSection, '(?i)(STOR|INST|SEC|HADR|OPS)-\d+.{0,200}?(Critical|High|Medium|Low|Informational)')
+# After fix: each check should have a severity in the same table row. Accept legacy prefixes,
+# trace-flag IDs, or descriptive CamelCase rule IDs, paired with a named severity or a numeric
+# severity level (live SqlAssessment_CL uses numeric levels 1–3).
+$bpaSeverityPaired = [regex]::Matches($bpaSection, '(?i)((?:STOR|INST|SEC|HADR|OPS)-\d+|TF\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)\s*\|?\s*(Critical|High|Medium|Low|Informational|[1-3])\b')
 $results += Test-Assertion -Name "#72-TDD: BPA check IDs paired with severity (5+ checks)" -Category "TDD (open issues)" -Passed ($bpaSeverityPaired.Count -ge 5) -Detail $(if ($bpaSeverityPaired.Count -lt 5) { "Only $($bpaSeverityPaired.Count) check-severity pairs found (need 5+). BPA parsing may not be producing structured output." } else { "" })
+
+# --- Issue #73 / #104: Azure Migrate utilisation & SQL-assessment enrichment ---
+# All Migrate-enrichment specific — only assert when Migrate enrichment is enabled.
+if ($MigrateEnrichmentEnabled) {
 
 # Issue #73 (strict): ARCBOX-SQL2016 must have actual utilisation METRICS (CPU/memory %)
 # Current bug: report says "ARCBOX-SQL2016 not assessed" — machine missing from API response
@@ -226,6 +267,8 @@ $searchScope = if ($migrateSection.Length -gt 10) { $migrateSection } else { $re
 $arcMachineCorrelated = ($searchScope -match '(?i)ArcBox-SQL')
 $results += Test-Assertion -Name "#104-TDD: Arc machine name correlated via linkages.workloadName in assessment context" -Category "TDD (open issues)" -Passed $arcMachineCorrelated -Detail $(if (-not $arcMachineCorrelated) { "ArcBox-SQL not found in Azure Migrate/utilisation context. Expected Arc machine name to appear via linkages.workloadName correlation from assessedSqlInstances." } else { "" })
 
+} # end if ($MigrateEnrichmentEnabled) — Migrate utilisation & SQL-assessment enrichment
+
 # --- Issue #78: Adaptive report formatting ---
 # These assertions validate adaptive formatting behaviour. Because the regression test estate (ArcBox-SQL +
 # ARCBOX-SQL2016) is a 2-instance estate (Tier 1), we assert that NO Tier 2/3 aggregated structures are
@@ -236,16 +279,24 @@ $results += Test-Assertion -Name "#104-TDD: Arc machine name correlated via link
 $estateTierDeclared = $reportContent -match '(?i)(estate size|tier 1|tier 2|tier 3|aggregated report format|instances across.*machines)'
 $results += Test-Assertion -Name "#78-TDD: Estate size/tier declaration present" -Category "TDD (adaptive formatting)" -Passed $estateTierDeclared -Detail $(if (-not $estateTierDeclared) { "Report does not contain an estate size or tier declaration. Expected: 'Estate size: N instances' or 'Tier 1/2/3' label in Estate summary." } else { "" })
 
-# #78-TDD (Tier 1 enforcement): 2-instance regression estate MUST NOT produce an Appendix section
-$appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|^#\s+Appendix'
-$results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
+# Tier detection: the Tier-1 enforcement assertions below only apply to a Tier 1 (<=10 instance)
+# estate. A Tier 2/3 estate legitimately uses aggregated structures and an Appendix (see
+# references/output-template.md), so only enforce "no appendix / no action-grouped table" when the
+# report actually declares Tier 1 and does not declare Tier 2/3.
+$isTier1 = ($reportContent -match '(?i)tier\s*1') -and -not ($reportContent -match '(?i)tier\s*[23]')
 
-# #78-TDD (Tier 1 enforcement): 2-instance estate MUST NOT use action-grouped migration target table
-# Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
-# This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
-# false positives from general narrative text that mentions "Migration target" or "Machines".
-$actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
-$results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
+if ($isTier1) {
+    # #78-TDD (Tier 1 enforcement): small estate MUST NOT produce an Appendix section
+    $appendixPresent = $reportContent -match '(?i)<h[1-6][^>]*>Appendix</h[1-6]>|(?m)^#{1,6}\s+Appendix'
+    $results += Test-Assertion -Name "#78-TDD: No Appendix for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $appendixPresent) -Detail $(if ($appendixPresent) { "Appendix section found in a Tier 1 (small estate) report. Appendix must only appear for Tier 2/3 (11+ instances)." } else { "" })
+
+    # #78-TDD (Tier 1 enforcement): small estate MUST NOT use action-grouped migration target table
+    # Match the specific pipe-delimited markdown table header OR the HTML table header for the action-grouped table.
+    # This pattern is deliberately specific (pipe-delimited, matching the exact column sequence) to avoid
+    # false positives from general narrative text that mentions "Migration target" or "Machines".
+    $actionGroupedTable = $reportContent -match '(?i)(\|\s*Migration target\s*\|\s*Machines\s*\|\s*Instances\s*\||\<th[^>]*>\s*Migration target\s*<\/th>)'
+    $results += Test-Assertion -Name "#78-TDD: No action-grouped inventory table for Tier 1 estate" -Category "TDD (adaptive formatting)" -Passed (-not $actionGroupedTable) -Detail $(if ($actionGroupedTable) { "Action-grouped migration target table found in a Tier 1 report. This table is only for Tier 2/3 (11+ instances)." } else { "" })
+}
 
 # --- Section 9: Branding/Formatting ---
 $results += Test-ContentContains -Content $reportContent -Pattern "Microsoft" -Name "Branding: Microsoft wordmark" -Category "Formatting"

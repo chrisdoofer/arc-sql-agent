@@ -700,7 +700,7 @@ classification, OS type, last assessment time). Populates `PatchAssessmentSummar
 
 ```powershell
 $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
-az graph query -q "patchassessmentresources | where type !has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend byClass = prop.availablePatchCountByClassification | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = tostring(split(id, '/', 8)[0]), osType = tostring(prop.osType), assessmentState = tostring(prop.assessmentState), assessmentTime = tostring(prop.lastModifiedDateTime), securityCount = toint(byClass.security), criticalCount = toint(byClass.critical), otherCount = toint(byClass.other), subscriptionId, resourceGroup, tenantId" --subscriptions {subscriptionIds} --first 1000 -o json
+az graph query -q "patchassessmentresources | where type !has 'softwarepatches' | where subscriptionId in ('{sub1}','{sub2}') | extend prop = parse_json(properties) | extend byClass = prop.availablePatchCountByClassification | project machineResourceId = tostring(split(id, '/patchAssessmentResults/')[0]), machineName = tostring(split(id, '/', 8)[0]), osType = tostring(prop.osType), assessmentState = tostring(coalesce(prop.status, prop.configurationStatus.assessmentModeConfiguration.status, prop.assessmentState)), assessmentTime = tostring(prop.lastModifiedDateTime), securityCount = toint(byClass.security), criticalCount = toint(byClass.critical), otherCount = toint(byClass.other), subscriptionId, resourceGroup, tenantId" --subscriptions {subscriptionIds} --first 1000 -o json
 ```
 
 - Works for **both Windows and Linux** Arc machines (the `!has 'softwarepatches'` filter

@@ -6,7 +6,7 @@ Use this prompt to execute a full estate analysis with pre-defined answers. Copy
 
 1. Run `git pull` to get the latest skill changes
 2. Paste the prompt below into the Copilot CLI
-3. After execution completes, run the validation script: `pwsh docs/testing/validate-report.ps1`
+3. After execution completes, run the validation script. This regression run **enables** Azure Migrate enrichment (see the run parameters below), so pass `-MigrateEnrichmentEnabled` to assert the optional Migrate content: `pwsh docs/testing/validate-report.ps1 -MigrateEnrichmentEnabled`. For a core (Migrate-off) report, omit the switch.
 
 ## Test Prompt
 
