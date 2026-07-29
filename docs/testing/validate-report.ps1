@@ -173,8 +173,11 @@ if ($MigrateEnrichmentEnabled) {
 # the legacy prefixes, trace-flag IDs, or descriptive CamelCase rule IDs.
 $results += Test-ContentContains -Content $reportContent -Pattern '(?:STOR-|INST-|SEC-|HADR-|OPS-|TF\d+|[A-Z][a-z]+(?:[A-Z][a-z]+)+)' -Name "#72: BPA check IDs present (parsed successfully)" -Category "Regressions (fixed)" -Regex
 
-# Issue #72 (secondary): BPA should not contain failure/retry language indicating parsing broke
-$bpaParseFailure = $reportContent -match '(?:could not parse|parsing failed|empty.*BPA|BPA.*unavailable)'
+# Issue #72 (secondary): BPA should not contain failure/retry language indicating parsing broke.
+# The '.*' spanning patterns are anchored to a short adjacency window so unrelated later text
+# (e.g. "CVE enrichment unavailable" elsewhere in the flattened single-line HTML) cannot
+# false-match against an earlier "BPA" token.
+$bpaParseFailure = $reportContent -match '(?:could not parse|parsing failed|empty\s+\S{0,30}\s*BPA|BPA\s+\S{0,30}\s*unavailable)'
 $results += Test-Assertion -Name "#72: No BPA parsing failure language" -Category "Regressions (fixed)" -Passed (-not $bpaParseFailure) -Detail $(if ($bpaParseFailure) { "Report contains BPA parsing failure indicators" } else { "" })
 
 # --- Section 9: Security Exposure (core — shipped, must pass) ---
