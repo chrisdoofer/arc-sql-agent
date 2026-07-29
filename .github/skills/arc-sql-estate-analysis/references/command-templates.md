@@ -32,6 +32,26 @@ az connectedmachine run-command list --machine-name {machineName} --resource-gro
 
 ---
 
+### 1a. Verify RunCommandHandler Extension Health (pre-flight)
+
+**Purpose:** Confirm the `RunCommandHandlerWindows` extension is present and healthy on the target machine **before** submitting a Run Command. Older Arc agents (observed on agent 1.65) do not always auto-provision this extension; when it is absent, a `PUT` to `runCommands/{slot}` returns `provisioningState=Creating` optimistically but the slot never materialises and a follow-up `GET` returns `HCRP404`.
+
+**Usage:** Run this once per machine before the first Run Command submission. If the extension is missing or not `Succeeded`, do not trust an optimistic `Creating` response — either install/repair the extension (Phase 5 write approval) or record the machine as audit-incomplete in Data gaps.
+
+```powershell
+$env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+az connectedmachine extension list --machine-name {machineName} --resource-group {resourceGroup} --subscription {subscriptionId} --query "[?contains(name, 'RunCommandHandlerWindows')].{name:name, state:provisioningState}" -o json
+```
+
+**Placeholders:**
+- `{machineName}` — Arc machine name
+- `{resourceGroup}` — Resource group name
+- `{subscriptionId}` — Azure subscription ID (GUID)
+
+**Expected output:** A single element with `provisioningState = Succeeded`. An empty array (or a non-`Succeeded` state) means the machine cannot reliably run commands — see Template 2's post-submission verification step.
+
+---
+
 ### 2. Create or Update Run Command via REST API
 
 **Purpose:** Submit a PowerShell script to an Arc machine via Run Command using the REST API to avoid Azure CLI argument parsing issues.
@@ -83,6 +103,15 @@ az rest --method PUT --url "https://management.azure.com/subscriptions/{subscrip
 - No need to escape special characters or worry about command-line length
 
 **Expected output:** JSON response with run command resource details and provisioning state.
+
+> **Verify the slot after PUT — do not trust the optimistic `Creating` response.** The `PUT` returns immediately with `provisioningState=Creating` even on machines where the slot will never materialise (missing/unhealthy `RunCommandHandlerWindows` extension — see Template 1a). Always confirm the slot actually exists before polling for results:
+>
+> ```powershell
+> $env:AZURE_CORE_ONLY_SHOW_ERRORS = 'true'
+> az connectedmachine run-command show --machine-name {machineName} --resource-group {resourceGroup} --subscription {subscriptionId} --name {slotName} --query "provisioningState" -o tsv
+> ```
+>
+> If this returns `HCRP404` / resource-not-found (rather than `Creating`/`Succeeded`) within ~60s of the PUT, the extension is not servicing Run Commands on that host. Repair/install the extension (Phase 5 write approval) and retry, or record the machine as audit-incomplete in Data gaps — never report a downgrade/security result derived from a slot that never persisted.
 
 ---
 
