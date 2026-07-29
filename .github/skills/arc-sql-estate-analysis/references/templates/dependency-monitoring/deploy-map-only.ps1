@@ -64,6 +64,7 @@ foreach ($machineId in $MachineResourceIds) {
         --type $depName `
         --name $depName `
         --enable-auto-upgrade true `
+        --settings '{\"enableAMA\":true}' `
         -o none
 
     az monitor data-collection rule association create `

@@ -37,8 +37,10 @@ Use this path when you want an exact **Map-only** capture with no perf counters.
 
 - `deploy-map-only.bicep` — creates a **dedicated Log Analytics workspace** plus a **Map-only DCR**
   that sends only the `Microsoft-ServiceMap` stream.
-- `deploy-map-only.ps1` — deploys the Bicep template, installs AMA + Dependency Agent on the
-  supplied Arc machines, and creates DCR associations.
+- `deploy-map-only.ps1` — deploys the Bicep template, installs AMA + Dependency Agent (with
+  `enableAMA=true`, required so the Dependency Agent feeds the AMA-based `Microsoft-ServiceMap`
+  pipeline instead of running in legacy mode) on the supplied Arc machines, and creates DCR
+  associations.
 - `teardown-map-only.ps1` — removes DCR associations plus AMA / Dependency Agent extensions and can
   optionally delete the DCR and workspace.
 
