@@ -72,26 +72,65 @@ table dim_linux_patch_cve_mapping
 		mode: import
 		source =
 				let
-				    SupportedReleases = {"noble", "jammy", "focal"},
-				    RelevantPatchRows =
-				        Table.SelectRows(
-				            view_missing_patches,
-				            each
-				                Text.Lower(Text.Trim(Text.From([os_type]))) = "linux"
-				                    and List.Contains(
-				                        SupportedReleases,
-				                        Text.Lower(Text.Trim(Text.From([release_codename])))
-				                    )
-				                    and [patch_name] <> null
-				                    and Text.Trim(Text.From([patch_name])) <> ""
-				                    and [package_version] <> null
-				                    and Text.Trim(Text.From([package_version])) <> ""
+				    MappingType = type table [
+				        distribution = text,
+				        release_codename = text,
+				        package_name = text,
+				        package_version = text,
+				        advisory_id = text,
+				        cve_id = text,
+				        severity = text,
+				        product = text,
+				        published_at = nullable datetime,
+				        mapping_source = text,
+				        source_url = text
+				    ],
+				    SupportedUbuntuReleases = {"noble", "jammy", "focal"},
+				    SupportedRhelReleases = {"10", "9", "8", "7"},
+				    CutoffDate = Date.AddMonths(Date.From(DateTimeZone.UtcNow()), -24),
+				    RetryableStatusCodes = {429, 500, 502, 503, 504},
+				    RpmArchitectures = {"x86_64", "aarch64", "ppc64le", "s390x", "noarch", "i686"},
+				    NormalizeRpmVersion = (value as any) as text =>
+				        let
+				            Version = Text.Trim(Text.From(value)),
+				            WithoutArchitecture =
+				                List.Accumulate(
+				                    RpmArchitectures,
+				                    Version,
+				                    (state as text, architecture as text) =>
+				                        if Text.EndsWith(Text.Lower(state), "." & architecture)
+				                        then Text.Start(state, Text.Length(state) - Text.Length(architecture) - 1)
+				                        else state
+				                ),
+				            Normalized = if Text.StartsWith(WithoutArchitecture, "0:") then Text.AfterDelimiter(WithoutArchitecture, ":") else WithoutArchitecture
+				        in
+				            Normalized,
+				    RelevantLinuxRows =
+				        Table.Buffer(
+				            Table.SelectRows(
+				                view_missing_patches,
+				                each
+				                    Text.Lower(Text.Trim(Text.From([os_type]))) = "linux"
+				                        and [patch_name] <> null
+				                        and Text.Trim(Text.From([patch_name])) <> ""
+				                        and [package_version] <> null
+				                        and Text.Trim(Text.From([package_version])) <> ""
+				                        and [release_codename] <> null
+				                        and Text.Trim(Text.From([release_codename])) <> ""
+				            )
 				        ),
-				    RelevantPatchKeys =
+				    UbuntuRelevantRows =
+				        Table.SelectRows(
+				            RelevantLinuxRows,
+				            each
+				                [os_distribution] = "Ubuntu"
+				                    and List.Contains(SupportedUbuntuReleases, Text.Lower(Text.Trim(Text.From([release_codename]))))
+				        ),
+				    UbuntuPatchKeys =
 				        List.Buffer(
 				            List.Distinct(
 				                List.Transform(
-				                    Table.ToRecords(RelevantPatchRows),
+				                    Table.ToRecords(UbuntuRelevantRows),
 				                    each
 				                        Text.Lower(Text.Trim(Text.From([release_codename])))
 				                            & "|"
@@ -101,15 +140,9 @@ table dim_linux_patch_cve_mapping
 				                )
 				            )
 				        ),
-				    RelevantPatchKeySet =
-				        Record.FromList(
-				            List.Repeat({true}, List.Count(RelevantPatchKeys)),
-				            RelevantPatchKeys
-				        ),
-				    PageSize = 20,
-				    CutoffDate = Date.AddMonths(Date.From(DateTimeZone.UtcNow()), -24),
-				    RetryableStatusCodes = {429, 500, 502, 503, 504},
-				    FetchPage = (offset as number, optional attempt as nullable number) as record =>
+				    UbuntuPatchKeySet = Record.FromList(List.Repeat({true}, List.Count(UbuntuPatchKeys)), UbuntuPatchKeys),
+				    UbuntuPageSize = 20,
+				    FetchUbuntuPage = (offset as number, optional attempt as nullable number) as record =>
 				        let
 				            CurrentAttempt = if attempt = null then 0 else attempt,
 				            Response =
@@ -118,62 +151,36 @@ table dim_linux_patch_cve_mapping
 				                        "https://ubuntu.com",
 				                        [
 				                            RelativePath = "security/notices.json",
-				                            Query = [
-				                                limit = Text.From(PageSize),
-				                                offset = Text.From(offset),
-				                                order = "newest"
-				                            ],
+				                            Query = [limit = Text.From(UbuntuPageSize), offset = Text.From(offset), order = "newest"],
 				                            Headers = [Accept = "application/json"],
 				                            ManualStatusHandling = RetryableStatusCodes
 				                        ]
 				                    )
 				                otherwise
 				                    null,
-				            Status =
-				                if Response = null
-				                then 0
-				                else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+				            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
 				            Result =
 				                if Status = 200 then
 				                    Json.Document(Response)
 				                else if CurrentAttempt < 3 then
-				                    Function.InvokeAfter(
-				                        () => @FetchPage(offset, CurrentAttempt + 1),
-				                        #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1))
-				                    )
+				                    Function.InvokeAfter(() => @FetchUbuntuPage(offset, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1)))
 				                else
-				                    error Error.Record(
-				                        "CanonicalSecurityFeedUnavailable",
-				                        "Canonical Ubuntu Security Notices could not be retrieved after four attempts.",
-				                        [Offset = offset, Status = Status]
-				                    )
+				                    error Error.Record("CanonicalSecurityFeedUnavailable", "Canonical Ubuntu Security Notices could not be retrieved after four attempts.", [Offset = offset, Status = Status])
 				        in
 				            Result,
-				    GetRecentNotices = () as list =>
+				    GetRecentUbuntuNotices = () as list =>
 				        let
 				            Pages =
 				                List.Generate(
-				                    () => [Offset = 0, Payload = FetchPage(0)],
+				                    () => [Offset = 0, Payload = FetchUbuntuPage(0)],
 				                    each [Payload] <> null,
 				                    each
 				                        let
 				                            Notices = Record.FieldOrDefault([Payload], "notices", {}),
-				                            PublishedDates =
-				                                List.RemoveNulls(
-				                                    List.Transform(
-				                                        Notices,
-				                                        each try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise null
-				                                    )
-				                                ),
-				                            OldestPublished =
-				                                if List.IsEmpty(PublishedDates)
-				                                then #date(1900, 1, 1)
-				                                else List.Min(PublishedDates),
-				                            NextOffset = [Offset] + PageSize,
-				                            NextPayload =
-				                                if List.Count(Notices) = PageSize and OldestPublished >= CutoffDate
-				                                then FetchPage(NextOffset)
-				                                else null
+				                            PublishedDates = List.RemoveNulls(List.Transform(Notices, each try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise null)),
+				                            OldestPublished = if List.IsEmpty(PublishedDates) then #date(1900, 1, 1) else List.Min(PublishedDates),
+				                            NextOffset = [Offset] + UbuntuPageSize,
+				                            NextPayload = if List.Count(Notices) = UbuntuPageSize and OldestPublished >= CutoffDate then FetchUbuntuPage(NextOffset) else null
 				                        in
 				                            [Offset = NextOffset, Payload = NextPayload],
 				                    each Record.FieldOrDefault([Payload], "notices", {})
@@ -183,38 +190,28 @@ table dim_linux_patch_cve_mapping
 				                List.Select(
 				                    Notices,
 				                    each
-				                        let
-				                            Published = try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise null
-				                        in
-				                            Published <> null and Published >= CutoffDate
+				                        let Published = try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise null
+				                        in Published <> null and Published >= CutoffDate
 				                )
 				        in
 				            Recent,
-				    RecentNotices =
-				        if List.IsEmpty(RelevantPatchKeys)
-				        then {}
-				        else List.Buffer(GetRecentNotices()),
-				    MappingRows =
+				    UbuntuNotices = if List.IsEmpty(UbuntuPatchKeys) then {} else List.Buffer(GetRecentUbuntuNotices()),
+				    UbuntuRows =
 				        List.Combine(
 				            List.Transform(
-				                SupportedReleases,
+				                SupportedUbuntuReleases,
 				                (release as text) =>
 				                    List.Combine(
 				                        List.Transform(
-				                            RecentNotices,
+				                            UbuntuNotices,
 				                            (notice as record) =>
 				                                let
 				                                    AdvisoryId = Text.From(Record.FieldOrDefault(notice, "id", "")),
 				                                    Product = Text.From(Record.FieldOrDefault(notice, "title", "")),
-				                                    Published =
-				                                        try DateTime.From(DateTimeZone.FromText(Text.From(notice[published])))
-				                                        otherwise null,
+				                                    Published = try DateTime.From(DateTimeZone.FromText(Text.From(notice[published]))) otherwise null,
 				                                    CveIds = Record.FieldOrDefault(notice, "cves_ids", {}),
 				                                    ReleasePackages = Record.FieldOrDefault(notice, "release_packages", []),
-				                                    Packages =
-				                                        if Record.HasFields(ReleasePackages, release)
-				                                        then Record.Field(ReleasePackages, release)
-				                                        else {},
+				                                    Packages = if Record.HasFields(ReleasePackages, release) then Record.Field(ReleasePackages, release) else {},
 				                                    BinaryPackages =
 				                                        List.Select(
 				                                            Packages,
@@ -222,12 +219,8 @@ table dim_linux_patch_cve_mapping
 				                                                try
 				                                                    Record.FieldOrDefault(_, "is_source", true) = false
 				                                                        and Record.HasFields(
-				                                                            RelevantPatchKeySet,
-				                                                            release
-				                                                                & "|"
-				                                                                & Text.Lower(Text.Trim(Text.From(_[name])))
-				                                                                & "|"
-				                                                                & Text.Trim(Text.From(_[version]))
+				                                                            UbuntuPatchKeySet,
+				                                                            release & "|" & Text.Lower(Text.Trim(Text.From(_[name]))) & "|" & Text.Trim(Text.From(_[version]))
 				                                                        )
 				                                                otherwise
 				                                                    false
@@ -259,27 +252,152 @@ table dim_linux_patch_cve_mapping
 				                    )
 				            )
 				        ),
-				    Mappings =
-				        Table.FromRecords(
-				            MappingRows,
-				            type table [
-				                distribution = text,
-				                release_codename = text,
-				                package_name = text,
-				                package_version = text,
-				                advisory_id = text,
-				                cve_id = text,
-				                severity = text,
-				                product = text,
-				                published_at = nullable datetime,
-				                mapping_source = text,
-				                source_url = text
-				            ]
+				    RhelRelevantRows =
+				        Table.Buffer(
+				            Table.SelectRows(
+				                RelevantLinuxRows,
+				                each
+				                    [os_distribution] = "Red Hat Enterprise Linux"
+				                        and List.Contains(SupportedRhelReleases, Text.Trim(Text.From([release_codename])))
+				            )
 				        ),
-				    DistinctMappings =
-				        Table.Distinct(
-				            Mappings,
-				            {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"}
-				        )
+				    RhelPackages =
+				        List.Buffer(
+				            List.Distinct(
+				                List.Transform(Table.Column(RhelRelevantRows, "patch_name"), each Text.Lower(Text.Trim(Text.From(_))))
+				            )
+				        ),
+				    RedHatPageSize = 1000,
+				    FetchRedHatPage = (packageName as text, page as number, optional attempt as nullable number) as list =>
+				        let
+				            CurrentAttempt = if attempt = null then 0 else attempt,
+				            Response =
+				                try
+				                    Web.Contents(
+				                        "https://access.redhat.com",
+				                        [
+				                            RelativePath = "hydra/rest/securitydata/csaf.json",
+				                            Query = [
+				                                package = packageName,
+				                                after = Date.ToText(CutoffDate, [Format = "yyyy-MM-dd", Culture = "en-US"]),
+				                                per_page = Text.From(RedHatPageSize),
+				                                page = Text.From(page),
+				                                isCompressed = "false"
+				                            ],
+				                            Headers = [Accept = "application/json"],
+				                            ManualStatusHandling = RetryableStatusCodes
+				                        ]
+				                    )
+				                otherwise
+				                    null,
+				            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+				            Result =
+				                if Status = 200 then
+				                    Json.Document(Response)
+				                else if CurrentAttempt < 3 then
+				                    Function.InvokeAfter(() => @FetchRedHatPage(packageName, page, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1)))
+				                else
+				                    error Error.Record("RedHatSecurityFeedUnavailable", "The Red Hat CSAF package query could not be retrieved after four attempts.", [Package = packageName, Page = page, Status = Status])
+				        in
+				            Result,
+				    GetRedHatAdvisories = (packageName as text) as list =>
+				        let
+				            Pages =
+				                List.Generate(
+				                    () => [Page = 1, Payload = FetchRedHatPage(packageName, 1)],
+				                    each [Payload] <> null,
+				                    each [Page = [Page] + 1, Payload = if List.Count([Payload]) = RedHatPageSize then FetchRedHatPage(packageName, [Page] + 1) else null],
+				                    each [Payload]
+				                )
+				        in
+				            List.Combine(Pages),
+				    ParseReleasedPackage = (packageName as text, packageNevra as text) as nullable record =>
+				        let
+				            Prefix = packageName & "-",
+				            Remainder = if Text.StartsWith(Text.Lower(packageNevra), Text.Lower(Prefix)) then Text.Range(packageNevra, Text.Length(Prefix)) else "",
+				            HasEpoch = Text.Contains(Remainder, ":"),
+				            Epoch = if HasEpoch then Text.BeforeDelimiter(Remainder, ":") else "",
+				            IsExactPackage = Epoch <> "" and Text.Select(Epoch, {"0".."9"}) = Epoch,
+				            Architecture = if IsExactPackage and Text.Contains(Remainder, ".") then Text.AfterDelimiter(Remainder, ".", {0, RelativePosition.FromEnd}) else "",
+				            VersionWithEpoch = if Architecture <> "" then Text.BeforeDelimiter(Remainder, ".", {0, RelativePosition.FromEnd}) else "",
+				            Release =
+				                if Text.Contains(Text.Lower(packageNevra), ".el10") then "10"
+				                else if Text.Contains(Text.Lower(packageNevra), ".el9") then "9"
+				                else if Text.Contains(Text.Lower(packageNevra), ".el8") then "8"
+				                else if Text.Contains(Text.Lower(packageNevra), ".el7") then "7"
+				                else "",
+				            Result =
+				                if IsExactPackage and Architecture <> "src" and Release <> ""
+				                then [version = VersionWithEpoch, release = Release]
+				                else null
+				        in
+				            Result,
+				    RedHatRows =
+				        List.Combine(
+				            List.Transform(
+				                RhelPackages,
+				                (packageName as text) =>
+				                    let
+				                        PackageTargets = Table.SelectRows(RhelRelevantRows, each Text.Lower(Text.Trim(Text.From([patch_name]))) = packageName),
+				                        Advisories = GetRedHatAdvisories(packageName)
+				                    in
+				                        List.Combine(
+				                            List.Transform(
+				                                Advisories,
+				                                (advisory as record) =>
+				                                    let
+				                                        AdvisoryId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(advisory, "RHSA", "")))),
+				                                        Severity = Text.Proper(Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(advisory, "severity", "Unknown"))))),
+				                                        Published = try DateTime.From(DateTimeZone.FromText(Text.From(Record.FieldOrDefault(advisory, "released_on", null)))) otherwise null,
+				                                        CveIds = Record.FieldOrDefault(advisory, "CVEs", {}),
+				                                        ReleasedPackages = Record.FieldOrDefault(advisory, "released_packages", {}),
+				                                        ParsedPackages = List.RemoveNulls(List.Transform(ReleasedPackages, each ParseReleasedPackage(packageName, Text.From(_)))),
+				                                        SourceUrl = "https://access.redhat.com/errata/" & AdvisoryId
+				                                    in
+				                                        List.Combine(
+				                                            List.Transform(
+				                                                ParsedPackages,
+				                                                (releasedPackage as record) =>
+				                                                    let
+				                                                        Release = Text.From(releasedPackage[release]),
+				                                                        FixedVersion = Text.From(releasedPackage[version]),
+				                                                        MatchingTargets =
+				                                                            Table.SelectRows(
+				                                                                PackageTargets,
+				                                                                each
+				                                                                    Text.Trim(Text.From([release_codename])) = Release
+				                                                                        and NormalizeRpmVersion([package_version]) = NormalizeRpmVersion(FixedVersion)
+				                                                            )
+				                                                    in
+				                                                        List.Combine(
+				                                                            List.Transform(
+				                                                                Table.ToRecords(MatchingTargets),
+				                                                                (target as record) =>
+				                                                                    List.Transform(
+				                                                                        CveIds,
+				                                                                        (cve as text) => [
+				                                                                            distribution = "Red Hat Enterprise Linux",
+				                                                                            release_codename = Release,
+				                                                                            package_name = packageName,
+				                                                                            package_version = Text.Trim(Text.From(target[package_version])),
+				                                                                            advisory_id = AdvisoryId,
+				                                                                            cve_id = Text.Upper(Text.Trim(cve)),
+				                                                                            severity = Severity,
+				                                                                            product = "Red Hat Enterprise Linux " & Release,
+				                                                                            published_at = Published,
+				                                                                            mapping_source = "Red Hat CSAF",
+				                                                                            source_url = SourceUrl
+				                                                                        ]
+				                                                                    )
+				                                                            )
+				                                                        )
+				                                            )
+				                                        )
+				                            )
+				                        )
+				            )
+				        ),
+				    Mappings = Table.FromRecords(List.Combine({UbuntuRows, RedHatRows}), MappingType),
+				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings

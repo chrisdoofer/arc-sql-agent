@@ -151,6 +151,22 @@ table view_missing_patches
 				                machine_resource_id = tolower(id),
 				                machine_os_sku = tostring(mprop.osSku)
 				        ) on machine_resource_id
+				        | extend machine_os_sku_normalized = tolower(machine_os_sku)
+				        | extend os_distribution = case(
+				            machine_os_sku_normalized contains 'ubuntu', 'Ubuntu',
+				            machine_os_sku_normalized contains 'red hat' or machine_os_sku_normalized contains 'rhel', 'Red Hat Enterprise Linux',
+				            ''
+				        )
+				        | extend release_codename = case(
+				            os_distribution == 'Ubuntu' and machine_os_sku contains '24.04', 'noble',
+				            os_distribution == 'Ubuntu' and machine_os_sku contains '22.04', 'jammy',
+				            os_distribution == 'Ubuntu' and machine_os_sku contains '20.04', 'focal',
+				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '10.' or machine_os_sku endswith ' 10'), '10',
+				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '9.' or machine_os_sku endswith ' 9'), '9',
+				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '8.' or machine_os_sku endswith ' 8'), '8',
+				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '7.' or machine_os_sku endswith ' 7'), '7',
+				            ''
+				        )
 				        | project
 				            machine_resource_id,
 				            machine_name = tostring(split(machine_resource_id, '/')[8]),
@@ -160,13 +176,8 @@ table view_missing_patches
 				            classification = tostring(prop.classifications),
 				            os_type,
 				            patch_service_used,
-				            os_distribution = case(tolower(machine_os_sku) contains 'ubuntu', 'Ubuntu', ''),
-				            release_codename = case(
-				                machine_os_sku contains '24.04', 'noble',
-				                machine_os_sku contains '22.04', 'jammy',
-				                machine_os_sku contains '20.04', 'focal',
-				                ''
-				            ),
+				            os_distribution,
+				            release_codename,
 				            package_version = tostring(prop.version),
 				            reboot_behavior = tostring(prop.rebootBehavior),
 				            assessment_time = todatetime(prop.lastModifiedDateTime),
