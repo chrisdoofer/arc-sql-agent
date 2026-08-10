@@ -263,3 +263,158 @@ expression fnRockyLinuxPatchCveRows =
 		in
 		    RockyLinuxRows
 	lineageTag: 017b75c7-9bb7-40cf-8807-febab03a05d0
+
+/// Returns Canonical USN/CVE mappings when an Ubuntu security target supersedes the nearest vendor-published fixed binary package version under Debian version ordering.
+expression fnUbuntuPatchCveRows =
+		(missingPatches as table) as list =>
+		let
+		    SupportedReleases = {"noble", "jammy", "focal"},
+		    RetryableStatusCodes = {429, 500, 502, 503, 504},
+		    PageSize = 20,
+		    CutoffDate = Date.AddMonths(Date.From(DateTimeZone.UtcNow()), -24),
+		    IsDigit = (character as text) as logical => character >= "0" and character <= "9",
+		    CharacterOrder = (character as text) as number =>
+		        if character = "~" then -1
+		        else if character = "" or IsDigit(character) then 0
+		        else if (character >= "A" and character <= "Z") or (character >= "a" and character <= "z") then Character.ToNumber(character)
+		        else Character.ToNumber(character) + 256,
+		    CompareVersionPart = (leftValue as text, rightValue as text) as number =>
+		        let
+		            LeftLength = Text.Length(leftValue),
+		            RightLength = Text.Length(rightValue),
+		            CharacterAt = (value as text, index as number) as text => if index < Text.Length(value) then Text.Middle(value, index, 1) else "",
+		            CompareNonDigits = (leftIndex as number, rightIndex as number) as record =>
+		                let
+		                    LeftCharacter = CharacterAt(leftValue, leftIndex),
+		                    RightCharacter = CharacterAt(rightValue, rightIndex),
+		                    LeftIsNonDigit = LeftCharacter <> "" and not IsDigit(LeftCharacter),
+		                    RightIsNonDigit = RightCharacter <> "" and not IsDigit(RightCharacter),
+		                    LeftOrder = CharacterOrder(LeftCharacter),
+		                    RightOrder = CharacterOrder(RightCharacter),
+		                    Result =
+		                        if not LeftIsNonDigit and not RightIsNonDigit then [comparison = 0, leftIndex = leftIndex, rightIndex = rightIndex]
+		                        else if LeftOrder < RightOrder then [comparison = -1, leftIndex = leftIndex, rightIndex = rightIndex]
+		                        else if LeftOrder > RightOrder then [comparison = 1, leftIndex = leftIndex, rightIndex = rightIndex]
+		                        else @CompareNonDigits(if LeftIsNonDigit then leftIndex + 1 else leftIndex, if RightIsNonDigit then rightIndex + 1 else rightIndex)
+		                in
+		                    Result,
+		            ReadDigits = (value as text, startIndex as number) as record =>
+		                let
+		                    EndIndex = List.Accumulate({startIndex..Text.Length(value)}, startIndex, (state as number, candidate as number) => if state = candidate and candidate < Text.Length(value) and IsDigit(Text.Middle(value, candidate, 1)) then candidate + 1 else state),
+		                    Digits = Text.Middle(value, startIndex, EndIndex - startIndex),
+		                    Significant = Text.TrimStart(Digits, {"0"})
+		                in
+		                    [endIndex = EndIndex, significant = Significant],
+		            CompareAt = (leftIndex as number, rightIndex as number) as number =>
+		                let
+		                    NonDigits = CompareNonDigits(leftIndex, rightIndex),
+		                    NonDigitComparison = Number.From(NonDigits[comparison]),
+		                    LeftDigits = if NonDigitComparison = 0 then ReadDigits(leftValue, Number.From(NonDigits[leftIndex])) else [endIndex = Number.From(NonDigits[leftIndex]), significant = ""],
+		                    RightDigits = if NonDigitComparison = 0 then ReadDigits(rightValue, Number.From(NonDigits[rightIndex])) else [endIndex = Number.From(NonDigits[rightIndex]), significant = ""],
+		                    LeftSignificant = Text.From(LeftDigits[significant]),
+		                    RightSignificant = Text.From(RightDigits[significant]),
+		                    DigitComparison =
+		                        if NonDigitComparison <> 0 then NonDigitComparison
+		                        else if Text.Length(LeftSignificant) < Text.Length(RightSignificant) then -1
+		                        else if Text.Length(LeftSignificant) > Text.Length(RightSignificant) then 1
+		                        else if LeftSignificant < RightSignificant then -1
+		                        else if LeftSignificant > RightSignificant then 1
+		                        else 0,
+		                    NextLeftIndex = Number.From(LeftDigits[endIndex]),
+		                    NextRightIndex = Number.From(RightDigits[endIndex]),
+		                    Result = if DigitComparison <> 0 then DigitComparison else if NextLeftIndex >= LeftLength and NextRightIndex >= RightLength then 0 else @CompareAt(NextLeftIndex, NextRightIndex)
+		                in
+		                    Result
+		        in
+		            CompareAt(0, 0),
+		    ParseDebianVersion = (value as any) as record =>
+		        let
+		            Version = Text.Trim(Text.From(value)),
+		            ColonPosition = Text.PositionOf(Version, ":"),
+		            PotentialEpoch = if ColonPosition > 0 then Text.Start(Version, ColonPosition) else "",
+		            HasEpoch = PotentialEpoch <> "" and Text.Select(PotentialEpoch, {"0".."9"}) = PotentialEpoch,
+		            Epoch = if HasEpoch then Number.FromText(PotentialEpoch) else 0,
+		            WithoutEpoch = if HasEpoch then Text.Range(Version, ColonPosition + 1) else Version,
+		            RevisionPosition = Text.PositionOf(WithoutEpoch, "-", Occurrence.Last),
+		            Upstream = if RevisionPosition < 0 then WithoutEpoch else Text.Start(WithoutEpoch, RevisionPosition),
+		            Revision = if RevisionPosition < 0 then "0" else Text.Range(WithoutEpoch, RevisionPosition + 1)
+		        in
+		            [epoch = Epoch, upstream = Upstream, revision = Revision],
+		    CompareDebianVersions = (leftValue as any, rightValue as any) as number =>
+		        let
+		            Left = ParseDebianVersion(leftValue),
+		            Right = ParseDebianVersion(rightValue),
+		            EpochComparison = if Left[epoch] < Right[epoch] then -1 else if Left[epoch] > Right[epoch] then 1 else 0,
+		            UpstreamComparison = if EpochComparison = 0 then CompareVersionPart(Text.From(Left[upstream]), Text.From(Right[upstream])) else EpochComparison,
+		            RevisionComparison = if EpochComparison = 0 and UpstreamComparison = 0 then CompareVersionPart(Text.From(Left[revision]), Text.From(Right[revision])) else UpstreamComparison
+		        in
+		            RevisionComparison,
+		    RelevantRows = Table.Buffer(Table.SelectRows(missingPatches, each Text.Lower(Text.Trim(Text.From([os_type]))) = "linux" and [os_distribution] = "Ubuntu" and Text.Contains(Text.Lower(Text.Trim(Text.From([classification]))), "security") and List.Contains(SupportedReleases, Text.Lower(Text.Trim(Text.From([release_codename])))) and [patch_name] <> null and Text.Trim(Text.From([patch_name])) <> "" and [package_version] <> null and Text.Trim(Text.From([package_version])) <> "")),
+		    TargetRecords = List.Buffer(Table.ToRecords(RelevantRows)),
+		    ActiveReleases = List.Buffer(List.Distinct(List.Transform(TargetRecords, each Text.Lower(Text.Trim(Text.From([release_codename])))))),
+		    FetchPage = (release as text, offset as number, optional attempt as nullable number) as record =>
+		        let
+		            CurrentAttempt = if attempt = null then 0 else attempt,
+		            Response = try Web.Contents("https://ubuntu.com", [RelativePath = "security/notices.json", Query = [limit = Text.From(PageSize), offset = Text.From(offset), order = "newest", release = release], Headers = [Accept = "application/json"], ManualStatusHandling = RetryableStatusCodes]) otherwise null,
+		            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+		            Result = if Status = 200 then Json.Document(Response) else if CurrentAttempt < 3 then Function.InvokeAfter(() => @FetchPage(release, offset, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1))) else error Error.Record("CanonicalSecurityFeedUnavailable", "Canonical Ubuntu Security Notices could not be retrieved after four attempts.", [Release = release, Offset = offset, Status = Status])
+		        in
+		            Result,
+		    GetRecentNotices = (release as text) as list =>
+		        let
+		            Pages = List.Generate(
+		                () => [Offset = 0, Payload = FetchPage(release, 0)],
+		                each [Payload] <> null,
+		                each
+		                    let
+		                        Notices = Record.FieldOrDefault([Payload], "notices", {}),
+		                        PublishedDates = List.RemoveNulls(List.Transform(Notices, each try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise try Date.From(DateTime.FromText(Text.From(_[published]))) otherwise null)),
+		                        OldestPublished = if List.IsEmpty(PublishedDates) then #date(1900, 1, 1) else List.Min(PublishedDates),
+		                        NextOffset = [Offset] + PageSize,
+		                        NextPayload = if List.Count(Notices) = PageSize and OldestPublished >= CutoffDate then FetchPage(release, NextOffset) else null
+		                    in
+		                        [Offset = NextOffset, Payload = NextPayload],
+		                each Record.FieldOrDefault([Payload], "notices", {})
+		            ),
+		            Notices = List.Combine(Pages),
+		            Recent = List.Select(Notices, each let Published = try Date.From(DateTimeZone.FromText(Text.From(_[published]))) otherwise try Date.From(DateTime.FromText(Text.From(_[published]))) otherwise null in Published <> null and Published >= CutoffDate)
+		        in
+		            Recent,
+		    ParseRelease = (release as text) as list =>
+		        let
+		            ReleaseTargets = List.Buffer(List.Select(TargetRecords, each Text.Lower(Text.Trim(Text.From([release_codename]))) = release)),
+		            Notices = GetRecentNotices(release),
+		            PackageEvidence = List.Combine(List.Transform(Notices, (notice as record) =>
+		                let
+		                    AdvisoryId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(notice, "id", "")))),
+		                    Product = Text.Trim(Text.From(Record.FieldOrDefault(notice, "title", ""))),
+		                    PublishedText = Text.Trim(Text.From(Record.FieldOrDefault(notice, "published", ""))),
+		                    Published = if PublishedText = "" then null else try DateTime.From(DateTimeZone.FromText(PublishedText)) otherwise try DateTime.FromText(PublishedText) otherwise null,
+		                    CveIds = List.Distinct(List.RemoveNulls(List.Transform(Record.FieldOrDefault(notice, "cves_ids", {}), each let CveId = Text.Upper(Text.Trim(Text.From(_))) in if Text.StartsWith(CveId, "CVE-") then CveId else null))),
+		                    ReleasePackages = Record.FieldOrDefault(notice, "release_packages", []),
+		                    Packages = if ReleasePackages is record and Record.HasFields(ReleasePackages, release) then Record.Field(ReleasePackages, release) else {},
+		                    BinaryPackages = List.Select(Packages, each try Record.FieldOrDefault(_, "is_source", true) = false otherwise false)
+		                in
+		                    List.RemoveNulls(List.Transform(BinaryPackages, (package as record) =>
+		                        let
+		                            PackageName = Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(package, "name", "")))),
+		                            FixedVersion = Text.Trim(Text.From(Record.FieldOrDefault(package, "version", "")))
+		                        in
+		                            if PackageName = "" or FixedVersion = "" or List.IsEmpty(CveIds) then null else [package_name = PackageName, fixed_version = FixedVersion, advisory_id = AdvisoryId, cve_ids = CveIds, product = Product, published_at = Published, source_url = "https://ubuntu.com/security/notices/" & AdvisoryId])))),
+		            Rows = List.Combine(List.Transform(ReleaseTargets, (target as record) =>
+		                let
+		                    PackageName = Text.Lower(Text.Trim(Text.From(target[patch_name]))),
+		                    TargetVersion = Text.Trim(Text.From(target[package_version])),
+		                    HasExactVersion = List.AnyTrue(List.Transform(PackageEvidence, each [package_name] = PackageName and CompareDebianVersions(TargetVersion, [fixed_version]) = 0)),
+		                    Candidates = if HasExactVersion then {} else List.Select(PackageEvidence, each [package_name] = PackageName and CompareDebianVersions(TargetVersion, [fixed_version]) > 0),
+		                    LatestFixedVersion = List.Accumulate(Candidates, null, (state as any, candidate as record) => if state = null then candidate[fixed_version] else if CompareDebianVersions(candidate[fixed_version], state) > 0 then candidate[fixed_version] else state),
+		                    LatestEvidence = if LatestFixedVersion = null then {} else List.Select(Candidates, each CompareDebianVersions([fixed_version], LatestFixedVersion) = 0),
+		                    TargetRows = List.Combine(List.Transform(LatestEvidence, (evidence as record) => List.Transform(evidence[cve_ids], (cveId as text) => [distribution = "Ubuntu", release_codename = release, package_name = PackageName, package_version = TargetVersion, advisory_id = Text.From(evidence[advisory_id]), cve_id = cveId, severity = "Unknown", product = Text.From(evidence[product]), published_at = evidence[published_at], mapping_source = "Canonical USN (superseded)", source_url = Text.From(evidence[source_url])])))
+		                in
+		                    TargetRows))
+		        in
+		            Rows,
+		    UbuntuRows = if List.IsEmpty(TargetRecords) then {} else List.Combine(List.Transform(ActiveReleases, each ParseRelease(_)))
+		in
+		    UbuntuRows
+	lineageTag: 58b5504b-161a-4c13-828b-77dc027347d7

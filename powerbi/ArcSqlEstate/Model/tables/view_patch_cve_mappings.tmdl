@@ -224,7 +224,7 @@ table view_patch_cve_mappings
 				        "cve_id", [cve_id],
 				        "product", [product],
 				        "severity", [severity],
-				        "confidence", "High",
+				        "confidence", IF ( [mapping_source] = "Canonical USN (superseded)", "Medium", "High" ),
 				        "mapping_source", [mapping_source],
 				        "source_url", [source_url],
 				        "assessment_time", [assessment_time],

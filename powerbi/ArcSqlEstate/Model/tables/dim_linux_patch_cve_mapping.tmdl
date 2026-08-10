@@ -217,3 +217,13 @@ table dim_linux_patch_cve_mapping
 				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings
+
+	partition 'Ubuntu USN supersedence' = m
+		mode: import
+		source =
+				let
+				    UbuntuRows = fnUbuntuPatchCveRows(view_missing_patches),
+				    Mappings = Table.FromRecords(UbuntuRows, type table [distribution = text, release_codename = text, package_name = text, package_version = text, advisory_id = text, cve_id = text, severity = text, product = text, published_at = nullable datetime, mapping_source = text, source_url = text]),
+				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
+				in
+				    DistinctMappings

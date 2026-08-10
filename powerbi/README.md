@@ -59,11 +59,14 @@ Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
-Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted only
-when the machine release, binary package name, and Update Manager target
-package version exactly match a Canonical USN package record. Candidate
-packages without a published matching advisory remain visible as missing
-patches but are not assigned speculative CVEs.
+Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted when
+the machine release and binary package match a Canonical USN package record.
+Exact target-version matches remain high confidence. When Update Manager
+classifies a target as a security update but reports a newer superseding
+version, the nearest earlier Canonical fixed version is selected using Debian
+version ordering and labelled medium confidence. Non-security targets and
+packages without qualifying Canonical evidence remain visible as missing
+patches without speculative CVEs.
 
 Red Hat Enterprise Linux rows use the public Red Hat Security Data API's CSAF
 package index. RHEL major release, binary RPM name, and target epoch-version-
