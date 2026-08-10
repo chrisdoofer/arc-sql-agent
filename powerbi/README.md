@@ -41,9 +41,9 @@ subscriptions.
 - `view_missing_patches` - individual missing Windows and Linux patches.
 - `dim_patch_cve_mapping` - authoritative MSRC-only KB-to-CVE mappings.
 - `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
-  providers import Canonical Ubuntu Security Notices and Red Hat CSAF data for
-  supported releases, retaining only exact package/version keys present in the
-  current estate.
+  providers import Canonical Ubuntu Security Notices, Red Hat CSAF data, and
+  Debian Security Tracker data for supported releases, retaining only exact
+  package/version keys present in the current estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
   from `view_missing_patches`, MSRC, and Linux vendor mappings without another
   Resource Graph query.
@@ -51,8 +51,9 @@ subscriptions.
   from the existing keyed Arc SQL inventory tables.
 
 Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
-`ubuntu.com`, `access.redhat.com`, and the Microsoft Learn SQL build-reference
-page when the template is first opened.
+`ubuntu.com`, `access.redhat.com`, `snapshot.debian.org`,
+`security-tracker.debian.org`, and the Microsoft Learn SQL build-reference page
+when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
 Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted only
@@ -67,6 +68,13 @@ release must match a released RHSA package exactly. Matching normalizes only
 an implicit zero epoch and an optional architecture suffix; it does not use
 lexicographic RPM version comparisons or reuse RHSA mappings for downstream
 distributions such as AlmaLinux, Rocky Linux, or Oracle Linux.
+
+Debian 11, 12, and 13 rows resolve each estate binary package and exact target
+version through Debian Snapshot's machine-readable metadata. The resulting
+source package and source version are matched to the Debian Security Tracker
+for Bullseye, Bookworm, or Trixie. A CVE is emitted only when the tracker marks
+the release resolved and its fixed source version exactly equals the resolved
+target source version; no lexicographic Debian version comparison is used.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

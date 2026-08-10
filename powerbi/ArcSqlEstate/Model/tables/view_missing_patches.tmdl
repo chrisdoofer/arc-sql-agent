@@ -155,6 +155,7 @@ table view_missing_patches
 				        | extend os_distribution = case(
 				            machine_os_sku_normalized contains 'ubuntu', 'Ubuntu',
 				            machine_os_sku_normalized contains 'red hat' or machine_os_sku_normalized contains 'rhel', 'Red Hat Enterprise Linux',
+				            machine_os_sku_normalized contains 'debian', 'Debian GNU/Linux',
 				            ''
 				        )
 				        | extend release_codename = case(
@@ -165,6 +166,9 @@ table view_missing_patches
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '9.' or machine_os_sku endswith ' 9'), '9',
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '8.' or machine_os_sku endswith ' 8'), '8',
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '7.' or machine_os_sku endswith ' 7'), '7',
+				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'trixie' or machine_os_sku contains '13.' or machine_os_sku endswith ' 13'), 'trixie',
+				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'bookworm' or machine_os_sku contains '12.' or machine_os_sku endswith ' 12'), 'bookworm',
+				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'bullseye' or machine_os_sku contains '11.' or machine_os_sku endswith ' 11'), 'bullseye',
 				            ''
 				        )
 				        | project
