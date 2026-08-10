@@ -187,6 +187,7 @@ table dim_linux_patch_cve_mapping
 				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings
+
 	partition 'Oracle Linux ELSA' = m
 		mode: import
 		source =
@@ -203,6 +204,16 @@ table dim_linux_patch_cve_mapping
 				let
 				    AlmaLinuxRows = fnAlmaLinuxPatchCveRows(view_missing_patches),
 				    Mappings = Table.FromRecords(AlmaLinuxRows, type table [distribution = text, release_codename = text, package_name = text, package_version = text, advisory_id = text, cve_id = text, severity = text, product = text, published_at = nullable datetime, mapping_source = text, source_url = text]),
+				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
+				in
+				    DistinctMappings
+
+	partition 'Rocky Linux RLSA' = m
+		mode: import
+		source =
+				let
+				    RockyLinuxRows = fnRockyLinuxPatchCveRows(view_missing_patches),
+				    Mappings = Table.FromRecords(RockyLinuxRows, type table [distribution = text, release_codename = text, package_name = text, package_version = text, advisory_id = text, cve_id = text, severity = text, product = text, published_at = nullable datetime, mapping_source = text, source_url = text]),
 				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings

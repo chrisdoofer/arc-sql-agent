@@ -42,9 +42,10 @@ subscriptions.
 - `dim_patch_cve_mapping` - authoritative MSRC-only KB-to-CVE mappings.
 - `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
   providers import Canonical Ubuntu Security Notices, Red Hat CSAF data,
-  Debian Security Tracker data, SUSE CSAF advisories, and Oracle Linux ELSA
-  metadata plus AlmaLinux ALSA errata for supported releases, retaining only
-  exact package/version keys present in the current estate.
+  Debian Security Tracker data, SUSE CSAF advisories, Oracle Linux ELSA
+  metadata, AlmaLinux ALSA errata, and Rocky Linux RLSA advisories for
+  supported releases, retaining only exact package/version keys present in
+  the current estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
   from `view_missing_patches`, MSRC, and Linux vendor mappings without another
   Resource Graph query.
@@ -54,7 +55,7 @@ subscriptions.
 Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 `ubuntu.com`, `access.redhat.com`, `snapshot.debian.org`,
 `security-tracker.debian.org`, `www.suse.com`, `ftp.suse.com`,
-`yum.oracle.com`, `errata.almalinux.org`, and the
+`yum.oracle.com`, `errata.almalinux.org`, `errata.rockylinux.org`, and the
 Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
@@ -100,6 +101,14 @@ exact AlmaLinux release, binary RPM name, and normalized target
 epoch-version-release match; the emitted package version preserves the raw
 Update Manager value used by the model join. Red Hat advisories and generic
 CPE inference are not reused for AlmaLinux.
+
+Rocky Linux 8-10 rows use the Rocky Enterprise Software Foundation's official
+Apollo v2 errata API. Only major releases present in the estate are requested.
+RLSA mappings require an exact Rocky Linux release, binary RPM name, and
+normalized target epoch-version-release match; source RPMs are excluded and
+the emitted package version preserves the raw Update Manager value used by the
+model join. Red Hat or AlmaLinux advisories and generic CPE inference are not
+reused for Rocky Linux.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

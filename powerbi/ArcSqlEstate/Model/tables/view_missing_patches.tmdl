@@ -158,6 +158,7 @@ table view_missing_patches
 				        | extend oracle_version_text = tolower(strcat(machine_os_sku, ' ', machine_os_version, ' ', patch_os_version))
 				        | extend os_distribution = case(
 				            machine_os_sku_normalized contains 'ubuntu', 'Ubuntu',
+				            machine_os_sku_normalized contains 'rocky linux' or machine_os_sku_normalized contains 'rockylinux', 'Rocky Linux',
 				            machine_os_sku_normalized contains 'almalinux' or machine_os_sku_normalized contains 'alma linux', 'AlmaLinux',
 				            machine_os_sku_normalized contains 'oracle linux' or machine_os_sku_normalized contains 'oraclelinux', 'Oracle Linux',
 				            machine_os_sku_normalized contains 'red hat' or machine_os_sku_normalized contains 'rhel', 'Red Hat Enterprise Linux',
@@ -169,6 +170,9 @@ table view_missing_patches
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '24.04', 'noble',
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '22.04', 'jammy',
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '20.04', 'focal',
+				            os_distribution == 'Rocky Linux' and (machine_os_sku_normalized contains 'rocky linux 10' or machine_os_sku_normalized contains 'rockylinux 10' or machine_os_version startswith '10.' or machine_os_version == '10' or patch_os_version startswith '10.' or patch_os_version == '10'), '10',
+				            os_distribution == 'Rocky Linux' and (machine_os_sku_normalized contains 'rocky linux 9' or machine_os_sku_normalized contains 'rockylinux 9' or machine_os_version startswith '9.' or machine_os_version == '9' or patch_os_version startswith '9.' or patch_os_version == '9'), '9',
+				            os_distribution == 'Rocky Linux' and (machine_os_sku_normalized contains 'rocky linux 8' or machine_os_sku_normalized contains 'rockylinux 8' or machine_os_version startswith '8.' or machine_os_version == '8' or patch_os_version startswith '8.' or patch_os_version == '8'), '8',
 				            os_distribution == 'AlmaLinux' and (machine_os_sku_normalized contains 'almalinux 10' or machine_os_sku_normalized contains 'alma linux 10' or machine_os_version startswith '10.' or machine_os_version == '10' or patch_os_version startswith '10.' or patch_os_version == '10'), '10',
 				            os_distribution == 'AlmaLinux' and (machine_os_sku_normalized contains 'almalinux 9' or machine_os_sku_normalized contains 'alma linux 9' or machine_os_version startswith '9.' or machine_os_version == '9' or patch_os_version startswith '9.' or patch_os_version == '9'), '9',
 				            os_distribution == 'AlmaLinux' and (machine_os_sku_normalized contains 'almalinux 8' or machine_os_sku_normalized contains 'alma linux 8' or machine_os_version startswith '8.' or machine_os_version == '8' or patch_os_version startswith '8.' or patch_os_version == '8'), '8',

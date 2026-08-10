@@ -182,3 +182,84 @@ expression fnAlmaLinuxPatchCveRows =
 		in
 		    AlmaLinuxRows
 	lineageTag: d42dad84-a102-40f0-a2ef-cf53681ea610
+
+/// Returns exact Rocky Linux RLSA/CVE mappings from the official Rocky Apollo v2 errata API for missing package targets.
+expression fnRockyLinuxPatchCveRows =
+		(missingPatches as table) as list =>
+		let
+		    SupportedReleases = {"10", "9", "8"},
+		    RetryableStatusCodes = {429, 500, 502, 503, 504},
+		    RpmArchitectures = {"x86_64", "aarch64", "ppc64le", "s390x", "noarch", "i686", "src"},
+		    NormalizeRpmVersion = (value as any) as text =>
+		        let
+		            Version = Text.Trim(Text.From(value)),
+		            WithoutArchitecture = List.Accumulate(RpmArchitectures, Version, (state as text, architecture as text) => if Text.EndsWith(Text.Lower(state), "." & architecture) then Text.Start(state, Text.Length(state) - Text.Length(architecture) - 1) else state)
+		        in
+		            if Text.StartsWith(WithoutArchitecture, "0:") then Text.AfterDelimiter(WithoutArchitecture, ":") else WithoutArchitecture,
+		    RelevantRows = Table.Buffer(Table.SelectRows(missingPatches, each Text.Lower(Text.Trim(Text.From([os_type]))) = "linux" and [os_distribution] = "Rocky Linux" and List.Contains(SupportedReleases, Text.Trim(Text.From([release_codename]))) and [patch_name] <> null and Text.Trim(Text.From([patch_name])) <> "" and [package_version] <> null and Text.Trim(Text.From([package_version])) <> "")),
+		    TargetRecords = List.Buffer(Table.ToRecords(RelevantRows)),
+		    MakeTargetKey = (target as record) as text => Text.Trim(Text.From(target[release_codename])) & "|" & Text.Lower(Text.Trim(Text.From(target[patch_name]))) & "|" & NormalizeRpmVersion(target[package_version]),
+		    TargetKeys = List.Buffer(List.Distinct(List.Transform(TargetRecords, each MakeTargetKey(_)))),
+		    TargetVersionsByKey = if List.IsEmpty(TargetKeys) then [] else Record.FromList(List.Transform(TargetKeys, (targetKey as text) => List.Distinct(List.Transform(List.Select(TargetRecords, each MakeTargetKey(_) = targetKey), each Text.Trim(Text.From([package_version]))))), TargetKeys),
+		    FetchRockyPage = (product as text, page as number, optional attempt as nullable number) as record =>
+		        let
+		            CurrentAttempt = if attempt = null then 0 else attempt,
+		            Response = try Web.Contents("https://errata.rockylinux.org", [RelativePath = "api/v2/advisories", Query = [limit = "100", page = Number.ToText(page), #"filters.product" = product, #"filters.type" = "TYPE_SECURITY", #"filters.include_rpms" = "true"], Headers = [Accept = "application/json"], ManualStatusHandling = RetryableStatusCodes]) otherwise null,
+		            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+		            Result = if Status = 200 then Json.Document(Response) else if CurrentAttempt < 3 then Function.InvokeAfter(() => @FetchRockyPage(product, page, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1))) else error Error.Record("RockyLinuxSecurityFeedUnavailable", "The Rocky Linux Apollo errata API could not be retrieved after four attempts.", [Product = product, Page = page, Status = Status])
+		        in
+		            Result,
+		    ActiveReleases = List.Buffer(List.Distinct(List.Transform(TargetRecords, each Text.Trim(Text.From([release_codename]))))),
+		    FetchReleaseAdvisories = (release as text) as list =>
+		        let
+		            Product = "Rocky Linux " & release,
+		            FirstPage = FetchRockyPage(Product, 0),
+		            Total = try Number.From(Record.FieldOrDefault(FirstPage, "total", 0)) otherwise 0,
+		            PageSize = try Number.From(Record.FieldOrDefault(FirstPage, "size", 100)) otherwise 100,
+		            PageCount = if Total = 0 or PageSize = 0 then 0 else Number.RoundUp(Total / PageSize),
+		            Pages = if PageCount = 0 then {} else {0..PageCount - 1},
+		            PageRecords = List.Transform(Pages, each if _ = 0 then FirstPage else FetchRockyPage(Product, _)),
+		            Advisories = List.Combine(List.Transform(PageRecords, each Record.FieldOrDefault(_, "advisories", {})))
+		        in
+		            Advisories,
+		    ParseRelease = (release as text) as list =>
+		        let
+		            Product = "Rocky Linux " & release,
+		            Advisories = FetchReleaseAdvisories(release),
+		            SecurityAdvisories = List.Select(Advisories, each Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(_, "type", "")))) = "TYPE_SECURITY" and Text.StartsWith(Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(_, "name", "")))), "RLSA-")),
+		            Rows = List.Combine(List.Transform(SecurityAdvisories, (advisory as record) =>
+		                let
+		                    AdvisoryId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(advisory, "name", "")))),
+		                    SeverityText = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(advisory, "severity", "")))),
+		                    Severity = if Text.StartsWith(SeverityText, "SEVERITY_") then Text.Proper(Text.Lower(Text.AfterDelimiter(SeverityText, "_"))) else if SeverityText = "" then "Unknown" else Text.Proper(Text.Lower(SeverityText)),
+		                    PublishedText = Text.Trim(Text.From(Record.FieldOrDefault(advisory, "publishedAt", ""))),
+		                    Published = if PublishedText = "" then null else try DateTimeZone.RemoveZone(DateTimeZone.FromText(PublishedText)) otherwise null,
+		                    Cves = Record.FieldOrDefault(advisory, "cves", {}),
+		                    CveIds = List.Distinct(List.RemoveNulls(List.Transform(Cves, each let CveId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(_, "name", "")))) in if Text.StartsWith(CveId, "CVE-") then CveId else null))),
+		                    RpmMap = Record.FieldOrDefault(advisory, "rpms", []),
+		                    ProductRpmRecord = if Record.HasFields(RpmMap, Product) then Record.Field(RpmMap, Product) else [],
+		                    Nvras = Record.FieldOrDefault(ProductRpmRecord, "nvras", {}),
+		                    MatchingPackages = List.RemoveNulls(List.Transform(Nvras, (nvraValue as any) =>
+		                        let
+		                            Nvra = Text.Trim(Text.From(nvraValue)),
+		                            WithoutRpm = if Text.EndsWith(Text.Lower(Nvra), ".rpm") then Text.Start(Nvra, Text.Length(Nvra) - 4) else Nvra,
+		                            Architecture = try List.First(List.Select(RpmArchitectures, each Text.EndsWith(Text.Lower(WithoutRpm), "." & _))) otherwise null,
+		                            Nevr = if Architecture = null then WithoutRpm else Text.Start(WithoutRpm, Text.Length(WithoutRpm) - Text.Length(Architecture) - 1),
+		                            BeforeEpoch = if Text.Contains(Nevr, ":") then Text.BeforeDelimiter(Nevr, ":") else "",
+		                            PackageName = if BeforeEpoch = "" or not Text.Contains(BeforeEpoch, "-") then "" else Text.Lower(Text.BeforeDelimiter(BeforeEpoch, "-", {0, RelativePosition.FromEnd})),
+		                            Epoch = if BeforeEpoch = "" or not Text.Contains(BeforeEpoch, "-") then "0" else Text.AfterDelimiter(BeforeEpoch, "-", {0, RelativePosition.FromEnd}),
+		                            VersionRelease = if Text.Contains(Nevr, ":") then Text.AfterDelimiter(Nevr, ":") else "",
+		                            FixedVersion = (if Epoch = "" or Epoch = "0" then "" else Epoch & ":") & VersionRelease,
+		                            TargetKey = release & "|" & PackageName & "|" & NormalizeRpmVersion(FixedVersion)
+		                        in
+		                            if PackageName <> "" and VersionRelease <> "" and Architecture <> "src" and Record.HasFields(TargetVersionsByKey, TargetKey) then [package_name = PackageName, package_versions = Record.Field(TargetVersionsByKey, TargetKey)] else null)),
+		                    SourceUrl = "https://errata.rockylinux.org/api/v2/advisories/" & AdvisoryId,
+		                    AdvisoryRows = List.Combine(List.Transform(MatchingPackages, (package as record) => List.Combine(List.Transform(package[package_versions], (targetVersion as text) => List.Transform(CveIds, (cveId as text) => [distribution = "Rocky Linux", release_codename = release, package_name = Text.From(package[package_name]), package_version = targetVersion, advisory_id = AdvisoryId, cve_id = cveId, severity = Severity, product = Product, published_at = Published, mapping_source = "Rocky Linux Errata (Apollo)", source_url = SourceUrl])))))
+		                in
+		                    AdvisoryRows))
+		        in
+		            Rows,
+		    RockyLinuxRows = if List.IsEmpty(TargetRecords) then {} else List.Combine(List.Transform(ActiveReleases, each ParseRelease(_)))
+		in
+		    RockyLinuxRows
+	lineageTag: 017b75c7-9bb7-40cf-8807-febab03a05d0
