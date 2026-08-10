@@ -118,3 +118,67 @@ expression fnOracleLinuxPatchCveRows =
 		in
 		    OracleRows
 	lineageTag: 668288b3-748c-418d-a399-4d817cba5e25
+
+/// Returns exact AlmaLinux ALSA/CVE mappings from official AlmaLinux full errata feeds for missing package targets.
+expression fnAlmaLinuxPatchCveRows =
+		(missingPatches as table) as list =>
+		let
+		    SupportedReleases = {"10", "9", "8"},
+		    RetryableStatusCodes = {429, 500, 502, 503, 504},
+		    RpmArchitectures = {"x86_64", "aarch64", "ppc64le", "s390x", "noarch", "i686"},
+		    NormalizeRpmVersion = (value as any) as text =>
+		        let
+		            Version = Text.Trim(Text.From(value)),
+		            WithoutArchitecture = List.Accumulate(RpmArchitectures, Version, (state as text, architecture as text) => if Text.EndsWith(Text.Lower(state), "." & architecture) then Text.Start(state, Text.Length(state) - Text.Length(architecture) - 1) else state)
+		        in
+		            if Text.StartsWith(WithoutArchitecture, "0:") then Text.AfterDelimiter(WithoutArchitecture, ":") else WithoutArchitecture,
+		    RelevantRows = Table.Buffer(Table.SelectRows(missingPatches, each Text.Lower(Text.Trim(Text.From([os_type]))) = "linux" and [os_distribution] = "AlmaLinux" and List.Contains(SupportedReleases, Text.Trim(Text.From([release_codename]))) and [patch_name] <> null and Text.Trim(Text.From([patch_name])) <> "" and [package_version] <> null and Text.Trim(Text.From([package_version])) <> "")),
+		    TargetRecords = List.Buffer(Table.ToRecords(RelevantRows)),
+		    MakeTargetKey = (target as record) as text => Text.Trim(Text.From(target[release_codename])) & "|" & Text.Lower(Text.Trim(Text.From(target[patch_name]))) & "|" & NormalizeRpmVersion(target[package_version]),
+		    TargetKeys = List.Buffer(List.Distinct(List.Transform(TargetRecords, each MakeTargetKey(_)))),
+		    TargetVersionsByKey = if List.IsEmpty(TargetKeys) then [] else Record.FromList(List.Transform(TargetKeys, (targetKey as text) => List.Distinct(List.Transform(List.Select(TargetRecords, each MakeTargetKey(_) = targetKey), each Text.Trim(Text.From([package_version]))))), TargetKeys),
+		    FetchAlmaLinuxFeed = (release as text, optional attempt as nullable number) as record =>
+		        let
+		            CurrentAttempt = if attempt = null then 0 else attempt,
+		            Response = try Web.Contents("https://errata.almalinux.org", [RelativePath = release & "/errata.full.json", Headers = [Accept = "application/json"], ManualStatusHandling = RetryableStatusCodes]) otherwise null,
+		            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+		            Result = if Status = 200 then Json.Document(Response) else if CurrentAttempt < 3 then Function.InvokeAfter(() => @FetchAlmaLinuxFeed(release, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1))) else error Error.Record("AlmaLinuxSecurityFeedUnavailable", "The AlmaLinux full errata feed could not be retrieved after four attempts.", [Release = release, Status = Status])
+		        in
+		            Result,
+		    ActiveReleases = List.Buffer(List.Distinct(List.Transform(TargetRecords, each Text.Trim(Text.From([release_codename]))))),
+		    ParseRelease = (release as text) as list =>
+		        let
+		            Feed = FetchAlmaLinuxFeed(release),
+		            Advisories = Record.FieldOrDefault(Feed, "data", {}),
+		            SecurityAdvisories = List.Select(Advisories, each Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(_, "type", "")))) = "security" and Text.StartsWith(Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(_, "id", "")))), "ALSA-")),
+		            Rows = List.Combine(List.Transform(SecurityAdvisories, (advisory as record) =>
+		                let
+		                    AdvisoryId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(advisory, "id", "")))),
+		                    SeverityText = Text.Trim(Text.From(Record.FieldOrDefault(advisory, "severity", "Unknown"))),
+		                    Severity = if SeverityText = "" then "Unknown" else Text.Proper(Text.Lower(SeverityText)),
+		                    IssuedSeconds = try Number.From(Record.FieldOrDefault(advisory, "issued_date", null)) otherwise null,
+		                    Published = if IssuedSeconds = null then null else #datetime(1970, 1, 1, 0, 0, 0) + #duration(0, 0, 0, IssuedSeconds),
+		                    References = Record.FieldOrDefault(advisory, "references", {}),
+		                    CveIds = List.Distinct(List.RemoveNulls(List.Transform(List.Select(References, each Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(_, "type", "")))) = "cve"), each let CveId = Text.Upper(Text.Trim(Text.From(Record.FieldOrDefault(_, "id", "")))) in if Text.StartsWith(CveId, "CVE-") then CveId else null))),
+		                    Packages = Record.FieldOrDefault(advisory, "packages", {}),
+		                    MatchingPackages = List.RemoveNulls(List.Transform(Packages, (package as record) =>
+		                        let
+		                            PackageName = Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(package, "name", "")))),
+		                            Epoch = Text.Trim(Text.From(Record.FieldOrDefault(package, "epoch", "0"))),
+		                            Version = Text.Trim(Text.From(Record.FieldOrDefault(package, "version", ""))),
+		                            PackageRelease = Text.Trim(Text.From(Record.FieldOrDefault(package, "release", ""))),
+		                            Architecture = Text.Lower(Text.Trim(Text.From(Record.FieldOrDefault(package, "arch", "")))),
+		                            FixedVersion = (if Epoch = "" or Epoch = "0" then "" else Epoch & ":") & Version & "-" & PackageRelease,
+		                            TargetKey = release & "|" & PackageName & "|" & NormalizeRpmVersion(FixedVersion)
+		                        in
+		                            if PackageName <> "" and Version <> "" and PackageRelease <> "" and Architecture <> "src" and Record.HasFields(TargetVersionsByKey, TargetKey) then [package_name = PackageName, package_versions = Record.Field(TargetVersionsByKey, TargetKey)] else null)),
+		                    SourceUrl = "https://errata.almalinux.org/" & release & "/" & Text.Replace(AdvisoryId, ":", "-") & ".html",
+		                    AdvisoryRows = List.Combine(List.Transform(MatchingPackages, (package as record) => List.Combine(List.Transform(package[package_versions], (targetVersion as text) => List.Transform(CveIds, (cveId as text) => [distribution = "AlmaLinux", release_codename = release, package_name = Text.From(package[package_name]), package_version = targetVersion, advisory_id = AdvisoryId, cve_id = cveId, severity = Severity, product = "AlmaLinux " & release, published_at = Published, mapping_source = "AlmaLinux Errata", source_url = SourceUrl])))))
+		                in
+		                    AdvisoryRows))
+		        in
+		            Rows,
+		    AlmaLinuxRows = if List.IsEmpty(TargetRecords) then {} else List.Combine(List.Transform(ActiveReleases, each ParseRelease(_)))
+		in
+		    AlmaLinuxRows
+	lineageTag: d42dad84-a102-40f0-a2ef-cf53681ea610

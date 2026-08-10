@@ -43,8 +43,8 @@ subscriptions.
 - `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
   providers import Canonical Ubuntu Security Notices, Red Hat CSAF data,
   Debian Security Tracker data, SUSE CSAF advisories, and Oracle Linux ELSA
-  metadata for supported releases, retaining only exact package/version keys
-  present in the current estate.
+  metadata plus AlmaLinux ALSA errata for supported releases, retaining only
+  exact package/version keys present in the current estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
   from `view_missing_patches`, MSRC, and Linux vendor mappings without another
   Resource Graph query.
@@ -54,7 +54,7 @@ subscriptions.
 Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 `ubuntu.com`, `access.redhat.com`, `snapshot.debian.org`,
 `security-tracker.debian.org`, `www.suse.com`, `ftp.suse.com`,
-`yum.oracle.com`, and the
+`yum.oracle.com`, `errata.almalinux.org`, and the
 Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
@@ -93,6 +93,13 @@ normalized target epoch-version-release match exactly. Standard x86_64 latest
 or BaseOS, AppStream, and current UEK repositories are covered; optional
 channels and other architectures remain unmapped rather than receiving
 speculative advisory matches.
+
+AlmaLinux 8-10 rows use AlmaLinux's official `errata.full.json` feeds. Only
+major releases present in the estate are downloaded. ALSA mappings require an
+exact AlmaLinux release, binary RPM name, and normalized target
+epoch-version-release match; the emitted package version preserves the raw
+Update Manager value used by the model join. Red Hat advisories and generic
+CPE inference are not reused for AlmaLinux.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

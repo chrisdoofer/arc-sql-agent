@@ -1,4 +1,4 @@
-/// Authoritative Linux package-to-CVE mappings normalized from Canonical, Red Hat, Debian, SUSE, and Oracle security sources.
+/// Authoritative Linux package-to-CVE mappings normalized from Canonical, Red Hat, Debian, SUSE, Oracle, and AlmaLinux security sources.
 table dim_linux_patch_cve_mapping
 	isHidden
 
@@ -187,13 +187,22 @@ table dim_linux_patch_cve_mapping
 				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings
-
 	partition 'Oracle Linux ELSA' = m
 		mode: import
 		source =
 				let
 				    OracleRows = fnOracleLinuxPatchCveRows(view_missing_patches),
 				    Mappings = Table.FromRecords(OracleRows, type table [distribution = text, release_codename = text, package_name = text, package_version = text, advisory_id = text, cve_id = text, severity = text, product = text, published_at = nullable datetime, mapping_source = text, source_url = text]),
+				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
+				in
+				    DistinctMappings
+
+	partition 'AlmaLinux ALSA' = m
+		mode: import
+		source =
+				let
+				    AlmaLinuxRows = fnAlmaLinuxPatchCveRows(view_missing_patches),
+				    Mappings = Table.FromRecords(AlmaLinuxRows, type table [distribution = text, release_codename = text, package_name = text, package_version = text, advisory_id = text, cve_id = text, severity = text, product = text, published_at = nullable datetime, mapping_source = text, source_url = text]),
 				    DistinctMappings = Table.Distinct(Mappings, {"distribution", "release_codename", "package_name", "package_version", "advisory_id", "cve_id"})
 				in
 				    DistinctMappings
