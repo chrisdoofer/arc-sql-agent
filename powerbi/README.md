@@ -41,9 +41,10 @@ subscriptions.
 - `view_missing_patches` - individual missing Windows and Linux patches.
 - `dim_patch_cve_mapping` - authoritative MSRC-only KB-to-CVE mappings.
 - `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
-  providers import Canonical Ubuntu Security Notices, Red Hat CSAF data, and
-  Debian Security Tracker data for supported releases, retaining only exact
-  package/version keys present in the current estate.
+  providers import Canonical Ubuntu Security Notices, Red Hat CSAF data,
+  Debian Security Tracker data, and SUSE CSAF advisories for supported
+  releases, retaining only exact package/version keys present in the current
+  estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
   from `view_missing_patches`, MSRC, and Linux vendor mappings without another
   Resource Graph query.
@@ -52,8 +53,8 @@ subscriptions.
 
 Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 `ubuntu.com`, `access.redhat.com`, `snapshot.debian.org`,
-`security-tracker.debian.org`, and the Microsoft Learn SQL build-reference page
-when the template is first opened.
+`security-tracker.debian.org`, `www.suse.com`, `ftp.suse.com`, and the
+Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
 Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted only
@@ -75,6 +76,13 @@ source package and source version are matched to the Debian Security Tracker
 for Bullseye, Bookworm, or Trixie. A CVE is emitted only when the tracker marks
 the release resolved and its fixed source version exactly equals the resolved
 target source version; no lexicographic Debian version comparison is used.
+
+SUSE Linux Enterprise Server rows use SUSE's public advisory search and CSAF
+2.0 feeds. The implementation supports SLES 12 SP3-SP5 and SLES 15 SP3-SP7.
+The service pack, binary RPM name, and exact Update Manager target version must
+match a CSAF product relationship, and the corresponding composite product ID
+must be listed by the vulnerability. SUSE module, openSUSE, and other product
+records are not reused for SLES mappings.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

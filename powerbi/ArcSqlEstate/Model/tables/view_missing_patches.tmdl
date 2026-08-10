@@ -141,7 +141,8 @@ table view_missing_patches
 				            | project
 				                machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0])),
 				                os_type = tostring(sprop.osType),
-				                patch_service_used = tostring(sprop.patchServiceUsed)
+				                patch_service_used = tostring(sprop.patchServiceUsed),
+				                patch_os_version = tostring(sprop.osVersion)
 				        ) on machine_resource_id
 				        | join kind=leftouter (
 				            resources
@@ -149,13 +150,16 @@ table view_missing_patches
 				            | extend mprop = parse_json(properties)
 				            | project
 				                machine_resource_id = tolower(id),
-				                machine_os_sku = tostring(mprop.osSku)
+				                machine_os_sku = tostring(mprop.osSku),
+				                machine_os_version = tostring(mprop.osVersion)
 				        ) on machine_resource_id
 				        | extend machine_os_sku_normalized = tolower(machine_os_sku)
+				        | extend suse_version_text = tolower(strcat(machine_os_sku, ' ', machine_os_version, ' ', patch_os_version))
 				        | extend os_distribution = case(
 				            machine_os_sku_normalized contains 'ubuntu', 'Ubuntu',
 				            machine_os_sku_normalized contains 'red hat' or machine_os_sku_normalized contains 'rhel', 'Red Hat Enterprise Linux',
 				            machine_os_sku_normalized contains 'debian', 'Debian GNU/Linux',
+				            machine_os_sku_normalized contains 'suse' or machine_os_sku_normalized contains 'sles', 'SUSE Linux Enterprise Server',
 				            ''
 				        )
 				        | extend release_codename = case(
@@ -169,6 +173,14 @@ table view_missing_patches
 				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'trixie' or machine_os_sku contains '13.' or machine_os_sku endswith ' 13'), 'trixie',
 				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'bookworm' or machine_os_sku contains '12.' or machine_os_sku endswith ' 12'), 'bookworm',
 				            os_distribution == 'Debian GNU/Linux' and (machine_os_sku_normalized contains 'bullseye' or machine_os_sku contains '11.' or machine_os_sku endswith ' 11'), 'bullseye',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '15 sp7' or suse_version_text contains '15-sp7' or suse_version_text contains '15.7'), '15 SP7',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '15 sp6' or suse_version_text contains '15-sp6' or suse_version_text contains '15.6'), '15 SP6',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '15 sp5' or suse_version_text contains '15-sp5' or suse_version_text contains '15.5'), '15 SP5',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '15 sp4' or suse_version_text contains '15-sp4' or suse_version_text contains '15.4'), '15 SP4',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '15 sp3' or suse_version_text contains '15-sp3' or suse_version_text contains '15.3'), '15 SP3',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '12 sp5' or suse_version_text contains '12-sp5' or suse_version_text contains '12.5'), '12 SP5',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '12 sp4' or suse_version_text contains '12-sp4' or suse_version_text contains '12.4'), '12 SP4',
+				            os_distribution == 'SUSE Linux Enterprise Server' and (suse_version_text contains '12 sp3' or suse_version_text contains '12-sp3' or suse_version_text contains '12.3'), '12 SP3',
 				            ''
 				        )
 				        | project
