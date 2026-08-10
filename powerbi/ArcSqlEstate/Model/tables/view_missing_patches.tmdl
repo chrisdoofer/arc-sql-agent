@@ -155,8 +155,10 @@ table view_missing_patches
 				        ) on machine_resource_id
 				        | extend machine_os_sku_normalized = tolower(machine_os_sku)
 				        | extend suse_version_text = tolower(strcat(machine_os_sku, ' ', machine_os_version, ' ', patch_os_version))
+				        | extend oracle_version_text = tolower(strcat(machine_os_sku, ' ', machine_os_version, ' ', patch_os_version))
 				        | extend os_distribution = case(
 				            machine_os_sku_normalized contains 'ubuntu', 'Ubuntu',
+				            machine_os_sku_normalized contains 'oracle linux' or machine_os_sku_normalized contains 'oraclelinux', 'Oracle Linux',
 				            machine_os_sku_normalized contains 'red hat' or machine_os_sku_normalized contains 'rhel', 'Red Hat Enterprise Linux',
 				            machine_os_sku_normalized contains 'debian', 'Debian GNU/Linux',
 				            machine_os_sku_normalized contains 'suse' or machine_os_sku_normalized contains 'sles', 'SUSE Linux Enterprise Server',
@@ -166,6 +168,10 @@ table view_missing_patches
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '24.04', 'noble',
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '22.04', 'jammy',
 				            os_distribution == 'Ubuntu' and machine_os_sku contains '20.04', 'focal',
+				            os_distribution == 'Oracle Linux' and (oracle_version_text contains 'ol10' or oracle_version_text contains '10.' or oracle_version_text endswith ' 10'), '10',
+				            os_distribution == 'Oracle Linux' and (oracle_version_text contains 'ol9' or oracle_version_text contains '9.' or oracle_version_text endswith ' 9'), '9',
+				            os_distribution == 'Oracle Linux' and (oracle_version_text contains 'ol8' or oracle_version_text contains '8.' or oracle_version_text endswith ' 8'), '8',
+				            os_distribution == 'Oracle Linux' and (oracle_version_text contains 'ol7' or oracle_version_text contains '7.' or oracle_version_text endswith ' 7'), '7',
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '10.' or machine_os_sku endswith ' 10'), '10',
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '9.' or machine_os_sku endswith ' 9'), '9',
 				            os_distribution == 'Red Hat Enterprise Linux' and (machine_os_sku contains '8.' or machine_os_sku endswith ' 8'), '8',

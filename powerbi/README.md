@@ -13,7 +13,7 @@ remain consistent:
   patches by machine and classification, a complete missing-patch detail table,
   and a separate machine/KB/CVE exposure table. Missing patches come from
   Resource Graph; CVEs are mapped dynamically from Microsoft Security Response
-  Center CVRF documents and are never inferred from patch names.
+  Center and authoritative Linux vendor feeds, never inferred from patch names.
 - `Best Practices` - a normalized Arc SQL assessment aligned to the PDF report
   contract, including check ID, check name, category, status, severity,
   affected asset, current and expected values, evidence source, and
@@ -42,9 +42,9 @@ subscriptions.
 - `dim_patch_cve_mapping` - authoritative MSRC-only KB-to-CVE mappings.
 - `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
   providers import Canonical Ubuntu Security Notices, Red Hat CSAF data,
-  Debian Security Tracker data, and SUSE CSAF advisories for supported
-  releases, retaining only exact package/version keys present in the current
-  estate.
+  Debian Security Tracker data, SUSE CSAF advisories, and Oracle Linux ELSA
+  metadata for supported releases, retaining only exact package/version keys
+  present in the current estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
   from `view_missing_patches`, MSRC, and Linux vendor mappings without another
   Resource Graph query.
@@ -53,7 +53,8 @@ subscriptions.
 
 Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 `ubuntu.com`, `access.redhat.com`, `snapshot.debian.org`,
-`security-tracker.debian.org`, `www.suse.com`, `ftp.suse.com`, and the
+`security-tracker.debian.org`, `www.suse.com`, `ftp.suse.com`,
+`yum.oracle.com`, and the
 Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
@@ -83,6 +84,15 @@ The service pack, binary RPM name, and exact Update Manager target version must
 match a CSAF product relationship, and the corresponding composite product ID
 must be listed by the vulnerability. SUSE module, openSUSE, and other product
 records are not reused for SLES mappings.
+
+Oracle Linux 7-10 rows use the official Oracle Public Yum repository metadata.
+Only releases present in the estate are downloaded. The implementation follows
+each repository's `repomd.xml` pointer, GZip-decompresses `updateinfo.xml`, and
+emits ELSA CVEs only when the Oracle Linux major release, binary RPM name, and
+normalized target epoch-version-release match exactly. Standard x86_64 latest
+or BaseOS, AppStream, and current UEK repositories are covered; optional
+channels and other architectures remain unmapped rather than receiving
+speculative advisory matches.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

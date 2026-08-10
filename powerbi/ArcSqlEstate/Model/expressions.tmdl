@@ -1,0 +1,120 @@
+/// Returns exact Oracle Linux ELSA/CVE mappings from official Oracle Public Yum updateinfo metadata for missing package targets.
+expression fnOracleLinuxPatchCveRows =
+		(missingPatches as table) as list =>
+		let
+		    SupportedReleases = {"10", "9", "8", "7"},
+		    RetryableStatusCodes = {429, 500, 502, 503, 504},
+		    RpmArchitectures = {"x86_64", "aarch64", "ppc64le", "s390x", "noarch", "i686"},
+		    NormalizeRpmVersion = (value as any) as text =>
+		        let
+		            Version = Text.Trim(Text.From(value)),
+		            WithoutArchitecture = List.Accumulate(RpmArchitectures, Version, (state as text, architecture as text) => if Text.EndsWith(Text.Lower(state), "." & architecture) then Text.Start(state, Text.Length(state) - Text.Length(architecture) - 1) else state)
+		        in
+		            if Text.StartsWith(WithoutArchitecture, "0:") then Text.AfterDelimiter(WithoutArchitecture, ":") else WithoutArchitecture,
+		    RelevantRows = Table.Buffer(Table.SelectRows(missingPatches, each Text.Lower(Text.Trim(Text.From([os_type]))) = "linux" and [os_distribution] = "Oracle Linux" and List.Contains(SupportedReleases, Text.Trim(Text.From([release_codename]))) and [patch_name] <> null and Text.Trim(Text.From([patch_name])) <> "" and [package_version] <> null and Text.Trim(Text.From([package_version])) <> "")),
+		    TargetRecords = List.Buffer(Table.ToRecords(RelevantRows)),
+		    MakeTargetKey = (target as record) as text => Text.Trim(Text.From(target[release_codename])) & "|" & Text.Lower(Text.Trim(Text.From(target[patch_name]))) & "|" & NormalizeRpmVersion(target[package_version]),
+		    TargetKeys = List.Buffer(List.Distinct(List.Transform(TargetRecords, each MakeTargetKey(_)))),
+		    TargetVersionsByKey = if List.IsEmpty(TargetKeys) then [] else Record.FromList(List.Transform(TargetKeys, (targetKey as text) => List.Distinct(List.Transform(List.Select(TargetRecords, each MakeTargetKey(_) = targetKey), each Text.Trim(Text.From([package_version]))))), TargetKeys),
+		    EmptyXmlTable = #table({"Name", "Namespace", "Value", "Attributes"}, {}),
+		    AsXmlTable = (value as any) as table => if value is table then value else EmptyXmlTable,
+		    NodeChildren = (node as any) as table => if node is record then AsXmlTable(Record.FieldOrDefault(node, "Value", null)) else EmptyXmlTable,
+		    NamedNodes = (nodes as any, elementName as text) as list =>
+		        let
+		            XmlTable = AsXmlTable(nodes),
+		            Matches = if Table.HasColumns(XmlTable, {"Name"}) then Table.SelectRows(XmlTable, each Text.Lower(Text.From(Record.FieldOrDefault(_, "Name", ""))) = Text.Lower(elementName)) else EmptyXmlTable
+		        in
+		            Table.ToRecords(Matches),
+		    FirstNamedNode = (nodes as any, elementName as text) as any => List.First(NamedNodes(nodes, elementName), null),
+		    NodeText = (node as any) as text =>
+		        let
+		            Value = if node is record then Record.FieldOrDefault(node, "Value", null) else null,
+		            DirectText = if Value is text then Text.Trim(Value) else if Value is number or Value is date or Value is datetime or Value is datetimezone then Text.Trim(Text.From(Value)) else "",
+		            NestedText = if DirectText <> "" or not (Value is table) then "" else Text.Combine(List.RemoveNulls(List.Transform(Table.ToRecords(Value), each let NestedValue = Record.FieldOrDefault(_, "Value", null) in if NestedValue is text then Text.Trim(NestedValue) else null)), "")
+		        in
+		            if DirectText <> "" then DirectText else NestedText,
+		    ElementText = (node as any, elementName as text) as text => NodeText(FirstNamedNode(NodeChildren(node), elementName)),
+		    NodeAttribute = (node as any, attributeName as text) as text =>
+		        let
+		            Attributes = if node is record then Record.FieldOrDefault(node, "Attributes", null) else null,
+		            AttributeTable = AsXmlTable(Attributes),
+		            Matches = if Table.HasColumns(AttributeTable, {"Name"}) then Table.ToRecords(Table.SelectRows(AttributeTable, each Text.Lower(Text.From(Record.FieldOrDefault(_, "Name", ""))) = Text.Lower(attributeName))) else {},
+		            Value = if List.IsEmpty(Matches) then "" else Text.Trim(Text.From(Record.FieldOrDefault(Matches{0}, "Value", "")))
+		        in
+		            Value,
+		    FetchOracleBinary = (relativePath as text, context as text, optional attempt as nullable number) as binary =>
+		        let
+		            CurrentAttempt = if attempt = null then 0 else attempt,
+		            Response = try Web.Contents("https://yum.oracle.com", [RelativePath = relativePath, ManualStatusHandling = RetryableStatusCodes]) otherwise null,
+		            Status = if Response = null then 0 else Record.FieldOrDefault(Value.Metadata(Response), "Response.Status", 200),
+		            Result = if Status = 200 then Binary.Buffer(Response) else if CurrentAttempt < 3 then Function.InvokeAfter(() => @FetchOracleBinary(relativePath, context, CurrentAttempt + 1), #duration(0, 0, 0, Number.Power(2, CurrentAttempt + 1))) else error Error.Record("OracleLinuxSecurityFeedUnavailable", "Oracle Public Yum security metadata could not be retrieved after four attempts.", [Context = context, RelativePath = relativePath, Status = Status])
+		        in
+		            Result,
+		    RepositoryCatalog = #table(type table [release = text, repository = text], {
+		        {"7", "OL7/latest"},
+		        {"7", "OL7/UEKR6"},
+		        {"8", "OL8/baseos/latest"},
+		        {"8", "OL8/appstream"},
+		        {"8", "OL8/UEKR7"},
+		        {"9", "OL9/baseos/latest"},
+		        {"9", "OL9/appstream"},
+		        {"9", "OL9/UEKR7"},
+		        {"10", "OL10/baseos/latest"},
+		        {"10", "OL10/appstream"},
+		        {"10", "OL10/UEKR8"}
+		    }),
+		    ActiveReleases = List.Buffer(List.Distinct(List.Transform(TargetRecords, each Text.Trim(Text.From([release_codename]))))),
+		    ActiveRepositories = Table.ToRecords(Table.SelectRows(RepositoryCatalog, each List.Contains(ActiveReleases, [release]))),
+		    ParseRepository = (release as text, repository as text) as list =>
+		        let
+		            BasePath = "repo/OracleLinux/" & repository & "/x86_64/",
+		            RepomdDocument = Xml.Document(FetchOracleBinary(BasePath & "repodata/repomd.xml", repository & " repomd")),
+		            RepomdNode = FirstNamedNode(RepomdDocument, "repomd"),
+		            DataNodes = NamedNodes(NodeChildren(RepomdNode), "data"),
+		            UpdateInfoDataNode = List.First(List.Select(DataNodes, each Text.Lower(NodeAttribute(_, "type")) = "updateinfo"), null),
+		            LocationNode = FirstNamedNode(NodeChildren(UpdateInfoDataNode), "location"),
+		            UpdateInfoHref = NodeAttribute(LocationNode, "href"),
+		            ValidUpdateInfoHref = if UpdateInfoHref = "" then error Error.Record("OracleLinuxUpdateInfoMissing", "Oracle Public Yum repository metadata does not expose updateinfo.xml.", [Repository = repository]) else UpdateInfoHref,
+		            UpdateInfoBinary = Binary.Decompress(FetchOracleBinary(BasePath & ValidUpdateInfoHref, repository & " updateinfo", null), Compression.GZip),
+		            UpdateInfoDocument = Xml.Document(UpdateInfoBinary),
+		            UpdatesNode = FirstNamedNode(UpdateInfoDocument, "updates"),
+		            UpdateNodes = NamedNodes(NodeChildren(UpdatesNode), "update"),
+		            SecurityUpdateNodes = List.Select(UpdateNodes, each Text.Lower(NodeAttribute(_, "type")) = "security" and Text.StartsWith(Text.Upper(ElementText(_, "id")), "ELSA-")),
+		            Rows = List.Combine(List.Transform(SecurityUpdateNodes, (updateNode as record) =>
+		                let
+		                    AdvisoryId = Text.Upper(ElementText(updateNode, "id")),
+		                    SeverityText = ElementText(updateNode, "severity"),
+		                    Severity = if SeverityText = "" then "Unknown" else Text.Proper(Text.Lower(SeverityText)),
+		                    ProductText = ElementText(updateNode, "release"),
+		                    Product = if ProductText = "" then "Oracle Linux " & release else ProductText,
+		                    IssuedNode = FirstNamedNode(NodeChildren(updateNode), "issued"),
+		                    Published = try DateTime.FromText(NodeAttribute(IssuedNode, "date"), [Culture = "en-US"]) otherwise null,
+		                    ReferencesNode = FirstNamedNode(NodeChildren(updateNode), "references"),
+		                    ReferenceNodes = NamedNodes(NodeChildren(ReferencesNode), "reference"),
+		                    CveIds = List.Distinct(List.RemoveNulls(List.Transform(List.Select(ReferenceNodes, each Text.Lower(NodeAttribute(_, "type")) = "cve"), each let CveId = Text.Upper(NodeAttribute(_, "id")) in if Text.StartsWith(CveId, "CVE-") then CveId else null))),
+		                    SelfReference = List.First(List.Select(ReferenceNodes, each Text.Lower(NodeAttribute(_, "type")) = "self"), null),
+		                    SelfHref = NodeAttribute(SelfReference, "href"),
+		                    SourceUrl = if SelfHref <> "" then SelfHref else "https://linux.oracle.com/errata/" & AdvisoryId & ".html",
+		                    PackageListNode = FirstNamedNode(NodeChildren(updateNode), "pkglist"),
+		                    CollectionNodes = NamedNodes(NodeChildren(PackageListNode), "collection"),
+		                    PackageNodes = List.Combine(List.Transform(CollectionNodes, each NamedNodes(NodeChildren(_), "package"))),
+		                    MatchingPackages = List.RemoveNulls(List.Transform(PackageNodes, (packageNode as record) =>
+		                        let
+		                            PackageName = Text.Lower(NodeAttribute(packageNode, "name")),
+		                            Version = NodeAttribute(packageNode, "version"),
+		                            PackageRelease = NodeAttribute(packageNode, "release"),
+		                            Epoch = NodeAttribute(packageNode, "epoch"),
+		                            Architecture = Text.Lower(NodeAttribute(packageNode, "arch")),
+		                            FixedVersion = (if Epoch = "" or Epoch = "0" then "" else Epoch & ":") & Version & "-" & PackageRelease,
+		                            TargetKey = release & "|" & PackageName & "|" & NormalizeRpmVersion(FixedVersion)
+		                        in
+		                            if PackageName <> "" and Version <> "" and PackageRelease <> "" and Architecture <> "src" and Record.HasFields(TargetVersionsByKey, TargetKey) then [package_name = PackageName, package_versions = Record.Field(TargetVersionsByKey, TargetKey)] else null)),
+		                    AdvisoryRows = List.Combine(List.Transform(MatchingPackages, (package as record) => List.Combine(List.Transform(package[package_versions], (targetVersion as text) => List.Transform(CveIds, (cveId as text) => [distribution = "Oracle Linux", release_codename = release, package_name = Text.From(package[package_name]), package_version = targetVersion, advisory_id = AdvisoryId, cve_id = cveId, severity = Severity, product = Product, published_at = Published, mapping_source = "Oracle Linux Updateinfo", source_url = SourceUrl])))))
+		                in
+		                    AdvisoryRows))
+		        in
+		            Rows,
+		    OracleRows = if List.IsEmpty(TargetRecords) then {} else List.Combine(List.Transform(ActiveRepositories, each ParseRepository(Text.From([release]), Text.From([repository]))))
+		in
+		    OracleRows
+	lineageTag: 668288b3-748c-418d-a399-4d817cba5e25
