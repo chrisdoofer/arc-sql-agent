@@ -1,0 +1,46 @@
+table bridge_resource_tags
+
+	column resource_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column tag_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [tag_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition bridge_resource_tags = calculated
+		mode: import
+		source = ```
+				
+				VAR j =
+				    NATURALINNERJOIN (
+				        // Left: resource_key + normalized tag columns
+				        SELECTCOLUMNS (
+				            ext_resource_tags,
+				            "resource_key", ext_resource_tags[resource_key],
+				            "tag_name",     LOWER ( TRIM ( ext_resource_tags[tag_name] ) ),
+				            "tag_value",    LOWER ( TRIM ( ext_resource_tags[tag_value] ) )
+				        ),
+				        // Right: tag_key + normalized tag columns
+				        SELECTCOLUMNS (
+				            dim_tags,
+				            "tag_key",   dim_tags[tag_key],
+				            "tag_name",  LOWER ( TRIM ( dim_tags[tag_name] ) ),
+				            "tag_value", LOWER ( TRIM ( dim_tags[tag_value] ) )
+				        )
+				    )
+				RETURN
+				    DISTINCT ( SELECTCOLUMNS ( j, "resource_key", [resource_key], "tag_key", [tag_key] ) )
+				
+				```
+
+	annotation PBI_Id = c299c4d0a098458aaed9988df18763b7
+

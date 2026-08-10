@@ -1,0 +1,580 @@
+/// Unified view of servers ESU costs across windows and SQL
+table view_esu
+
+	column index
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [index]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column server_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column logical_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [logical_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [os_esu_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_basecost_monthly
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [os_esu_basecost_monthly]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column os_esu_start_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_start_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_end_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_end_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_edition
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_edition]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_type_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_resource_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column server_resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column sql_instance_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_instance_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [sql_esu_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_basecost_monthly
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [sql_esu_basecost_monthly]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sql_esu_start_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_start_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_end_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_end_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_edition
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_edition]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_compute_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [mi_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_compute_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [db_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_compute_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [vm_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_storage_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [mi_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_storage_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [db_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_storage_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [vm_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_total_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [mi_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_total_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [db_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_total_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [vm_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column user_db_count
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [user_db_count]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [esu_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_run_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [azure_run_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_sql_fullname
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_sql_fullname]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_min_start_date =
+			
+			VAR min_date =
+			    MINX(
+			        {
+			            [sql_esu_start_date],
+			            [os_esu_start_date]
+			        },
+			        [Value]
+			    )
+			RETURN
+			COALESCE(min_date, DATE(2026, 7, 14))
+		formatString: General Date
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_max_start_date =
+			
+			VAR max_date =
+			    MINX(
+			        {
+			            [sql_esu_start_date],
+			            [os_esu_start_date]
+			        },
+			        [Value]
+			    )
+			RETURN
+			COALESCE(max_date, DATE(2030, 12, 30))
+		formatString: General Date
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_modernisation_status =
+			
+			VAR strategy = SELECTEDVALUE(dim_migration_strategy[migration_strategy], "Modernize to PaaS")
+			
+			-- Readiness flags
+			VAR db_ready = [db_status] = "Ready" && NOT ISBLANK([db_total_cost])
+			VAR mi_ready = [mi_status] = "Ready" && NOT ISBLANK([mi_total_cost])
+			VAR vm_ready = [vm_status] = "Ready" && NOT ISBLANK([vm_total_cost])
+			
+			-- Costs
+			VAR db_cost = [db_total_cost]
+			VAR mi_cost = [mi_total_cost]
+			VAR vm_cost = [vm_total_cost]
+			
+			-- Minimize cost logic
+			VAR cheapest_ready =
+			    SWITCH(
+			        TRUE(),
+			        db_ready &&
+			            (NOT mi_ready || db_cost <= mi_cost) &&
+			            (NOT vm_ready || db_cost <= vm_cost), "SQL DB",
+			
+			        mi_ready &&
+			            (NOT db_ready || mi_cost <= db_cost) &&
+			            (NOT vm_ready || mi_cost <= vm_cost), "SQL MI",
+			
+			        vm_ready, "VM",
+			        "VM*"
+			    )
+			
+			-- Modernize to PaaS logic
+			VAR paas_choice =
+			    SWITCH(
+			        TRUE(),
+			        db_ready, "SQL DB",
+			        mi_ready, "SQL MI",
+			        vm_ready, "VM",
+			        "VM*"
+			    )
+			
+			RETURN
+			    IF(strategy = "Minimize cost", cheapest_ready, paas_choice)
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_modernisation_type =
+			
+			SWITCH(
+			    TRUE(),
+			    [azure_modernisation_status] IN {"VM", "VM*"}, "IaaS",
+			    [azure_modernisation_status] IN {"SQL MI", "SQL DB"}, "PaaS",
+			    "Other"
+			)
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_assessment_url = ```
+			
+			IF (
+			    [azure_modernisation_status] = "VM*",
+			    "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/ddsv5-series?tabs=sizebasic",
+			    "https://portal.azure.com/#resource/subscriptions/" & 
+			        [subscription_id] & 
+			        "/resourceGroups/" & 
+			        [resource_group] & 
+			        "/providers/Microsoft.AzureArcData/SqlServerInstances/" & 
+			        [server_name] & 
+			        "/migrationAssessment"
+			)
+			```
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition view_esu = calculated
+		mode: import
+		source = ```
+				
+				/* 1) Servers: Project and ensure unique column names for the join */
+				VAR Servers =
+				    SELECTCOLUMNS (
+				        view_servers,
+				        "s_resource_key",           view_servers[resource_key],
+				        "server_name",              view_servers[server_name],
+				        "logical_cores",            view_servers[logical_cores],
+				        "os_esu_status",            view_servers[os_esu_status],
+				        "os_esu_cores",             view_servers[os_esu_cores],
+				        "os_esu_basecost_monthly",  view_servers[os_esu_basecost_monthly],
+				        "os_esu_start_date",        view_servers[os_esu_start_date],
+				        "os_esu_end_date",          view_servers[os_esu_end_date],
+				        "os_version",               view_servers[os_version],
+				        "os_edition",               view_servers[os_edition],
+				        "resource_type_group",      view_servers[platform],
+				        "subscription_id",          view_servers[subscription_id],
+				        "resource_group",           view_servers[resource_group] )
+				/* 2) Instances: Projection */
+				VAR Inst =
+				    SELECTCOLUMNS (
+				        view_sql_instances,
+				        "parent_resource_key",      view_sql_instances[parent_resource_key],
+				        "sql_resource_key",         view_sql_instances[resource_key],
+				        "sql_instance_name",        view_sql_instances[sql_instance_name],
+				        "sql_esu_status",           view_sql_instances[sql_esu_status],
+				        "sql_esu_cores",            view_sql_instances[sql_esu_cores],
+				        "sql_esu_basecost_monthly", view_sql_instances[sql_esu_basecost_monthly],
+				        "sql_esu_start_date",       view_sql_instances[sql_esu_start_date],
+				        "sql_esu_end_date",         view_sql_instances[sql_esu_end_date],
+				        "sql_version",              view_sql_instances[sql_version],
+				        "sql_edition",              view_sql_instances[sql_edition],
+				        "mi_compute_cost",          view_sql_instances[mi_compute_cost],
+				        "db_compute_cost",          view_sql_instances[db_compute_cost],
+				        "vm_compute_cost",          view_sql_instances[vm_compute_cost],
+				        "mi_storage_cost",          view_sql_instances[mi_storage_cost],
+				        "db_storage_cost",          view_sql_instances[db_storage_cost],
+				        "vm_storage_cost",          view_sql_instances[vm_storage_cost],
+				        "mi_status",                view_sql_instances[mi_status],
+				        "db_status",                view_sql_instances[db_status],
+				        "vm_status",                view_sql_instances[vm_status],
+				        "mi_total_cost",            view_sql_instances[mi_total_cost],
+				        "db_total_cost",            view_sql_instances[db_total_cost],
+				        "vm_total_cost",            view_sql_instances[vm_total_cost],
+				        "sql_user_db_count",        view_sql_instances[sql_user_db_count]
+				    )
+				
+				/* 3) Explicit LEFT JOIN using GENERATEALL */
+				VAR Joined =
+				    GENERATEALL (
+				        Servers,
+				        VAR CurrentServerKey = [s_resource_key]
+				        RETURN FILTER ( Inst, [parent_resource_key] = CurrentServerKey )
+				    )
+				
+				/* 4) Adding Logic Columns */
+				VAR Enhanced = 
+				    ADDCOLUMNS (
+				        Joined,
+				        -- Calculate row count per server to identify multi-instance scenarios
+				        "row_count", 
+				            VAR sk = [s_resource_key] 
+				            RETURN COUNTROWS(FILTER(Joined, [s_resource_key] = sk)),
+				            
+				        -- OS ESU Logic: Zero out if multi-instance and SQL has no ESU
+				        "os_esu_cores_final",
+				            VAR multi = (VAR sk = [s_resource_key] RETURN COUNTROWS(FILTER(Joined, [s_resource_key] = sk))) > 1
+				            VAR sql0  = COALESCE ( [sql_esu_cores], 0 ) = 0
+				            RETURN IF ( multi && sql0, 0, [os_esu_cores] ),
+				
+				        -- ESU Status Rollup
+				        "esu_status_val",
+				            VAR os_ok  = LOWER ( TRIM ( [os_esu_status] ) ) IN { "upcoming", "esu" }
+				            VAR sql_ok = LOWER ( TRIM ( [sql_esu_status] ) ) IN { "upcoming", "esu" }
+				            RETURN IF(os_ok || sql_ok, "TRUE", "FALSE"),
+
+				        -- Developer edition workloads receive ESU through Visual Studio subscriptions.
+				        "is_developer_workload",
+				            VAR sql_edition_norm = LOWER ( TRIM ( COALESCE ( [sql_edition], "" ) ) )
+				            RETURN CONTAINSSTRING ( sql_edition_norm, "developer" ),
+				
+				        -- Min Cores logic
+				        "azure_run_cores_val",
+				            IF ( ISBLANK ( [logical_cores] ), 2, MAX([logical_cores], 2) ),
+				
+				        -- Full Name logic
+				        "server_sql_fullname_val",
+				            IF ( ISBLANK ( [sql_resource_key] ), [server_name], [server_name] & "\" & [sql_instance_name] )
+				    )
+				
+				/* 5) Indexing and Final Cleanup */
+				VAR WithKey =
+				    ADDCOLUMNS (
+				        Enhanced,
+				        "__ckey", [s_resource_key] * 1000000 + COALESCE ( [sql_resource_key], 0 )
+				    )
+				
+				VAR Indexed =
+				    ADDCOLUMNS ( WithKey, "final_index", RANKX ( WithKey, [__ckey], , ASC, DENSE ) )
+				
+				RETURN
+				SELECTCOLUMNS (
+				    Indexed,
+				    "index",                    [final_index],
+				    "resource_key",             [s_resource_key],
+				    "server_name",              [server_name],
+				    "logical_cores",            [logical_cores],
+				    "os_esu_status",            [os_esu_status],
+				    "os_esu_cores",             IF ( [is_developer_workload], 0, [os_esu_cores_final] ),
+				    "os_esu_basecost_monthly",  IF ( [is_developer_workload], 0, [os_esu_basecost_monthly] ),
+				    "os_esu_start_date",        [os_esu_start_date],
+				    "os_esu_end_date",          [os_esu_end_date],
+				    "os_version",               [os_version],
+				    "os_edition",               [os_edition],
+				    "resource_type_group",      [resource_type_group],
+				    "sql_resource_key",         [sql_resource_key],
+				    "server_resource_key",      [parent_resource_key],
+				    "sql_instance_name",        [sql_instance_name],
+				    "sql_esu_status",           [sql_esu_status],
+				    "sql_esu_cores",            IF ( [is_developer_workload], 0, [sql_esu_cores] ),
+				    "sql_esu_basecost_monthly", IF ( [is_developer_workload], 0, [sql_esu_basecost_monthly] ),
+				    "sql_esu_start_date",       [sql_esu_start_date],
+				    "sql_esu_end_date",         [sql_esu_end_date],
+				    "sql_version",              [sql_version],
+				    "sql_edition",              [sql_edition],
+				    "mi_compute_cost",          [mi_compute_cost],
+				    "db_compute_cost",          [db_compute_cost],
+				    "vm_compute_cost",          [vm_compute_cost],
+				    "mi_storage_cost",          [mi_storage_cost],
+				    "db_storage_cost",          [db_storage_cost],
+				    "vm_storage_cost",          [vm_storage_cost],
+				    "mi_status",                [mi_status],
+				    "db_status",                [db_status],
+				    "vm_status",                [vm_status],
+				    "mi_total_cost",            [mi_total_cost],
+				    "db_total_cost",            [db_total_cost],
+				    "vm_total_cost",            [vm_total_cost],
+				    "user_db_count",            [sql_user_db_count],
+				    "esu_status",               [esu_status_val],
+				    "azure_run_cores",          [azure_run_cores_val],
+				    "server_sql_fullname",      [server_sql_fullname_val],
+				    "subscription_id",          [subscription_id],
+				    "resource_group",           [resource_group] )
+				```
+
+	annotation PBI_Id = ff813eb6b774434ba185c0c3bea8cb79

@@ -1,0 +1,53 @@
+[
+  {
+    "name": "5900f9dd530b91367a91",
+    "expression": {
+      "Column": {
+        "Expression": {
+          "SourceRef": {
+            "Entity": "fact_resources"
+          }
+        },
+        "Property": "platform"
+      }
+    },
+    "type": "Categorical",
+    "howCreated": 1,
+    "objects": {}
+  },
+  {
+    "expression": {
+      "Arithmetic": {
+        "Left": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "all_measures"
+              }
+            },
+            "Property": "user_database_count_per_instance"
+          }
+        },
+        "Right": {
+          "ScopedEval": {
+            "Expression": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "user_database_count_per_instance"
+              }
+            },
+            "Scope": []
+          }
+        },
+        "Operator": 3
+      }
+    },
+    "type": "Advanced",
+    "howCreated": 1,
+    "isHiddenInViewMode": false
+  }
+]

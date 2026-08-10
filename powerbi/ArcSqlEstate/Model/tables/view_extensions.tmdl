@@ -1,0 +1,240 @@
+/// Extensions
+table view_extensions
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column extension_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [extension_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [extension_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column publisher
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [publisher]
+
+		annotation SummarizationSetBy = Automatic
+
+	column provisioning_state
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [provisioning_state]
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_handler_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [type_handler_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column auto_upgrade_minor_version
+		dataType: string
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [auto_upgrade_minor_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_status_level
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [instanceview_status_level]
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_status_code
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [instanceview_status_code]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_name = ```
+			LOOKUPVALUE(fact_resources[resource_name], fact_resources[resource_key], view_extensions[parent_resource_key])
+			
+			```
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [source_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [location]
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [platform]
+
+		annotation SummarizationSetBy = Automatic
+
+	column timestamp
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [timestamp]
+
+		annotation SummarizationSetBy = Automatic
+
+	column settings
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [settings]
+
+		annotation SummarizationSetBy = Automatic
+
+	column protected_settings
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [protected_settings]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition view_extensions = calculated
+		mode: import
+		source = ```
+				
+				-- 1. Start with the base table and apply the first Guard (Not Blank)
+				VAR base_table = 
+				    FILTER (
+				        ext_all_extensions,
+				        NOT ISBLANK ( ext_all_extensions[resource_key] )
+				    )
+				
+				-- 2. Enrich with Lookups
+				VAR enriched = 
+				    ADDCOLUMNS (
+				        base_table,
+				        "parent_key_lookup", 
+				            LOOKUPVALUE ( 
+				                fact_resources[resource_key], 
+				                fact_resources[resource_id], [parent_resource_id] 
+				            )
+				    )
+				
+				-- 3. Final Guard: Remove orphans
+				VAR guarded = 
+				    FILTER (
+				        enriched,
+				        NOT ISBLANK ( [parent_key_lookup] )
+				    )
+				
+				-- 4. Final Projection: Restoring 'platform' to fix visuals
+				RETURN 
+				    SELECTCOLUMNS (
+				        guarded,
+				        "resource_key",               [resource_key],
+				        "parent_resource_key",        [parent_key_lookup],
+				        "resource_id",                [resource_id],
+				        "parent_resource_id",         [parent_resource_id],
+				        "extension_name",             [extension_name],
+				        "extension_type",             [extension_type],
+				        "publisher",                  [publisher],
+				        "provisioning_state",         [provisioning_state],
+				        "type_handler_version",       [type_handler_version],
+				        "auto_upgrade_minor_version", [auto_upgrade_minor_version],
+				        "instanceview_status_level",  
+				            VAR _lvl = [instanceview_status_level]
+				            RETURN SWITCH( TRUE(),
+				                ISBLANK(_lvl) || _lvl = "", "Unknown",
+				                _lvl
+				            ),
+				        "instanceview_status_code",   COALESCE ( [instanceview_status_code], "0" ),
+				        "resource_name",              [resource_name],
+				        "resource_type",              [resource_type],
+				        
+				        -- Fix: Included both names to support legacy visuals and new logic
+				        "platform",                   [platform], 
+				        "source_type",                [platform], 
+				
+				        "location",                   [location],
+				        "subscription_id",            [subscription_id],
+				        "resource_group",             [resource_group],
+				        "timestamp",                  [timestamp],
+				        "settings",                   [settings],
+				        "protected_settings",         [protected_settings]
+				    )
+				```
+
+	annotation PBI_Id = cbb75153b012476aac1223adbd63fabd
+

@@ -1,0 +1,34 @@
+/// Shared Knowledge Base dimension used to filter missing-patch and CVE evidence consistently.
+table dim_patch_kb
+	isHidden
+
+	column kb_numeric
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: [kb_numeric]
+
+	partition dim_patch_kb = calculated
+		mode: import
+		source = ```
+				VAR _missingPatchKbs =
+				    SELECTCOLUMNS (
+				        FILTER (
+				            view_missing_patches,
+				            NOT ISBLANK ( view_missing_patches[kb_id] )
+				                && view_missing_patches[kb_id] <> ""
+				        ),
+				        "kb_numeric", view_missing_patches[kb_id] & ""
+				    )
+				VAR _mappedKbs =
+				    SELECTCOLUMNS (
+				        FILTER (
+				            dim_patch_cve_mapping,
+				            NOT ISBLANK ( dim_patch_cve_mapping[kb_numeric] )
+				                && dim_patch_cve_mapping[kb_numeric] <> ""
+				        ),
+				        "kb_numeric", dim_patch_cve_mapping[kb_numeric] & ""
+				    )
+				RETURN
+				    DISTINCT ( UNION ( _missingPatchKbs, _mappedKbs ) )
+				```

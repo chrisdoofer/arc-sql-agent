@@ -1,0 +1,140 @@
+/// Machine-level CVE exposure derived from the existing Update Manager patch evidence and the authoritative MSRC KB-to-CVE mapping.
+table view_patch_cve_mappings
+	lineageTag: c5ac691d-8652-443e-8b44-a43148c72ba3
+
+	column resource_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: [resource_key]
+
+	column machine_resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: [machine_resource_id]
+
+	column machine_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [machine_name]
+
+	column kb_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [kb_id]
+
+	column kb_numeric
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: [kb_numeric]
+
+	column patch_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [patch_name]
+
+	column classification
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [classification]
+
+	column cve_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [cve_id]
+
+	column product
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [product]
+
+	column severity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [severity]
+
+	column confidence
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [confidence]
+
+	column mapping_source
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [mapping_source]
+
+	column source_url
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [source_url]
+
+	column assessment_time
+		dataType: dateTime
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: [assessment_time]
+
+	column subscription_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [subscription_id]
+
+	column resource_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [resource_group]
+
+	partition view_patch_cve_mappings = calculated
+		mode: import
+		source = ```
+				VAR _patches =
+				    SELECTCOLUMNS (
+				        FILTER (
+				            view_missing_patches,
+				            NOT ISBLANK ( view_missing_patches[resource_key] )
+				                && NOT ISBLANK ( view_missing_patches[kb_id] )
+				                && view_missing_patches[kb_id] <> ""
+				        ),
+				        "resource_key", view_missing_patches[resource_key],
+				        "machine_resource_id", view_missing_patches[machine_resource_id],
+				        "machine_name", view_missing_patches[machine_name],
+				        "kb_numeric", SUBSTITUTE ( UPPER ( TRIM ( view_missing_patches[kb_id] ) ), "KB", "" ),
+				        "patch_name", view_missing_patches[patch_name],
+				        "classification", view_missing_patches[classification],
+				        "assessment_time", view_missing_patches[assessment_time],
+				        "subscription_id", view_missing_patches[subscription_id],
+				        "resource_group", view_missing_patches[resource_group]
+				    )
+				VAR _mappings =
+				    SELECTCOLUMNS (
+				        dim_patch_cve_mapping,
+				        "kb_numeric", dim_patch_cve_mapping[kb_numeric] & "",
+				        "cve_id", dim_patch_cve_mapping[cve_id],
+				        "product", dim_patch_cve_mapping[product],
+				        "severity", dim_patch_cve_mapping[severity],
+				        "source_url", dim_patch_cve_mapping[source_url]
+				    )
+				VAR _joined = NATURALINNERJOIN ( _patches, _mappings )
+				RETURN
+				    SELECTCOLUMNS (
+				        _joined,
+				        "resource_key", [resource_key],
+				        "machine_resource_id", [machine_resource_id],
+				        "machine_name", [machine_name],
+				        "kb_id", "KB" & [kb_numeric],
+				        "kb_numeric", [kb_numeric],
+				        "patch_name", [patch_name],
+				        "classification", [classification],
+				        "cve_id", [cve_id],
+				        "product", [product],
+				        "severity", [severity],
+				        "confidence", "High",
+				        "mapping_source", "MSRC",
+				        "source_url", [source_url],
+				        "assessment_time", [assessment_time],
+				        "subscription_id", [subscription_id],
+				        "resource_group", [resource_group]
+				    )
+				```

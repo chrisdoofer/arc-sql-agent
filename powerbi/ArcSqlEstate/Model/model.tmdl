@@ -1,0 +1,61 @@
+model Model
+	culture: en-GB
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-GB
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Dimensions
+
+	annotation PBI_QueryGroupOrder = 1
+
+queryGroup 'Extenal-Resource Graph'
+
+	annotation PBI_QueryGroupOrder = 2
+
+annotation PBI_QueryOrder = ["dim_azure_regions","ext_all_extensions","ext_arc_sql_instances","ext_arc_sql_databases","ext_azure_sql_instances","ext_arc_servers","ext_azure_servers","dim_azure_vm_skus","dim_sql_patches","dim_patch_cve_mapping","dim_software_lifecycle","dim_date","dim_extension_types","all_measures","ext_resource_tags"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DaxQueryView_Desktop","TMDLView_Desktop"]
+
+ref table dim_azure_regions
+ref table ext_arc_servers
+ref table ext_azure_servers
+ref table dim_azure_vm_skus
+ref table ext_arc_sql_instances
+ref table ext_azure_sql_instances
+ref table dim_sql_patches
+ref table ext_arc_sql_databases
+ref table dim_software_lifecycle
+ref table dim_period_selector
+ref table dim_date
+ref table dim_extension_types
+ref table all_measures
+ref table dim_migration_strategy
+ref table dim_server_savings_plan
+ref table dim_sql_savings_plan
+ref table ext_all_extensions
+ref table ext_resource_tags
+ref table view_servers
+ref table view_sql_instances
+ref table view_arc_sql_databases
+ref table view_extensions
+ref table view_extension_deployments
+ref table view_esu
+ref table fact_keys
+ref table bridge_resource_tags
+ref table fact_resources
+ref table dim_tags
+ref table view_arg_scope_validation
+ref table view_migrate_projects
+ref table view_patch_assessment_summary
+ref table view_missing_patches
+ref table dim_patch_cve_mapping
+ref table dim_patch_kb
+ref table view_patch_cve_mappings
+ref table view_best_practice_findings
+
+ref cultureInfo en-GB

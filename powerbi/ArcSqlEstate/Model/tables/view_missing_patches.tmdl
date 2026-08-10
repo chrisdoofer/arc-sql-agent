@@ -1,0 +1,170 @@
+/// Individual missing Windows and Linux software patches reported by Azure Update Manager assessment data in Resource Graph.
+table view_missing_patches
+	lineageTag: 33d0ad00-87e7-4071-8ab7-3065bbbe5b9f
+
+	/// Lowercase Azure Resource Manager identifier for the affected Arc machine.
+	column machine_resource_id
+		dataType: string
+		isHidden
+		lineageTag: 61c9f04c-c684-4427-8ec4-02004967d680
+		summarizeBy: none
+		sourceColumn: machine_resource_id
+
+	/// Arc-enabled machine with the missing patch.
+	column machine_name
+		dataType: string
+		lineageTag: 23fa2035-e6ce-4393-829c-53a04de656e3
+		summarizeBy: none
+		sourceColumn: machine_name
+
+	/// Update Manager patch record identifier.
+	column patch_id
+		dataType: string
+		isHidden
+		lineageTag: bed3ae43-8d65-4e73-93db-96b721391c31
+		summarizeBy: none
+		sourceColumn: patch_id
+
+	/// Missing patch or package name.
+	column patch_name
+		dataType: string
+		lineageTag: 56c20f61-681e-498e-a9bb-8044d5c3b767
+		summarizeBy: none
+		sourceColumn: patch_name
+
+	/// Microsoft Knowledge Base identifier when available.
+	column kb_id
+		dataType: string
+		lineageTag: 00b3a466-d592-40e2-b64b-8c20992d20bb
+		summarizeBy: none
+		sourceColumn: kb_id
+
+	/// Patch classification returned by Update Manager.
+	column classification
+		dataType: string
+		lineageTag: 07cb95c9-589c-443f-a83a-01390b4f15be
+		summarizeBy: none
+		sourceColumn: classification
+
+	/// Operating system family resolved from the machine assessment summary.
+	column os_type
+		dataType: string
+		lineageTag: 677cb2d6-58da-45af-90ae-76b6dd995db8
+		summarizeBy: none
+		sourceColumn: os_type
+
+	/// Missing package version when available.
+	column package_version
+		dataType: string
+		lineageTag: e2a3b214-f9bb-4145-a269-566ae0a91fc0
+		summarizeBy: none
+		sourceColumn: package_version
+
+	/// Expected reboot behavior after patch installation.
+	column reboot_behavior
+		dataType: string
+		lineageTag: c94b1321-c489-4bb2-80f5-b82d66827a31
+		summarizeBy: none
+		sourceColumn: reboot_behavior
+
+	/// Time the missing patch was assessed.
+	column assessment_time
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: a4a54c76-4247-4114-b9a6-915eb85d96b1
+		sourceColumn: assessment_time
+
+	/// Azure subscription containing the machine.
+	column subscription_id
+		dataType: string
+		lineageTag: f6b41f89-9c2d-4e26-8903-e20c852d8719
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+	/// Resource group containing the machine.
+	column resource_group
+		dataType: string
+		lineageTag: 12630476-a8be-4f57-a270-be7d026cd256
+		summarizeBy: none
+		sourceColumn: resource_group
+
+	/// Microsoft Entra tenant identifier returned by Resource Graph.
+	column tenant_id
+		dataType: string
+		isHidden
+		lineageTag: c501c945-7dd9-4ee6-84c1-fe69830e02f5
+		summarizeBy: none
+		sourceColumn: tenant_id
+
+	/// Model relationship key resolved from the affected machine resource identifier.
+	column resource_key = LOOKUPVALUE(fact_keys[resource_key], fact_keys[resource_id], [machine_resource_id])
+		dataType: int64
+		isHidden
+		lineageTag: 531d6939-d4b2-4ff4-acef-cf43dc2c01d3
+		summarizeBy: none
+
+	partition view_missing_patches = m
+		mode: import
+		source =
+				let
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        patchassessmentresources
+				        | where type has 'softwarepatches'
+				        | extend prop = parse_json(properties)
+				        | extend machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0]))
+				        | join kind=leftouter (
+				            patchassessmentresources
+				            | where type !has 'softwarepatches'
+				            | extend sprop = parse_json(properties)
+				            | project machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0])), os_type = tostring(sprop.osType)
+				        ) on machine_resource_id
+				        | project
+				            machine_resource_id,
+				            machine_name = tostring(split(machine_resource_id, '/')[8]),
+				            patch_id = tostring(name),
+				            patch_name = tostring(prop.patchName),
+				            kb_id = tostring(prop.kbId),
+				            classification = tostring(prop.classifications),
+				            os_type,
+				            package_version = tostring(prop.version),
+				            reboot_behavior = tostring(prop.rebootBehavior),
+				            assessment_time = todatetime(prop.lastModifiedDateTime),
+				            subscription_id = tolower(subscriptionId),
+				            resource_group = tostring(resourceGroup),
+				            tenant_id = tostring(tenantId)
+				        ",
+				        null, null, null, [resultTruncated = false]
+				    ),
+				    NormalizedClassifications = Table.TransformColumns(
+				        SourceRaw,
+				        {
+				            {
+				                "classification",
+				                each
+				                    if _ = null then
+				                        null
+				                    else
+				                        let
+				                            Parsed = try Json.Document(Text.ToBinary(_)) otherwise _,
+				                            Values = if Parsed is list then Parsed else {Parsed}
+				                        in
+				                            Text.Combine(List.Transform(Values, each Text.From(_)), ", "),
+				                type text
+				            }
+				        }
+				    ),
+				    NormalizedKbIds = Table.TransformColumns(
+				        NormalizedClassifications,
+				        {
+				            {
+				                "kb_id",
+				                each if _ = null then null else Text.Replace(Text.Upper(Text.Trim(Text.From(_))), "KB", ""),
+				                type text
+				            }
+				        }
+				    ),
+				    Selected = Table.SelectColumns(NormalizedKbIds, {"machine_resource_id", "machine_name", "patch_id", "patch_name", "kb_id", "classification", "os_type", "package_version", "reboot_behavior", "assessment_time", "subscription_id", "resource_group", "tenant_id"}, MissingField.UseNull),
+				    Typed = Table.TransformColumnTypes(Selected, {{"machine_resource_id", type text}, {"machine_name", type text}, {"patch_id", type text}, {"patch_name", type text}, {"kb_id", type text}, {"classification", type text}, {"os_type", type text}, {"package_version", type text}, {"reboot_behavior", type text}, {"assessment_time", type datetime}, {"subscription_id", type text}, {"resource_group", type text}, {"tenant_id", type text}})
+				in
+				    Typed

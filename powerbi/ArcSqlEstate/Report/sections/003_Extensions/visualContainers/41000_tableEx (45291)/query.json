@@ -1,0 +1,164 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "a",
+              "Entity": "all_measures",
+              "Type": 0
+            },
+            {
+              "Name": "v",
+              "Entity": "view_extensions",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "server_name"
+              },
+              "Name": "view_extensions.server_name",
+              "NativeReferenceName": "Server Name"
+            },
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "kpi_all_extension_count"
+              },
+              "Name": "all_measures.kpi_all_extension_count",
+              "NativeReferenceName": "Extension Count"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "platform"
+              },
+              "Name": "view_extensions.platform",
+              "NativeReferenceName": "Platform"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "resource_group"
+              },
+              "Name": "view_extensions.resource_group",
+              "NativeReferenceName": "Resource Group"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "auto_upgrade_minor_version"
+              },
+              "Name": "view_extensions.auto_upgrade_minor_version",
+              "NativeReferenceName": "Auto Upgrade"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "platform"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_extensions.platform)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "auto_upgrade_minor_version"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_extensions.auto_upgrade_minor_version)"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 1,
+              "Expression": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Source": "v"
+                    }
+                  },
+                  "Property": "server_name"
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6
+                ],
+                "Subtotal": 1
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 3,
+            "Primary": {
+              "Window": {
+                "Count": 500
+              }
+            }
+          },
+          "SuppressedJoinPredicates": [
+            5,
+            6
+          ],
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

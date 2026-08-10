@@ -1,0 +1,56 @@
+{
+  "name": "8fe443fa5f6109500042",
+  "layouts": [
+    {
+      "id": 0,
+      "position": {
+        "x": 87.977464788732391,
+        "y": 15.864788732394366,
+        "z": 23000,
+        "width": 393.01408450704224,
+        "height": 48.315492957746478,
+        "tabOrder": 15000
+      }
+    }
+  ],
+  "singleVisual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Arc Jumpstart | Database Inventory",
+                    "textStyle": {
+                      "fontSize": "18pt",
+                      "color": "#ffffff"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "vcObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

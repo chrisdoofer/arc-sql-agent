@@ -1,0 +1,20 @@
+{
+  "name": "6a94d7e50b2033ba6ad2",
+  "layouts": [
+    {
+      "id": 0,
+      "position": {
+        "height": 199.2,
+        "width": 221.6,
+        "x": 1040.1996800000018,
+        "y": 106.39999999999995,
+        "z": 42000,
+        "tabOrder": 30000
+      }
+    }
+  ],
+  "singleVisualGroup": {
+    "displayName": "Group 2",
+    "groupMode": 0
+  }
+}

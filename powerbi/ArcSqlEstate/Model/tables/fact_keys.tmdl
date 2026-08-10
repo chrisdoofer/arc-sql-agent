@@ -1,0 +1,36 @@
+table fact_keys
+	isHidden
+
+	column resource_id
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_keys = calculated
+		mode: import
+		source = ```
+				
+				SELECTCOLUMNS (
+				    FILTER ( 
+				        fact_resources, 
+				        fact_resources[resource_key] > 0 
+				    ),
+				    "resource_id",  fact_resources[resource_id],
+				    "resource_key", fact_resources[resource_key]
+				)
+				```
+
+	annotation PBI_Id = 0104142f13624274b0bf45ee52b25bfa
+

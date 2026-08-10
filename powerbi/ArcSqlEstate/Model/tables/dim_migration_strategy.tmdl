@@ -1,0 +1,26 @@
+table dim_migration_strategy
+	isHidden
+
+	column migration_strategy
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [migration_strategy]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_migration_strategy = calculated
+		mode: import
+		source = ```
+				DATATABLE(
+				    "migration_strategy", STRING,
+				    {
+				        {"Modernize to PaaS"},
+				        {"Minimize cost"}
+				    }
+				)
+				
+				```
+
+	annotation PBI_Id = 606882dbe09a4853833c9fac26c3083b
+

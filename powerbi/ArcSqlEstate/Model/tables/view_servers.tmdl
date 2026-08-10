@@ -1,0 +1,553 @@
+/// All Servers View
+table view_servers
+
+	column server_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version_number
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_version_number]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_edition
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_edition]
+
+		annotation SummarizationSetBy = Automatic
+
+	column logical_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [logical_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column memory_gb
+		formatString: 0.0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [memory_gb]
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column pgsql_discovered
+		dataType: string
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [pgsql_discovered]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mssql_discovered
+		dataType: string
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mssql_discovered]
+
+		annotation SummarizationSetBy = Automatic
+
+	column cloud_provider
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [cloud_provider]
+
+		annotation SummarizationSetBy = Automatic
+
+	column model
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [model]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_license_state
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [esu_license_state]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_eligibility
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [esu_eligibility]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_key_state
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [esu_key_state]
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_server_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [esu_server_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column agent_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [agent_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column ad_fqdn
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ad_fqdn]
+
+		annotation SummarizationSetBy = Automatic
+
+	column nic_0_ip_0_address
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [nic_0_ip_0_address]
+
+		annotation SummarizationSetBy = Automatic
+
+	column region_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [region_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [latitude]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [longitude]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sql_instance_count
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [sql_instance_count]
+
+		annotation SummarizationSetBy = User
+
+	column sql_database_count
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [sql_database_count]
+
+		annotation SummarizationSetBy = User
+
+	column os_esu_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_basecost_monthly
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_basecost_monthly]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column os_esu_start_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_start_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_end_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_end_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_esu_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [os_esu_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [platform]
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_license_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_license_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition view_servers = calculated
+		mode: import
+		source = ```
+				
+				VAR base =
+				    FILTER ( fact_resources, fact_resources[resource_kind] = "server" )
+				
+				/* -------------------- Pass 1: your existing shaping (unchanged) -------------------- */
+				VAR servers_core =
+				    ADDCOLUMNS (
+				        base,
+				        // Canonical identity/context
+				        "server_name", fact_resources[resource_name],
+				        //"server_key",  fact_resources[resource_key],
+				
+				        // Friendly Azure region name via location
+				        "region_name",
+				            LOOKUPVALUE (
+				                dim_azure_regions[region_name],
+				                dim_azure_regions[location], fact_resources[location]
+				            ),
+				
+				        // ⬇️ NEW: coordinates from region dim (via location)
+				        "latitude",
+				            LOOKUPVALUE (
+				                dim_azure_regions[latitude],
+				                dim_azure_regions[location], fact_resources[location]
+				            ),
+				        "longitude",
+				            LOOKUPVALUE (
+				                dim_azure_regions[longitude],
+				                dim_azure_regions[location], fact_resources[location]
+				            ),
+				
+				        // Common (Arc or Azure) — resolve from the proper ext table
+				        "os_type",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[os_type],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[os_type], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            ),
+				        "os_version_number",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[os_version_number],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[os_version_number], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            ),
+				       
+				        "os_version",
+				        COALESCE (
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_arc_servers[os_version],
+				                    ext_arc_servers[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_arc_servers[os_version],
+				                    ext_arc_servers[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_azure_servers[os_version],
+				                    ext_azure_servers[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_azure_servers[os_version],
+				                    ext_azure_servers[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            "Unknown"
+				        ),
+				
+				        "os_edition",
+				        COALESCE (
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_arc_servers[os_edition],
+				                    ext_arc_servers[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_arc_servers[os_edition],
+				                    ext_arc_servers[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_azure_servers[os_edition],
+				                    ext_azure_servers[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_azure_servers[os_edition],
+				                    ext_azure_servers[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            "Unknown"
+				        ),
+				
+				        "logical_cores",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[logical_cores],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[logical_cores], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            ),
+				        "memory_gb",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[memory_gb],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[memory_gb], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            ),
+				        "status",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[status],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[status], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            ),
+				
+				        // -------------------------------------------------------------------------
+				        // Arc-only properties (Azure rows will be BLANK by design)
+				        // -------------------------------------------------------------------------
+				        "pgsql_discovered",
+				        VAR pg_lookup_raw = LOOKUPVALUE ( ext_arc_servers[pgsql_discovered], ext_arc_servers[resource_key], fact_resources[resource_key] )
+				        RETURN
+				        IF ( pg_lookup_raw = TRUE(), "Y", "N" ),
+				        "cloud_provider",
+				            LOOKUPVALUE ( ext_arc_servers[cloud_provider],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "model",
+				            LOOKUPVALUE ( ext_arc_servers[model],            ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "esu_license_state",
+				            LOOKUPVALUE ( ext_arc_servers[esu_license_state], ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "esu_eligibility",
+				            LOOKUPVALUE ( ext_arc_servers[esu_eligibility],    ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "esu_key_state",
+				            LOOKUPVALUE ( ext_arc_servers[esu_key_state],      ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "esu_server_type",
+				            LOOKUPVALUE ( ext_arc_servers[esu_server_type],    ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "agent_version",
+				            LOOKUPVALUE ( ext_arc_servers[agent_version],      ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "ad_fqdn",
+				            LOOKUPVALUE ( ext_arc_servers[ad_fqdn],            ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				        "nic_0_ip_0_address",
+				            LOOKUPVALUE ( ext_arc_servers[nic_0_ip_0_address], ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				
+				        "sql_instance_count",
+				            VAR sid      = fact_resources[resource_id]  // this server's resource_id
+				            VAR cnt_arc  =
+				                CALCULATE (
+				                    COUNTROWS ( ext_arc_sql_instances ),
+				                    FILTER ( ext_arc_sql_instances, ext_arc_sql_instances[parent_resource_id] = sid )
+				                )
+				            VAR cnt_az   =
+				                CALCULATE (
+				                    COUNTROWS ( ext_azure_sql_instances ),
+				                    FILTER ( ext_azure_sql_instances, ext_azure_sql_instances[parent_resource_id] = sid )
+				                )
+				            VAR total_cnt = cnt_arc + cnt_az
+				            RETURN IF ( total_cnt > 0, total_cnt, BLANK() ),
+				
+				        "sql_database_count",
+				            VAR sid2 = fact_resources[resource_id]   -- this server's resource_id
+				            VAR arc_inst_ids =
+				                SELECTCOLUMNS (
+				                    FILTER ( ext_arc_sql_instances, ext_arc_sql_instances[parent_resource_id] = sid2 ),
+				                    "iid", ext_arc_sql_instances[resource_id]
+				                )
+				            VAR az_inst_ids  =
+				                SELECTCOLUMNS (
+				                    FILTER ( ext_azure_sql_instances, ext_azure_sql_instances[parent_resource_id] = sid2 ),
+				                    "iid", ext_azure_sql_instances[resource_id]
+				                )
+				            VAR all_inst_ids = UNION ( arc_inst_ids, az_inst_ids )
+				            VAR cnt_db =
+				                COUNTROWS (
+				                    FILTER (
+				                        ext_arc_sql_databases,
+				                        CONTAINS ( all_inst_ids, [iid], ext_arc_sql_databases[parent_resource_id] )
+				                    )
+				                )
+				            RETURN IF ( cnt_db > 0, cnt_db, BLANK() )
+				    )
+				
+				/* -------------------- Pass 2: add lifecycle fields (use os_version/os_edition from pass 1) -------------------- */
+				VAR servers_with_lifecycle =
+				    ADDCOLUMNS (
+				        servers_core,
+				        "os_esu_status",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[software_status],
+				                dim_software_lifecycle[software_version], [os_version],
+				                dim_software_lifecycle[software_edition], [os_edition]
+				            ),
+				        "os_esu_basecost_monthly",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[software_esu_monthly],
+				                dim_software_lifecycle[software_version], [os_version],
+				                dim_software_lifecycle[software_edition], [os_edition]
+				            ),
+				        "os_esu_start_date",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[esu_start_date],
+				                dim_software_lifecycle[software_version], [os_version],
+				                dim_software_lifecycle[software_edition], [os_edition]
+				            ),
+				        "os_esu_end_date",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[esu_end_date],
+				                dim_software_lifecycle[software_version], [os_version],
+				                dim_software_lifecycle[software_edition], [os_edition]
+				            ),
+				        "mssql_discovered",
+				            -- Reference the local column created in Pass 1 instead of fact_resources
+				            VAR current_instance_count = [sql_instance_count]
+				            VAR lookup_raw = LOOKUPVALUE(ext_arc_servers[mssql_discovered], ext_arc_servers[resource_key], [resource_key])
+				            -- Convert Boolean or Null to Text to allow safe comparison
+				            VAR lookup_text = IF(lookup_raw = TRUE(), "Y", "N")
+				            RETURN
+				            IF(
+				                current_instance_count >= 1 || lookup_text = "Y",
+				                "Y",
+				                "N"
+				            )
+				    )
+				/* -------------------- Pass 3: compute os_esu_cores from status + logical_cores -------------------- */
+				VAR servers_final =
+				    ADDCOLUMNS (
+				        servers_with_lifecycle,
+				        // Step-5 rule:
+				        //   0 if os_esu_status NOT in {ESU, Upcoming}
+				        //   else at least 8 cores (max(8, logical_cores))
+				        "os_esu_cores",
+				            VAR status_norm = LOWER ( TRIM ( [os_esu_status] ) )
+				            VAR lc          = [logical_cores]
+				            RETURN
+				                IF (
+				                    NOT ( status_norm IN { "esu", "upcoming" } ),
+				                    0,
+				                    IF ( NOT ISBLANK ( lc ) && lc < 8, 8, lc )
+				                ),
+				            // ── Unified Server License Type (Arc + Native) ──────────────────────
+				       "server_license_type",
+				        VAR os = LOWER( [os_type] )
+				        VAR raw_license = 
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[server_license_type],   ext_arc_servers[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[server_license_type], ext_azure_servers[resource_key], fact_resources[resource_key] )
+				            )
+				        RETURN 
+				            IF ( 
+				                os = "linux", 
+				               "N/A", 
+				                COALESCE(raw_license, "PAYG")
+				            )
+				    )
+				/* -------------------- Final projection: strip ALL base columns you didn't list -------------------- */
+				RETURN
+				SELECTCOLUMNS (
+				    servers_final,
+				    "resource_key",            [resource_key],
+				    "server_name",             [server_name],
+				    "region_name",             [region_name],
+				    "latitude",                [latitude],
+				    "longitude",               [longitude],
+				    "platform",                [platform],           -- keep if you use it downstream
+				    "os_type",                 [os_type],
+				    "os_version_number",       [os_version_number],
+				    "os_version",              [os_version],
+				    "os_edition",              [os_edition],
+				    "logical_cores",           [logical_cores],
+				    "memory_gb",               [memory_gb],
+				    "status",                  [status],
+				    "pgsql_discovered",        [pgsql_discovered],
+				    "mssql_discovered",        [mssql_discovered],
+				    "cloud_provider",          [cloud_provider],
+				    "model",                   [model],
+				    "esu_license_state",       [esu_license_state],
+				    "esu_eligibility",         [esu_eligibility],
+				    "esu_key_state",           [esu_key_state],
+				    "esu_server_type",         [esu_server_type],
+				    "agent_version",           [agent_version],
+				    "ad_fqdn",                 [ad_fqdn],
+				    "nic_0_ip_0_address",      [nic_0_ip_0_address],
+				    "sql_instance_count",      [sql_instance_count],
+				    "sql_database_count",      [sql_database_count],
+				    "os_esu_status",           [os_esu_status],
+				    "os_esu_basecost_monthly", [os_esu_basecost_monthly],
+				    "os_esu_start_date",       [os_esu_start_date],
+				    "os_esu_end_date",         [os_esu_end_date],
+				    "os_esu_cores",            [os_esu_cores],
+				    "subscription_id",         [subscription_id],
+				    "resource_group",          [resource_group],
+				    "server_license_type",     [server_license_type])
+				```
+
+	annotation PBI_Id = dbf46992d36b4a29b27e72aaf9d55811
+

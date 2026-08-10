@@ -1,0 +1,56 @@
+{
+  "name": "81eb26fbe22356bfaa1b",
+  "layouts": [
+    {
+      "id": 0,
+      "position": {
+        "x": 87.849829351535831,
+        "y": 15.972696245733788,
+        "z": 3000,
+        "width": 334.09556313993176,
+        "height": 47.918088737201366,
+        "tabOrder": 23000
+      }
+    }
+  ],
+  "singleVisual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Arc Jumpstart | ESU Forecast",
+                    "textStyle": {
+                      "fontSize": "18pt",
+                      "color": "#ffffff"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "vcObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

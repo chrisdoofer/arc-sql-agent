@@ -1,0 +1,159 @@
+table ext_resource_tags
+	isHidden
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column tag_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: tag_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column tag_value
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: tag_value
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column loc
+		dataType: string
+		summarizeBy: none
+		sourceColumn: loc
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_resource_tags = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source = ```
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG-first KQL (NO comments inside KQL)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Kql = "
+				    resources
+				    | where type in~ (
+				        'microsoft.hybridcompute/machines',
+				        'microsoft.compute/virtualmachines',
+				        'microsoft.azurearcdata/sqlserverinstances',
+				        'microsoft.azurearcdata/sqlserverinstances/databases',
+				        'microsoft.sqlvirtualmachine/sqlvirtualmachines',
+				        'microsoft.hybridcompute/machines/extensions',
+				        'microsoft.compute/virtualmachines/extensions'
+				    )
+				    | where isnotempty(tags)
+				    | mv-expand tag = tags
+				    | extend 
+				        resource_id     = trim(' ', tolower(id)),
+				        tag_name        = trim(' ', tostring(bag_keys(tag)[0])),
+				        tag_value       = trim(' ', tostring(tag[tostring(bag_keys(tag)[0])])),
+				        subscription_id = trim(' ', tolower(subscriptionId)),
+				        resource_group  = trim(' ', resourceGroup),
+				        loc             = trim(' ', location)
+				    | summarize take_any(*) by id
+				    | project resource_id, tag_name, tag_value, loc, subscription_id, resource_group",
+				
+				    SourceRaw = AzureResourceGraph.Query(Kql, null, null, null, [resultTruncated = false]),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text,
+				            tag_name = text,
+				            tag_value = text,
+				            loc = text,
+				            subscription_id = text,
+				            resource_group = text
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard (adds missing cols as null; preserves typed-empty)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3.1) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(Validated, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Final selection and type enforcement (single pass)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Final = Table.TransformColumnTypes(
+				        Deduplicated,
+				        {
+				            {"resource_id", type text},
+				            {"tag_name", type text},
+				            {"tag_value", type text},
+				            {"loc", type text},
+				            {"subscription_id", type text},
+				            {"resource_group", type text}
+				        },
+				        "en-GB"
+				    )
+				in
+				    Final
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,171 @@
+/// Where Extensions have been deployed by Server
+table view_extension_deployments
+
+	column parent_resource_key
+		isHidden
+		formatString: 0
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: view_extensions[parent_resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_extension
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_extension]
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_monitor
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [azure_monitor]
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_defender
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [extension_defender]
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_admin_center
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [extension_admin_center]
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_change_tracking
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [extension_change_tracking]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_defender
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_defender]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_sql_host
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_sql_host]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition view_extension_deployments = calculated
+		mode: import
+		source = ```
+				
+				ADDCOLUMNS (
+				    SUMMARIZE ( view_extensions, view_extensions[parent_resource_key] ),
+				
+				    -- Helper: Determine if this parent (Server) actually hosts any SQL Instances
+				    "is_sql_host",
+				        VAR sk = [parent_resource_key]
+				        VAR server_id = LOOKUPVALUE(fact_resources[resource_id], fact_resources[resource_key], sk)
+				        RETURN
+				            CALCULATE (
+				                COUNTROWS ( fact_resources ),
+				                REMOVEFILTERS(fact_resources),
+				                fact_resources[parent_resource_id] = server_id,
+				                fact_resources[resource_kind] = "SQL Instance"
+				            ) > 0,
+				
+				    /* SQL agent classification: Arc vs Azure IaaS vs NotDeployed vs NotApplicable */
+				    "sql_extension",
+				        VAR sk = [parent_resource_key]
+				        VAR is_sql = 
+				            VAR server_id = LOOKUPVALUE(fact_resources[resource_id], fact_resources[resource_key], sk)
+				            RETURN CALCULATE(COUNTROWS(fact_resources), REMOVEFILTERS(fact_resources), fact_resources[parent_resource_id] = server_id, fact_resources[resource_kind] = "SQL Instance") > 0
+				        
+				        VAR arc =
+				            CALCULATE (
+				                COUNTROWS ( view_extensions ),
+				                FILTER (
+				                    view_extensions,
+				                    view_extensions[parent_resource_key] = sk
+				                        && CONTAINSSTRING ( LOWER ( view_extensions[extension_type] ), "windowsagent.sqlserver" )
+				                )
+				            )
+				        VAR az  =
+				            CALCULATE (
+				                COUNTROWS ( view_extensions ),
+				                FILTER (
+				                    view_extensions,
+				                    view_extensions[parent_resource_key] = sk
+				                        && CONTAINSSTRING ( LOWER ( view_extensions[extension_type] ), "sqliaasagent" )
+				                )
+				            )
+				        RETURN
+				            SWITCH ( TRUE (), 
+				                arc > 0, "Arc", 
+				                az > 0, "Azure", 
+				                is_sql = FALSE(), "Not Applicable", 
+				                "NotDeployed" 
+				            ),
+				
+				    /* SQL Defender: Classified by platform or NotApplicable */
+				    "sql_defender",
+				        VAR skp = [parent_resource_key]
+				        VAR is_sql_p = 
+				            VAR server_id_p = LOOKUPVALUE(fact_resources[resource_id], fact_resources[resource_key], skp)
+				            RETURN CALCULATE(COUNTROWS(fact_resources), REMOVEFILTERS(fact_resources), fact_resources[parent_resource_id] = server_id_p, fact_resources[resource_kind] = "SQL Instance") > 0
+				        
+				        VAR has_sql_defender =
+				            CALCULATE (
+				                COUNTROWS ( view_extensions ),
+				                FILTER (
+				                    view_extensions,
+				                    view_extensions[parent_resource_key] = skp
+				                        && CONTAINSSTRING ( LOWER ( view_extensions[extension_type] ), "advancedthreatprotection.windows" )
+				                )
+				            )
+				        VAR platform_norm = LOWER ( TRIM ( LOOKUPVALUE ( fact_resources[platform], fact_resources[resource_key], skp ) ) )
+				        RETURN
+				            SWITCH ( TRUE (),
+				                has_sql_defender > 0 && platform_norm = "arc",   "Arc",
+				                has_sql_defender > 0 && platform_norm = "azure", "Azure",
+				                is_sql_p = FALSE(), "Not Applicable",
+				                "NotDeployed"
+				            ),
+				
+				    /* Azure Monitor classification */
+				    "azure_monitor",
+				        VAR skm = [parent_resource_key]
+				        VAR win = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skm && LOWER ( view_extensions[extension_name] ) = "azuremonitorwindowsagent" ) )
+				        VAR lin = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skm && LOWER ( view_extensions[extension_name] ) = "azuremonitorlinuxagent" ) )
+				        RETURN SWITCH ( TRUE (), win > 0, "Windows", lin > 0, "Linux", "NotDeployed" ),
+				
+				    /* Defender for Endpoint (MDE) */
+				    "extension_defender",
+				        VAR skd = [parent_resource_key]
+				        VAR mde_win = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skd && LOWER ( view_extensions[extension_name] ) = "mde.windows" ) )
+				        VAR mde_lin = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skd && LOWER ( view_extensions[extension_name] ) = "mde.linux" ) )
+				        RETURN SWITCH ( TRUE (), mde_win > 0, "Windows", mde_lin > 0, "Linux", "NotDeployed" ),
+				
+				    /* Change Tracking */
+				    "extension_change_tracking",
+				        VAR skc = [parent_resource_key]
+				        VAR ct_win = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skc && LOWER ( view_extensions[extension_name] ) = "changetracking-windows" ) )
+				        VAR ct_lin = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = skc && LOWER ( view_extensions[extension_name] ) = "changetracking-linux" ) )
+				        RETURN SWITCH ( TRUE (), ct_win > 0, "Windows", ct_lin > 0, "Linux", "NotDeployed" ),
+				
+				    /* Windows Admin Center */
+				    "extension_admin_center",
+				        VAR ska = [parent_resource_key]
+				        VAR admin_win = CALCULATE ( COUNTROWS ( view_extensions ), FILTER ( view_extensions, view_extensions[parent_resource_key] = ska && LOWER ( view_extensions[extension_name] ) = "admincenter" ) )
+				        RETURN SWITCH ( TRUE (), admin_win > 0, "Windows", "NotDeployed" )
+				)
+				```
+
+	annotation PBI_Id = 238ec22a1d014ddb981f43ee7c842ca6
+

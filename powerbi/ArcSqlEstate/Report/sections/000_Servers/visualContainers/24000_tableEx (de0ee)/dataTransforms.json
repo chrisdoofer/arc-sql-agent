@@ -1,0 +1,1458 @@
+{
+  "objects": {
+    "total": [
+      {
+        "properties": {
+          "totals": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "bold": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "columnHeaders": [
+      {
+        "properties": {
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "wordWrap": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "values": [
+      {
+        "properties": {
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          },
+          "fontColorPrimary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "fontColorSecondary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "backColorSecondary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#282828'"
+                  }
+                }
+              }
+            }
+          },
+          "wordWrap": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "urlIcon": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#960B18'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#960B18'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "Sum(SQLInstances.DaysBehind)"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#960B18'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "SQLInstances.sqlPatchStatus"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_servers"
+                                      }
+                                    },
+                                    "Property": "server_license_type"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'BYOL'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#32B0E7'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_servers"
+                                      }
+                                    },
+                                    "Property": "server_license_type"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "null"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 5
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#666666'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_servers"
+                                      }
+                                    },
+                                    "Property": "server_license_type"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'N/A'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#666666'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_servers"
+                                      }
+                                    },
+                                    "Property": "server_license_type"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'AHUB'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_servers"
+                                      }
+                                    },
+                                    "Property": "server_license_type"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'PAYG'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_servers.server_license_type"
+        }
+      }
+    ],
+    "columnWidth": [
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "44.15609078602523D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.ServiceType"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "107.17458800320142D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.name"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "50.99602289664891D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.BackupPolicy"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "50.272174377424605D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.AVG"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "51.64615152981664D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.Clustered"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "47D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.sqlMemoryGB)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "46.30236761744655D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "42.96361558159572D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.DaysBehind)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "73.47064852509139D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.sqlVersionNumber"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "54.034686728126985D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.sqlPatchStatus"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "39.0737275370247D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.sqlCores)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "50.70924512540529D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(view_all_servers.memory_gb)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "117.77574373379412D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.server_name"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "52.65604881265335D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.pgsql_discovered"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "39.80891719745223D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.mssql_discovered"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "127.69961288051144D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.os_version"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "44.861995753715505D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_servers.server_license_type"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "38.22096317280453D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(view_all_servers.sql_instance_count)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "45.92351274787536D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(view_all_servers.sql_database_count)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "63.45042492917847D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.os_edition"
+        }
+      }
+    ],
+    "grid": [
+      {
+        "properties": {
+          "gridHorizontal": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "textSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          },
+          "imageHeight": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          },
+          "imageWidth": {
+            "expr": {
+              "Literal": {
+                "Value": "12D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "columnFormatting": [
+      {
+        "properties": {
+          "labelPrecision": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 8,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "styleValues": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "styleTotal": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_servers.server_license_type"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.mssql_discovered"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_all_servers.pgsql_discovered"
+        }
+      }
+    ]
+  },
+  "projectionOrdering": {
+    "Values": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      10,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "queryMetadata": {
+    "Select": [
+      {
+        "Restatement": "Server Name",
+        "Name": "view_all_servers.server_name",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Type",
+        "Name": "view_all_servers.platform",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Cores",
+        "Name": "Sum(view_all_servers.logical_cores)",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Mem (GB)",
+        "Name": "Sum(view_all_servers.memory_gb)",
+        "Type": 1,
+        "Format": "0.0"
+      },
+      {
+        "Restatement": "Operating System",
+        "Name": "view_all_servers.os_version",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Edition",
+        "Name": "view_all_servers.os_edition",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Has Postgres",
+        "Name": "view_all_servers.pgsql_discovered",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Has SQL",
+        "Name": "view_all_servers.mssql_discovered",
+        "Type": 2048
+      },
+      {
+        "Restatement": "SQL Inst.",
+        "Name": "Sum(view_all_servers.sql_instance_count)",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "SQL DBs",
+        "Name": "Sum(view_all_servers.sql_database_count)",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "License Type",
+        "Name": "view_servers.server_license_type",
+        "Type": 2048
+      }
+    ]
+  },
+  "visualElements": [
+    {
+      "DataRoles": [
+        {
+          "Name": "Values",
+          "Projection": 0,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 1,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 2,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 3,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 4,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 5,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 10,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 6,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 7,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 8,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 9,
+          "isActive": false
+        }
+      ]
+    }
+  ],
+  "selects": [
+    {
+      "displayName": "Server Name",
+      "queryName": "view_all_servers.server_name",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "server_name"
+        }
+      }
+    },
+    {
+      "displayName": "Type",
+      "queryName": "view_all_servers.platform",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "platform"
+        }
+      }
+    },
+    {
+      "displayName": "Cores",
+      "format": "0",
+      "queryName": "Sum(view_all_servers.logical_cores)",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_servers"
+                }
+              },
+              "Property": "logical_cores"
+            }
+          },
+          "Function": 0
+        }
+      }
+    },
+    {
+      "displayName": "Mem (GB)",
+      "format": "0.0",
+      "queryName": "Sum(view_all_servers.memory_gb)",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 259
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_servers"
+                }
+              },
+              "Property": "memory_gb"
+            }
+          },
+          "Function": 0
+        }
+      }
+    },
+    {
+      "displayName": "Operating System",
+      "queryName": "view_all_servers.os_version",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "os_version"
+        }
+      }
+    },
+    {
+      "displayName": "Edition",
+      "queryName": "view_all_servers.os_edition",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "os_edition"
+        }
+      }
+    },
+    {
+      "displayName": "Has Postgres",
+      "queryName": "view_all_servers.pgsql_discovered",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "pgsql_discovered"
+        }
+      }
+    },
+    {
+      "displayName": "Has SQL",
+      "queryName": "view_all_servers.mssql_discovered",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "mssql_discovered"
+        }
+      }
+    },
+    {
+      "displayName": "SQL Inst.",
+      "format": "0",
+      "queryName": "Sum(view_all_servers.sql_instance_count)",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_servers"
+                }
+              },
+              "Property": "sql_instance_count"
+            }
+          },
+          "Function": 0
+        }
+      }
+    },
+    {
+      "displayName": "SQL DBs",
+      "format": "0",
+      "queryName": "Sum(view_all_servers.sql_database_count)",
+      "roles": {
+        "Values": true
+      },
+      "sort": 2,
+      "sortOrder": 0,
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_servers"
+                }
+              },
+              "Property": "sql_database_count"
+            }
+          },
+          "Function": 0
+        }
+      }
+    },
+    {
+      "displayName": "License Type",
+      "queryName": "view_servers.server_license_type",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_servers"
+            }
+          },
+          "Property": "server_license_type"
+        }
+      }
+    },
+    {
+      "displayName": "First server_license_type",
+      "queryName": "Min(view_servers.server_license_type)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_servers"
+                }
+              },
+              "Property": "server_license_type"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_servers.server_license_type"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

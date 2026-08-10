@@ -1,0 +1,359 @@
+/// Stores all properties of this resource
+table ext_azure_sql_instances
+	isHidden
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column enable_automatic_upgrade
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: enable_automatic_upgrade
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_server_license_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_server_license_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column least_privilege_mode
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: least_privilege_mode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_management
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_management
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_edition
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_edition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column additional_vm_patch
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: additional_vm_patch
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_instance_name
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: sql_instance_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_image_offer
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_image_offer
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		formatString: 0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key = ```
+			
+			LOOKUPVALUE(
+			    fact_keys[resource_key],
+			    fact_keys[resource_id], [parent_resource_id]
+			)
+			
+			
+			```
+		formatString: 0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_azure_sql_instances = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source =
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG query: Flattened & normalized at source (ARG-first, self-keyed)
+				    //    - resource_key        = resource_id (normalized)
+				    //    - parent_resource_key = parent_resource_id (normalized)
+				    //    - include name as sql_instance_name (plus resource_name if desired)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        resources
+				        | where type == 'microsoft.sqlvirtualmachine/sqlvirtualmachines'
+				        | extend props = parse_json(properties)
+				        | summarize take_any(*) by id
+				        | project
+				            resource_id              = trim(' ', tolower(id)),
+				            parent_resource_id       = trim(' ', tolower(tostring(props.virtualMachineResourceId))),
+				            resource_name            = trim(' ', tostring(name)),
+				            platform                 = 'Azure',
+				            resource_type            = trim(' ', tostring(type)),
+				            sql_instance_name        = trim(' ', tostring(name)),
+				            location                 = trim(' ', tolower(location)),
+				            subscription_id          = trim(' ', tolower(subscriptionId)),
+				            resource_group           = trim(' ', tolower(resourceGroup)),
+				            provisioning_state       = tostring(props.provisioningState),
+				            enable_automatic_upgrade = tobool(props.enableAutomaticUpgrade),
+				            os_type                  = tostring(props.osType),
+				            sql_server_license_type  = tostring(props.sqlServerLicenseType),
+				            least_privilege_mode     = tostring(props.leastPrivilegeMode),
+				            sql_management           = tostring(props.sqlManagement),
+				            sql_image_offer          = trim(' ', tostring(props.sqlImageOffer)),
+				            sql_edition              = trim(' ', tostring(props.sqlImageSku)),
+				            additional_vm_patch      = tostring(props.additionalVmPatch)
+				        ",
+				        null, null, null, [ resultTruncated = false ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text,
+				            parent_resource_id = text,
+				            resource_name = text,
+				            platform = text,
+				            resource_type = text,
+				            sql_instance_name = text,
+				            location = text,
+				            subscription_id = text,
+				            resource_group = text,
+				            provisioning_state = text,
+				            enable_automatic_upgrade = logical,
+				            os_type = text,
+				            sql_server_license_type = text,
+				            least_privilege_mode = text,
+				            sql_management = text,
+				            sql_image_offer = text,
+				            sql_edition = text,
+				            additional_vm_patch = text
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard (adds missing cols as null; keeps typed-empty when needed)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Derived logic (kept minimal): sql_version from sql_image_offer
+				    //    e.g., 'SQL2019-WS2022' → 'SQL Server 2019'
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    AddSqlVersion = Table.AddColumn(
+				        Validated, "sql_version",
+				        each
+				            let offer = [sql_image_offer] in
+				            if offer <> null and Text.StartsWith(offer, "SQL", Comparer.OrdinalIgnoreCase) and Text.Length(offer) >= 7
+				            then "SQL Server " & Text.Middle(offer, 3, 4)
+				            else null,
+				        type text
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5) Final projection (stable column order)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    FinalSelection = Table.SelectColumns(
+				        AddSqlVersion,
+				        {
+				            "resource_id", "parent_resource_id",
+				            "resource_name", "platform", "resource_type", "sql_instance_name",
+				            "provisioning_state", "enable_automatic_upgrade", "os_type",
+				            "sql_server_license_type", "least_privilege_mode", "sql_management",
+				            "sql_image_offer", "sql_version", "sql_edition", "additional_vm_patch",
+				            "location", "subscription_id", "resource_group"
+				        }
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5.5) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(FinalSelection, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 6) Final type enforcement (single pass)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    TypedOutput = Table.TransformColumnTypes(
+				        Deduplicated,
+				        {
+				            {"enable_automatic_upgrade", type logical},
+				            {"resource_id", type text},
+				            {"parent_resource_id", type text},
+				            {"resource_name", type text},
+				            {"sql_instance_name", type text},
+				            {"os_type", type text},
+				            {"sql_server_license_type", type text},
+				            {"least_privilege_mode", type text},
+				            {"sql_management", type text},
+				            {"sql_image_offer", type text},
+				            {"sql_version", type text},
+				            {"sql_edition", type text},
+				            {"additional_vm_patch", type text},
+				            {"provisioning_state", type text},
+				            {"location", type text},
+				            {"subscription_id", type text},
+				            {"resource_group", type text}
+				        },
+				        "en-GB"
+				    )
+				in
+				    TypedOutput
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,62 @@
+/// Azure Migrate project containers discovered through the estate Resource Graph query.
+table view_migrate_projects
+	lineageTag: 5f104bc1-b5bc-4d57-84d6-b43fbbb0253a
+
+	/// Azure Resource Manager identifier for the Migrate project.
+	column resource_id
+		dataType: string
+		isHidden
+		lineageTag: 83882f8d-45a3-4f24-8d93-9370b5d23d86
+		summarizeBy: none
+		sourceColumn: resource_id
+
+	/// Azure Migrate project name.
+	column project_name
+		dataType: string
+		lineageTag: ee2e91fe-aca2-47c2-a09a-6b4446b6913e
+		summarizeBy: none
+		sourceColumn: project_name
+
+	/// Resource group containing the Migrate project.
+	column resource_group
+		dataType: string
+		lineageTag: b477804d-7ed8-4b8f-8385-8b61c57b9b2a
+		summarizeBy: none
+		sourceColumn: resource_group
+
+	/// Azure subscription containing the Migrate project.
+	column subscription_id
+		dataType: string
+		lineageTag: e56a1ff4-45b3-4eed-97c6-4dbe6c57f632
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+	/// Azure region of the Migrate project.
+	column location
+		dataType: string
+		lineageTag: df18d328-a707-4a6d-b052-6a87fbc1de38
+		summarizeBy: none
+		sourceColumn: location
+
+	partition view_migrate_projects = m
+		mode: import
+		source =
+				let
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        resources
+				        | where type =~ 'microsoft.migrate/migrateprojects'
+				        | project
+				            resource_id = tolower(id),
+				            project_name = tostring(name),
+				            resource_group = tostring(resourceGroup),
+				            subscription_id = tolower(subscriptionId),
+				            location = tostring(location)
+				        ",
+				        null, null, null, [resultTruncated = false]
+				    ),
+				    Selected = Table.SelectColumns(SourceRaw, {"resource_id", "project_name", "resource_group", "subscription_id", "location"}, MissingField.UseNull),
+				    Typed = Table.TransformColumnTypes(Selected, {{"resource_id", type text}, {"project_name", type text}, {"resource_group", type text}, {"subscription_id", type text}, {"location", type text}})
+				in
+				    Typed
+

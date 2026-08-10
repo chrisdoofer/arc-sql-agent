@@ -1,0 +1,64 @@
+table dim_tags
+
+	column tag_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [tag_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column tag_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [tag_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column tag_value
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [tag_value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_tags = calculated
+		mode: import
+		source = ```
+				
+				-- 1. Get all unique combinations across the model
+				VAR RawTags = 
+				    DISTINCT ( 
+				        SELECTCOLUMNS ( 
+				            ext_resource_tags, 
+				            "name",  TRIM ( ext_resource_tags[tag_name] ), 
+				            "value", TRIM ( ext_resource_tags[tag_value] ) 
+				        ) 
+				    )
+				
+				-- 2. Filter out blanks/empty strings
+				VAR FilteredTags = 
+				    FILTER ( 
+				        RawTags, 
+				        [name] <> BLANK() && [name] <> "" && 
+				        [value] <> BLANK() && [value] <> "" 
+				    )
+				
+				-- 3. Generate the Integer Key
+				VAR WithKey = 
+				    ADDCOLUMNS (
+				        FilteredTags,
+				        "tag_key", RANKX ( FilteredTags, [name] & "|" & [value], , ASC, DENSE )
+				    )
+				
+				RETURN 
+				    SELECTCOLUMNS (
+				        WithKey,
+				        "tag_key",   INT ( [tag_key] ),
+				        "tag_name",  [name],
+				        "tag_value", [value]
+				    )
+				```
+
+	annotation PBI_Id = 4905306d58504476b3e0c6d6fd3b2afc
+

@@ -1,0 +1,518 @@
+/// Stores all properties of this resource
+table ext_arc_servers
+	isHidden
+
+	column ad_fqdn
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: ad_fqdn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column agent_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: agent_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column memory_gb
+		dataType: double
+		isHidden
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: memory_gb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_eligibility
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: esu_eligibility
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_key_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: esu_key_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_license_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: esu_license_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column esu_server_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: esu_server_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column logical_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: logical_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mssql_discovered
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: mssql_discovered
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column nic_0_ip_0_address
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: nic_0_ip_0_address
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_edition
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_edition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version_number
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_version_number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column pgsql_discovered
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: pgsql_discovered
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: vm_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column cloud_provider
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cloud_provider
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column model
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: model
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_name
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: server_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column machine_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: machine_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_sku
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_sku
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		formatString: 0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_license_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: server_license_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_arc_servers = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source = ```
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG call (no parent_resource_id projected here; no joins, no stage keys)
+				    //    - Keep comments outside KQL
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        resources
+				        | where type =~ 'microsoft.hybridcompute/machines'
+				        | extend props = properties
+				        | extend
+				            resource_id     = trim(' ', tolower(id)),
+				            location        = trim(' ', tolower(location)),
+				            subscription_id = trim(' ', tolower(subscriptionId)),
+				            resource_group  = trim(' ', tolower(resourceGroup))
+				        | summarize take_any(*) by id
+				        | project
+				            resource_id,
+				            resource_name       = tostring(name),
+				            platform            = 'Arc',
+				            resource_type       = tolower(trim(' ', type)),
+				            server_name         = tostring(name),
+				            location,
+				            subscription_id,
+				            resource_group,
+				            provisioning_state  = tostring(props.provisioningState),
+				            status              = tostring(props.status),
+				            server_license_type = case(
+				                tostring(props.licenseType) == 'Windows_Server' or tobool(props.licenseProfile.softwareAssurance.softwareAssuranceCustomer) == true, 'AHUB',
+				                tostring(props.licenseProfile.productProfile.subscriptionStatus) == 'Enabled', 'PAYG',
+				                'BYOL'
+				            ),
+				            nic_0_ip_0_address  = tostring(props.networkProfile.networkInterfaces[0].ipAddresses[0].address),
+				            os_version_number   = tostring(props.osVersion),
+				            os_type             = tostring(props.osType),
+				            os_sku              = tostring(props.osSku),
+				            vm_id               = tostring(props.vmId),
+				            machine_id          = tostring(props.machineId),
+				            memory_gb           = todouble(props.detectedProperties.totalPhysicalMemoryInGigabytes),
+				            logical_cores       = tolong(props.detectedProperties.logicalCoreCount),
+				            mssql_discovered    = tobool(props.detectedProperties.mssqldiscovered),
+				            pgsql_discovered    = tobool(props.detectedProperties.pgsqldiscovered),
+				            cloud_provider      = tostring(props.detectedProperties.cloudprovider),
+				            model               = tostring(props.detectedProperties.model),
+				            esu_license_state   = tostring(props.licenseProfile.esuProfile.licenseAssignmentState),
+				            esu_eligibility     = tostring(props.licenseProfile.esuProfile.esuEligibility),
+				            esu_key_state       = tostring(props.licenseProfile.esuProfile.esuKeyState),
+				            esu_server_type     = tostring(props.licenseProfile.esuProfile.serverType),
+				            agent_version       = tostring(props.agentVersion),
+				            ad_fqdn             = tostring(props.adFqdn)
+				        ",
+				        null, null, null, [ resultTruncated = false ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (0-row safe; no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text,
+				            resource_name = text,
+				            resource_type = text,
+				            platform = text,
+				            server_name = text,
+				            location = text,
+				            subscription_id = text,
+				            resource_group = text,
+				            provisioning_state = text,
+				            status = text,
+				            nic_0_ip_0_address = text,
+				            os_version_number = text,
+				            os_type = text,
+				            os_sku = text,
+				            server_license_type = text,
+				            vm_id = text,
+				            machine_id = text,
+				            memory_gb = number,
+				            logical_cores = Int64.Type,
+				            mssql_discovered = logical,
+				            pgsql_discovered = logical,
+				            cloud_provider = text,
+				            model = text,
+				            esu_license_state = text,
+				            esu_eligibility = text,
+				            esu_key_state = text,
+				            esu_server_type = text,
+				            agent_version = text,
+				            ad_fqdn = text
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Derived OS split (single pass): os_version / os_edition
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    AddOSDerivations = Table.AddColumn(
+				        Validated,
+				        "OS_Data",
+				        each
+				            let 
+				                sku = [os_sku],
+				                lastSpace = if sku <> null then Text.PositionOfAny(sku, {" "}, Occurrence.Last) else -1
+				            in
+				                if [os_type] = "windows" and lastSpace > 0 then
+				                    [version = Text.Start(sku, lastSpace), edition = Text.Range(sku, lastSpace + 1)]
+				                else
+				                    [version = sku, edition = null]
+				    ),
+				    ExpandedOS = Table.ExpandRecordColumn(AddOSDerivations, "OS_Data", {"version", "edition"}, {"os_version", "os_edition"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5) Add parent_resource_id at the end (set to null for root resources)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    AddParentNull = Table.AddColumn(ExpandedOS, "parent_resource_id", each null, type text),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5.5) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(AddParentNull, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 6) Final select and typing (single pass; no resource_key)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    FinalSelected = Table.SelectColumns(
+				        Deduplicated,
+				        {
+				            "resource_id",
+				            "parent_resource_id",
+				            "resource_name",
+				            "platform",
+				            "resource_type",
+				            "server_name",
+				            "server_license_type",
+				            "provisioning_state",
+				            "status",
+				            "nic_0_ip_0_address",
+				            "os_version_number",
+				            "vm_id",
+				            "machine_id",
+				            "memory_gb",
+				            "logical_cores",
+				            "mssql_discovered",
+				            "pgsql_discovered",
+				            "cloud_provider",
+				            "model",
+				            "esu_license_state",
+				            "esu_eligibility",
+				            "esu_key_state",
+				            "esu_server_type",
+				            "agent_version",
+				            "ad_fqdn",
+				            "os_type",
+				            "os_sku",
+				            "os_version",
+				            "os_edition",
+				            "location",
+				            "subscription_id",
+				            "resource_group"
+				        }
+				    ),
+				
+				    Typed = Table.TransformColumnTypes(
+				        FinalSelected,
+				        {
+				            {"memory_gb", type number},
+				            {"logical_cores", Int64.Type},
+				            {"mssql_discovered", type logical},
+				            {"pgsql_discovered", type logical},
+				            {"location", type text},
+				            {"subscription_id", type text},
+				            {"resource_group", type text}
+				        },
+				        "en-GB"
+				    )
+				in
+				    Typed
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

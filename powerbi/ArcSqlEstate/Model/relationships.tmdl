@@ -1,0 +1,100 @@
+relationship 9586efe1-d914-8a45-bf59-29a25d143870
+	crossFilteringBehavior: bothDirections
+	fromColumn: fact_resources.resource_key
+	toColumn: view_arc_sql_databases.resource_key
+
+relationship 47f3ce28-fb32-59f4-e3bd-03f396a574f8
+	crossFilteringBehavior: bothDirections
+	toCardinality: many
+	fromColumn: bridge_resource_tags.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship fc5ac53f-2aa3-6f88-e1ce-765e8e1dd709
+	crossFilteringBehavior: bothDirections
+	toCardinality: many
+	fromColumn: fact_resources.resource_key
+	toColumn: view_esu.resource_key
+
+relationship 5d678584-d12b-37fc-4947-d2b7fb89560b
+	crossFilteringBehavior: bothDirections
+	fromColumn: bridge_resource_tags.tag_key
+	toColumn: dim_tags.tag_key
+
+relationship dd907c8c-ae50-ee6d-e83f-29625fbc9de3
+	fromColumn: ext_azure_servers.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 847b7b44-c01d-81a1-9ff7-0b9879aa0ba4
+	fromColumn: ext_arc_sql_databases.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 10ffa6e6-03c1-c9b2-91a7-e6f023577a95
+	fromColumn: ext_arc_servers.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 5de75ce3-5bed-3e02-6e00-524b3dc0f53b
+	fromColumn: ext_arc_sql_instances.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 32412f50-88c5-23dd-3916-d7d50b0410e6
+	fromColumn: ext_azure_sql_instances.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 8ce3c626-2cb3-24e3-ccc7-c8498264f08d
+	fromColumn: ext_all_extensions.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship 64eb6b8d-1452-08a9-e0d7-e8e7f2b35df5
+	fromColumn: ext_resource_tags.resource_id
+	toColumn: fact_keys.resource_id
+
+relationship ff089731-45e6-6459-fd48-5b10fc0f8cdc
+	fromColumn: fact_resources.resource_key
+	toColumn: fact_keys.resource_key
+
+relationship b84c86e5-3460-50c7-05ff-2b15dfa6692b
+	fromColumn: view_extensions.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship 4e2d8cb4-8918-827a-31ee-4eb4df629e2d
+	crossFilteringBehavior: bothDirections
+	fromColumn: view_extensions.parent_resource_key
+	toColumn: view_extension_deployments.parent_resource_key
+
+relationship ad44ac77-2273-d271-4ffb-3259724171d5
+	crossFilteringBehavior: bothDirections
+	fromColumn: fact_resources.resource_key
+	toColumn: view_servers.resource_key
+
+relationship 44b85350-2a0d-914a-4f5f-0965278f8a86
+	crossFilteringBehavior: bothDirections
+	fromColumn: fact_resources.resource_key
+	toColumn: view_sql_instances.resource_key
+
+relationship 9a4db67c-4b32-4f56-ae9f-9ba43ee64380
+	fromColumn: view_patch_assessment_summary.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship e2a52e1d-51dd-4eb1-80a7-d40b8a7b532c
+	fromColumn: view_missing_patches.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship a9716ec2-8d20-44d1-82db-02df6ec70763
+	fromColumn: view_patch_cve_mappings.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship e24b882b-e23b-4a85-9be3-611a7d606e34
+	fromColumn: view_best_practice_findings.resource_key
+	toColumn: fact_resources.resource_key
+
+relationship 5b9b6292-7353-4c97-9b57-f48115a4cf51
+	fromColumn: view_missing_patches.kb_id
+	toColumn: dim_patch_kb.kb_numeric
+
+relationship 2181ca85-48db-4307-bcfe-1b1ef48f7be3
+	fromColumn: dim_patch_cve_mapping.kb_numeric
+	toColumn: dim_patch_kb.kb_numeric
+
+relationship 7a658031-351e-4e9b-9394-945063b31fd5
+	fromColumn: view_patch_cve_mappings.kb_numeric
+	toColumn: dim_patch_kb.kb_numeric

@@ -1,0 +1,295 @@
+/// Normalized Arc SQL best-practice findings derived from the existing keyed inventory tables. Grain is one check result per instance or database.
+table view_best_practice_findings
+	lineageTag: 8b3f65e2-5372-4fc1-8216-616dadb3ebaf
+
+	column resource_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: [resource_key]
+
+	column parent_resource_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: [parent_resource_key]
+
+	column check_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [check_id]
+
+	column check_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [check_name]
+
+	column category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [category]
+
+	column status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [status]
+
+	column severity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [severity]
+
+	column machine_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [machine_name]
+
+	column sql_instance_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [sql_instance_name]
+
+	column sql_database_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [sql_database_name]
+
+	column scope
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [scope]
+
+	column current_value
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [current_value]
+
+	column expected_value
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [expected_value]
+
+	column remediation
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [remediation]
+
+	column evidence_source
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [evidence_source]
+
+	column evidence_time
+		dataType: dateTime
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: [evidence_time]
+
+	partition view_best_practice_findings = calculated
+		mode: import
+		source = ```
+				VAR _instances =
+				    FILTER (
+				        ext_arc_sql_instances,
+				        NOT ISBLANK ( ext_arc_sql_instances[resource_key] )
+				    )
+				VAR _databases =
+				    FILTER (
+				        view_arc_sql_databases,
+				        NOT ISBLANK ( view_arc_sql_databases[resource_key] )
+				    )
+				VAR _memoryFindings =
+				    SELECTCOLUMNS (
+				        _instances,
+				        "resource_key", ext_arc_sql_instances[resource_key],
+				        "parent_resource_key", ext_arc_sql_instances[parent_resource_key],
+				        "check_id", "INST-01",
+				        "check_name", "Max server memory configured",
+				        "category", "Instance configuration",
+				        "status", IF ( ext_arc_sql_instances[max_server_memory_mb] > 0, "Pass", "Fail" ),
+				        "severity", "High",
+				        "machine_name",
+				            VAR _serverKey = ext_arc_sql_instances[parent_resource_key]
+				            RETURN LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], _serverKey ),
+				        "sql_instance_name", ext_arc_sql_instances[sql_instance_name],
+				        "sql_database_name", BLANK (),
+				        "scope", "Instance",
+				        "current_value",
+				            IF (
+				                ext_arc_sql_instances[max_server_memory_mb] > 0,
+				                FORMAT ( ext_arc_sql_instances[max_server_memory_mb], "#,##0" ) & " MB",
+				                "Default / not reported"
+				            ),
+				        "expected_value", "Explicit workload-based limit",
+				        "remediation", "Set max server memory after reserving memory for the operating system, agents, and other services.",
+				        "evidence_source", "Existing Arc SQL inventory",
+				        "evidence_time", ext_arc_sql_instances[last_inventory_upload_time]
+				    )
+				VAR _defenderFindings =
+				    SELECTCOLUMNS (
+				        _instances,
+				        "resource_key", ext_arc_sql_instances[resource_key],
+				        "parent_resource_key", ext_arc_sql_instances[parent_resource_key],
+				        "check_id", "SEC-01",
+				        "check_name", "Microsoft Defender for SQL enabled",
+				        "category", "Security",
+				        "status",
+				            VAR _status = LOWER ( TRIM ( COALESCE ( ext_arc_sql_instances[azure_defender_status], "" ) ) )
+				            RETURN IF ( _status IN { "protected", "enabled" }, "Pass", "Fail" ),
+				        "severity", "High",
+				        "machine_name",
+				            VAR _serverKey = ext_arc_sql_instances[parent_resource_key]
+				            RETURN LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], _serverKey ),
+				        "sql_instance_name", ext_arc_sql_instances[sql_instance_name],
+				        "sql_database_name", BLANK (),
+				        "scope", "Instance",
+				        "current_value", COALESCE ( ext_arc_sql_instances[azure_defender_status], "Not reported" ),
+				        "expected_value", "Protected",
+				        "remediation", "Enable Microsoft Defender for SQL and confirm the Arc SQL resource reports a protected state.",
+				        "evidence_source", "Existing Arc SQL inventory",
+				        "evidence_time", ext_arc_sql_instances[last_inventory_upload_time]
+				    )
+				VAR _hadrFindings =
+				    SELECTCOLUMNS (
+				        _instances,
+				        "resource_key", ext_arc_sql_instances[resource_key],
+				        "parent_resource_key", ext_arc_sql_instances[parent_resource_key],
+				        "check_id", "HADR-01",
+				        "check_name", "High availability configured",
+				        "category", "High availability and DR",
+				        "status", IF ( ext_arc_sql_instances[is_hadr_enabled], "Pass", "Warning" ),
+				        "severity", "Informational",
+				        "machine_name",
+				            VAR _serverKey = ext_arc_sql_instances[parent_resource_key]
+				            RETURN LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], _serverKey ),
+				        "sql_instance_name", ext_arc_sql_instances[sql_instance_name],
+				        "sql_database_name", BLANK (),
+				        "scope", "Instance",
+				        "current_value", IF ( ext_arc_sql_instances[is_hadr_enabled], "Enabled", "Not enabled" ),
+				        "expected_value", "Business-aligned availability design",
+				        "remediation", "Confirm recovery objectives and implement an appropriate availability and disaster-recovery design where required.",
+				        "evidence_source", "Existing Arc SQL inventory",
+				        "evidence_time", ext_arc_sql_instances[last_inventory_upload_time]
+				    )
+				VAR _patchFindings =
+				    SELECTCOLUMNS (
+				        _instances,
+				        "resource_key", ext_arc_sql_instances[resource_key],
+				        "parent_resource_key", ext_arc_sql_instances[parent_resource_key],
+				        "check_id", "INST-11",
+				        "check_name", "SQL Server build current",
+				        "category", "Patching",
+				        "status",
+				            VAR _patchIndex =
+				                LOOKUPVALUE (
+				                    dim_sql_patches[patch_index],
+				                    dim_sql_patches[sql_version_number], ext_arc_sql_instances[sql_patch_level]
+				                )
+				            RETURN IF ( ISBLANK ( _patchIndex ), "Not Assessed", IF ( _patchIndex > 1, "Fail", "Pass" ) ),
+				        "severity", "High",
+				        "machine_name",
+				            VAR _serverKey = ext_arc_sql_instances[parent_resource_key]
+				            RETURN LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], _serverKey ),
+				        "sql_instance_name", ext_arc_sql_instances[sql_instance_name],
+				        "sql_database_name", BLANK (),
+				        "scope", "Instance",
+				        "current_value", COALESCE ( ext_arc_sql_instances[sql_patch_level], "Not reported" ),
+				        "expected_value", "Current supported CU/GDR",
+				        "remediation", "Validate application compatibility and patch to the current supported SQL Server servicing level.",
+				        "evidence_source", "Existing Arc SQL inventory + Microsoft build reference",
+				        "evidence_time", ext_arc_sql_instances[last_inventory_upload_time]
+				    )
+				VAR _coverageFindings =
+				    SELECTCOLUMNS (
+				        _instances,
+				        "resource_key", ext_arc_sql_instances[resource_key],
+				        "parent_resource_key", ext_arc_sql_instances[parent_resource_key],
+				        "check_id", "COVERAGE-01",
+				        "check_name", "Tier 2 SQL assessment evidence available",
+				        "category", "Assessment coverage",
+				        "status", "Not Assessed",
+				        "severity", "Informational",
+				        "machine_name",
+				            VAR _serverKey = ext_arc_sql_instances[parent_resource_key]
+				            RETURN LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], _serverKey ),
+				        "sql_instance_name", ext_arc_sql_instances[sql_instance_name],
+				        "sql_database_name", BLANK (),
+				        "scope", "Instance",
+				        "current_value", "SqlAssessment_CL not connected to this template",
+				        "expected_value", "Recent Tier 2 assessment evidence",
+				        "remediation", "Connect the customer Log Analytics SQL assessment results or the durable DMV evidence store to populate deeper checks.",
+				        "evidence_source", "Data gap",
+				        "evidence_time", BLANK ()
+				    )
+				VAR _autoShrinkFindings =
+				    SELECTCOLUMNS (
+				        _databases,
+				        "resource_key", view_arc_sql_databases[resource_key],
+				        "parent_resource_key", view_arc_sql_databases[parent_resource_key],
+				        "check_id", "INST-07",
+				        "check_name", "Auto-shrink disabled",
+				        "category", "Database configuration",
+				        "status", IF ( view_arc_sql_databases[is_auto_shrink_on] = 0, "Pass", "Fail" ),
+				        "severity", "Medium",
+				        "machine_name", view_arc_sql_databases[sql_server_name],
+				        "sql_instance_name", view_arc_sql_databases[sql_instance_name],
+				        "sql_database_name", view_arc_sql_databases[sql_database_name],
+				        "scope", "Database",
+				        "current_value", IF ( view_arc_sql_databases[is_auto_shrink_on] = 0, "Disabled", "Enabled" ),
+				        "expected_value", "Disabled",
+				        "remediation", "Disable AUTO_SHRINK and manage file capacity through planned growth and maintenance.",
+				        "evidence_source", "Existing Arc SQL database inventory",
+				        "evidence_time", view_arc_sql_databases[last_database_upload_time]
+				    )
+				VAR _autoCloseFindings =
+				    SELECTCOLUMNS (
+				        _databases,
+				        "resource_key", view_arc_sql_databases[resource_key],
+				        "parent_resource_key", view_arc_sql_databases[parent_resource_key],
+				        "check_id", "INST-08",
+				        "check_name", "Auto-close disabled",
+				        "category", "Database configuration",
+				        "status", IF ( view_arc_sql_databases[is_auto_close_on] = 0, "Pass", "Fail" ),
+				        "severity", "Medium",
+				        "machine_name", view_arc_sql_databases[sql_server_name],
+				        "sql_instance_name", view_arc_sql_databases[sql_instance_name],
+				        "sql_database_name", view_arc_sql_databases[sql_database_name],
+				        "scope", "Database",
+				        "current_value", IF ( view_arc_sql_databases[is_auto_close_on] = 0, "Disabled", "Enabled" ),
+				        "expected_value", "Disabled",
+				        "remediation", "Disable AUTO_CLOSE for production databases to avoid repeated database open and close overhead.",
+				        "evidence_source", "Existing Arc SQL database inventory",
+				        "evidence_time", view_arc_sql_databases[last_database_upload_time]
+				    )
+				VAR _encryptionFindings =
+				    SELECTCOLUMNS (
+				        _databases,
+				        "resource_key", view_arc_sql_databases[resource_key],
+				        "parent_resource_key", view_arc_sql_databases[parent_resource_key],
+				        "check_id", "SEC-02",
+				        "check_name", "Database encryption enabled",
+				        "category", "Security",
+				        "status", IF ( view_arc_sql_databases[is_encrypted] = 1, "Pass", "Warning" ),
+				        "severity", "Medium",
+				        "machine_name", view_arc_sql_databases[sql_server_name],
+				        "sql_instance_name", view_arc_sql_databases[sql_instance_name],
+				        "sql_database_name", view_arc_sql_databases[sql_database_name],
+				        "scope", "Database",
+				        "current_value", IF ( view_arc_sql_databases[is_encrypted] = 1, "Encrypted", "Not encrypted" ),
+				        "expected_value", "Encryption aligned to data classification",
+				        "remediation", "Assess data sensitivity and enable TDE or an approved equivalent where encryption at rest is required.",
+				        "evidence_source", "Existing Arc SQL database inventory",
+				        "evidence_time", view_arc_sql_databases[last_database_upload_time]
+				    )
+				RETURN
+				    UNION (
+				        _memoryFindings,
+				        _defenderFindings,
+				        _hadrFindings,
+				        _patchFindings,
+				        _coverageFindings,
+				        _autoShrinkFindings,
+				        _autoCloseFindings,
+				        _encryptionFindings
+				    )
+				```

@@ -1,0 +1,7 @@
+{
+  "Version": 5,
+  "AutoCreatedRelationships": [],
+  "FileDescription": "Template to create Arc Invenotry Dashboard for Jumpastart.\n\nThis is version 2 which includes improved refresh time,  Extensions, more grnaularity on ESU forecast and Filtering by TAGs",
+  "CreatedFrom": "Cloud",
+  "CreatedFromRelease": "2026.01"
+}

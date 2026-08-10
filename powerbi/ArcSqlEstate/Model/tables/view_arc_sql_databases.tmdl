@@ -1,0 +1,470 @@
+/// All Arc SQL Databases view
+table view_arc_sql_databases
+
+	column resource_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column sql_database_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_database_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_database_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_database_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column compatibility_level
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [compatibility_level]
+
+		annotation SummarizationSetBy = Automatic
+
+	column collation_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [collation_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column database_creation_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [database_creation_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_auto_close_on
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_auto_close_on]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_auto_create_stats_on
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_auto_create_stats_on]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_auto_shrink_on
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_auto_shrink_on]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_auto_update_stats_on
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_auto_update_stats_on]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_encrypted
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_encrypted]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_memory_optimization_enabled
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_memory_optimization_enabled]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_read_only
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_read_only]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_trustworthy_on
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_trustworthy_on]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_database_upload_time
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_database_upload_time]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_full_backup
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_full_backup]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_full_backup_days
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_full_backup_days]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_full_backup_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_full_backup_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_backup
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_log_backup]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_backup_hours
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_log_backup_hours]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_log_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column size_mb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [size_mb]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column log_file_size_mb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [log_file_size_mb]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column space_available_mb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [space_available_mb]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column provisioning_state
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [provisioning_state]
+
+		annotation SummarizationSetBy = Automatic
+
+	column recovery_mode
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [recovery_mode]
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [location]
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column instance_parent_resource_key
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [instance_parent_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column sql_instance_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_instance_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_server_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_server_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_full_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_full_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column status_effective
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [status_effective]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_heartbeat_hrs =
+			
+			VAR dt = view_arc_sql_databases[last_database_upload_time]
+			VAR secs =
+			    IF ( NOT ISBLANK ( dt ), DATEDIFF ( dt, UTCNOW(), SECOND ) )
+			RETURN IF ( ISBLANK ( dt ) || secs < 0, BLANK(), DIVIDE ( secs, 3600 ) )
+		dataType: int64
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sql_db_full_name = ```
+			
+			[sql_instance_name]
+			& "\" & 
+			[sql_database_name]
+			```
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition view_arc_sql_databases = calculated
+		mode: import
+		source =
+				
+				VAR db_base =
+				    SELECTCOLUMNS (
+				        ext_arc_sql_databases,
+				        "resource_key",                ext_arc_sql_databases[resource_key],
+				        "sql_database_name",           ext_arc_sql_databases[sql_database_name],
+				        "sql_database_type",           ext_arc_sql_databases[sql_database_type],
+				        "compatibility_level",         ext_arc_sql_databases[compatibility_level],
+				        "collation_name",              ext_arc_sql_databases[collation_name],
+				        "database_creation_date",      ext_arc_sql_databases[database_creation_date],
+				        "is_auto_close_on",            ext_arc_sql_databases[is_auto_close_on],
+				        "is_auto_create_stats_on",     ext_arc_sql_databases[is_auto_create_stats_on],
+				        "is_auto_shrink_on",           ext_arc_sql_databases[is_auto_shrink_on],
+				        "is_auto_update_stats_on",     ext_arc_sql_databases[is_auto_update_stats_on],
+				        "is_encrypted",                ext_arc_sql_databases[is_encrypted],
+				        "is_memory_optimization_enabled", ext_arc_sql_databases[is_memory_optimization_enabled],
+				        "is_read_only",                ext_arc_sql_databases[is_read_only],
+				        "is_trustworthy_on",           ext_arc_sql_databases[is_trustworthy_on],
+				        "last_database_upload_time",   ext_arc_sql_databases[last_database_upload_time],
+				        "last_full_backup",            ext_arc_sql_databases[last_full_backup],
+				        "last_full_backup_days",       ext_arc_sql_databases[last_full_backup_days],
+				        "last_full_backup_status",     ext_arc_sql_databases[last_full_backup_status],
+				        "last_log_backup",             ext_arc_sql_databases[last_log_backup],
+				        "last_log_backup_hours",       ext_arc_sql_databases[last_log_backup_hours],
+				        "last_log_status",             ext_arc_sql_databases[last_log_status],
+				        "size_mb",                     ext_arc_sql_databases[size_mb],
+				        "log_file_size_mb",            ext_arc_sql_databases[log_file_size_mb],
+				        "space_available_mb",          ext_arc_sql_databases[space_available_mb],
+				        "provisioning_state",          ext_arc_sql_databases[provisioning_state],
+				        "recovery_mode",               ext_arc_sql_databases[recovery_mode],
+				        "status",                      ext_arc_sql_databases[status],
+				        "location",                    ext_arc_sql_databases[location],
+				        "subscription_id",             ext_arc_sql_databases[subscription_id],
+				        "resource_group",              ext_arc_sql_databases[resource_group]
+				    )
+				VAR db_rows =
+				    FILTER ( db_base, NOT ISBLANK ( [resource_key] ) )
+				RETURN
+				ADDCOLUMNS (
+				    db_rows,
+				
+				    // 2) Instance key (DB -> Instance) from fact_resources
+				    "parent_resource_key",
+				        VAR inst_key =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        RETURN inst_key,
+				
+				    // 3) Server key (Instance -> Server) from fact_resources
+				    "instance_parent_resource_key",
+				        VAR inst_key2 =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        RETURN
+				            IF (
+				                NOT ISBLANK ( inst_key2 ),
+				                LOOKUPVALUE (
+				                    fact_resources[parent_resource_key],
+				                    fact_resources[resource_key], inst_key2
+				                )
+				            ),
+				
+				    // 4) Instance name (inline, blank-safe)
+				    "sql_instance_name",
+				        VAR inst_key3 =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        RETURN
+				            IF (
+				                NOT ISBLANK ( inst_key3 ),
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_instance_name],
+				                    ext_arc_sql_instances[resource_key], inst_key3
+				                )
+				            ),
+				
+				    // 5) Server name (inline, blank-safe)
+				    "sql_server_name",
+				        VAR inst_key4 =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        VAR srv_key4 =
+				            IF (
+				                NOT ISBLANK ( inst_key4 ),
+				                LOOKUPVALUE (
+				                    fact_resources[parent_resource_key],
+				                    fact_resources[resource_key], inst_key4
+				                )
+				            )
+				        RETURN
+				            IF (
+				                NOT ISBLANK ( srv_key4 ),
+				                LOOKUPVALUE (
+				                    ext_arc_servers[server_name],
+				                    ext_arc_servers[resource_key], srv_key4
+				                )
+				            ),
+				
+				    // 6) Full name (compute locally)
+				    "sql_full_name",
+				        VAR inst_keyF =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        VAR inst_nameF =
+				            IF (
+				                NOT ISBLANK ( inst_keyF ),
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_instance_name],
+				                    ext_arc_sql_instances[resource_key], inst_keyF
+				                )
+				            )
+				        VAR srv_keyF =
+				            IF (
+				                NOT ISBLANK ( inst_keyF ),
+				                LOOKUPVALUE (
+				                    fact_resources[parent_resource_key],
+				                    fact_resources[resource_key], inst_keyF
+				                )
+				            )
+				        VAR srv_nameF =
+				            IF (
+				                NOT ISBLANK ( srv_keyF ),
+				                LOOKUPVALUE (
+				                    ext_arc_servers[server_name],
+				                    ext_arc_servers[resource_key], srv_keyF
+				                )
+				            )
+				        RETURN
+				            IF (
+				                NOT ISBLANK ( srv_nameF ) || NOT ISBLANK ( inst_nameF ),
+				                srv_nameF & IF ( NOT ISBLANK ( srv_nameF ) && NOT ISBLANK ( inst_nameF ), "\", "" ) & inst_nameF,
+				                "UnKnown"
+				            ),
+				
+				    // 7) Effective status (instance fallback)
+				    "status_effective",
+				        VAR inst_keyS =
+				            LOOKUPVALUE (
+				                fact_resources[parent_resource_key],
+				                fact_resources[resource_key], [resource_key]
+				            )
+				        VAR inst_statusS =
+				            IF (
+				                NOT ISBLANK ( inst_keyS ),
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[status],
+				                    ext_arc_sql_instances[resource_key], inst_keyS
+				                )
+				            )
+				        RETURN COALESCE ( [status], inst_statusS )
+				)
+
+	annotation PBI_Id = 31032dae9ab245d29a05a655515275e1
+

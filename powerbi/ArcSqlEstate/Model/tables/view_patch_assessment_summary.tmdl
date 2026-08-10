@@ -1,0 +1,124 @@
+/// Latest Azure Update Manager assessment summary for each Arc-enabled machine visible in Resource Graph.
+table view_patch_assessment_summary
+	lineageTag: e601ce37-1a82-44fe-bcdc-061d7025147e
+
+	/// Lowercase Azure Resource Manager identifier for the assessed Arc machine.
+	column machine_resource_id
+		dataType: string
+		isHidden
+		lineageTag: 98c672f7-0e6e-4b83-a44b-b6ae519a87bd
+		summarizeBy: none
+		sourceColumn: machine_resource_id
+
+	/// Arc-enabled machine name.
+	column machine_name
+		dataType: string
+		lineageTag: ba8293e8-3384-48f3-87a4-243ead5a4f80
+		summarizeBy: none
+		sourceColumn: machine_name
+
+	/// Operating system family reported by Update Manager.
+	column os_type
+		dataType: string
+		lineageTag: a18b0f24-52c8-4ab8-bc59-1f662885b4c9
+		summarizeBy: none
+		sourceColumn: os_type
+
+	/// Latest Update Manager assessment state.
+	column assessment_state
+		dataType: string
+		lineageTag: 4b42b9bb-34c3-463d-b1f6-ac877604ddcd
+		summarizeBy: none
+		sourceColumn: assessment_state
+
+	/// Time of the latest patch assessment.
+	column assessment_time
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 88139c7d-ae2f-4e21-bfdf-e1a9e626528b
+		sourceColumn: assessment_time
+
+	/// Available security-classified patches.
+	column security_count
+		dataType: int64
+		isHidden
+		lineageTag: bd6baa17-d978-424e-8b19-6b3b7888889d
+		summarizeBy: sum
+		sourceColumn: security_count
+
+	/// Available critical-classified patches.
+	column critical_count
+		dataType: int64
+		isHidden
+		lineageTag: 5ebcdc44-cefa-4729-8492-02562df687f7
+		summarizeBy: sum
+		sourceColumn: critical_count
+
+	/// Available patches in other classifications.
+	column other_count
+		dataType: int64
+		isHidden
+		lineageTag: 5e07e3c0-d814-4953-84a8-3dca79901593
+		summarizeBy: sum
+		sourceColumn: other_count
+
+	/// Azure subscription containing the machine.
+	column subscription_id
+		dataType: string
+		lineageTag: f1ce0821-1c68-46ab-9a73-c79dbdd05058
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+	/// Resource group containing the machine.
+	column resource_group
+		dataType: string
+		lineageTag: de867701-83be-4a63-b6ae-fadb42ca4404
+		summarizeBy: none
+		sourceColumn: resource_group
+
+	/// Microsoft Entra tenant identifier returned by Resource Graph.
+	column tenant_id
+		dataType: string
+		isHidden
+		lineageTag: 887d16dd-bcbc-4e80-a0b4-ada196a34dde
+		summarizeBy: none
+		sourceColumn: tenant_id
+
+	/// Model relationship key resolved from the assessed machine resource identifier.
+	column resource_key = LOOKUPVALUE(fact_keys[resource_key], fact_keys[resource_id], [machine_resource_id])
+		dataType: int64
+		isHidden
+		lineageTag: 182cbe30-2125-4072-aefc-a67a1006dae9
+		summarizeBy: none
+
+	partition view_patch_assessment_summary = m
+		mode: import
+		source =
+				let
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        patchassessmentresources
+				        | where type !has 'softwarepatches'
+				        | extend prop = parse_json(properties)
+				        | extend by_class = prop.availablePatchCountByClassification
+				        | extend machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0]))
+				        | project
+				            machine_resource_id,
+				            machine_name = tostring(split(machine_resource_id, '/')[8]),
+				            os_type = tostring(prop.osType),
+				            assessment_state = tostring(coalesce(prop.status, prop.configurationStatus.assessmentModeConfiguration.status, prop.assessmentState)),
+				            assessment_time = todatetime(prop.lastModifiedDateTime),
+				            security_count = toint(by_class.security),
+				            critical_count = toint(by_class.critical),
+				            other_count = toint(by_class.other),
+				            subscription_id = tolower(subscriptionId),
+				            resource_group = tostring(resourceGroup),
+				            tenant_id = tostring(tenantId)
+				        ",
+				        null, null, null, [resultTruncated = false]
+				    ),
+				    Selected = Table.SelectColumns(SourceRaw, {"machine_resource_id", "machine_name", "os_type", "assessment_state", "assessment_time", "security_count", "critical_count", "other_count", "subscription_id", "resource_group", "tenant_id"}, MissingField.UseNull),
+				    Typed = Table.TransformColumnTypes(Selected, {{"machine_resource_id", type text}, {"machine_name", type text}, {"os_type", type text}, {"assessment_state", type text}, {"assessment_time", type datetime}, {"security_count", Int64.Type}, {"critical_count", Int64.Type}, {"other_count", Int64.Type}, {"subscription_id", type text}, {"resource_group", type text}, {"tenant_id", type text}})
+				in
+				    Typed
+

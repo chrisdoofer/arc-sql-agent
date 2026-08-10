@@ -1,0 +1,137 @@
+table dim_sql_patches
+	isHidden
+
+	column sql_version_number
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: sql_version_number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_pack
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: service_pack
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column update
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: update
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column kb_number
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: kb_number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column release_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		summarizeBy: none
+		sourceColumn: release_date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column patch_index
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: patch_index
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column sql_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_sql_patches = m
+		mode: import
+		queryGroup: Dimensions
+		source =
+				let
+				    // Define the source URL
+				    Source = Web.BrowserContents("https://learn.microsoft.com/en-us/troubleshoot/sql/releases/download-and-install-latest-updates"),
+				
+				    // Helper function to extract, promote, sort, index, and tag each version
+				    ExtractVersionTable = (selector as text, version as text) =>
+				        let
+				            Extracted = Html.Table(Source, {
+				                {"Column1", selector & " > :nth-child(1)"},
+				                {"Column2", selector & " > :nth-child(2)"},
+				                {"Column3", selector & " > :nth-child(3)"},
+				                {"Column4", selector & " > :nth-child(4)"},
+				                {"Column5", selector & " > :nth-child(5)"}
+				            }, [RowSelector=selector]),
+				            Promoted = Table.PromoteHeaders(Extracted, [PromoteAllScalars=true]),
+				            DistinctRows = Table.Distinct(Promoted, {"Build number or version"}),
+				            Indexed = Table.AddIndexColumn(DistinctRows, "patch_index", 1, 1, Int64.Type),
+				            Tagged = Table.AddColumn(Indexed, "sql_version", each version)
+				        in
+				            Tagged,
+				
+				    // Extract each version table using the helper
+				    Table2025 = ExtractVersionTable("table[aria-label=""SQL Server 2025""] > * > tr", "SQL Server 2025"),
+				    Table2022 = ExtractVersionTable("table[aria-label=""SQL Server 2022""] > * > tr", "SQL Server 2022"),
+				    Table2019 = ExtractVersionTable("table[aria-label=""SQL Server 2019""] > * > tr", "SQL Server 2019"),
+				    Table2017 = ExtractVersionTable("table[aria-label=""SQL Server 2017""] > * > tr", "SQL Server 2017"),
+				    Table2016 = ExtractVersionTable("table[aria-label=""SQL Server 2016""] > * > tr", "SQL Server 2016"),
+				    Table2014 = ExtractVersionTable("table[aria-label=""SQL Server 2014""] > * > tr", "SQL Server 2014"),
+				    Table2012 = ExtractVersionTable("table[aria-label=""SQL Server 2012""] > * > tr", "SQL Server 2012"),
+				    Table2008R2 = ExtractVersionTable("table[aria-label=""SQL Server 2008 R2""] > * > tr", "SQL Server 2008 R2"),
+				    Table2008 = ExtractVersionTable("table[aria-label=""SQL Server 2008""] > * > tr", "SQL Server 2008"),
+				
+				
+				    // Combine all version tables
+				    CombinedTables = Table.Combine({Table2025, Table2022, Table2019, Table2017, Table2016, Table2014, Table2012, Table2008}),
+				
+				    // Standardize column names and types
+				    Rename = Table.RenameColumns(CombinedTables, {
+				        {"Build number or version", "sql_version_number"},
+				        {"Service pack", "service_pack"},
+				        {"Update", "update"},
+				        {"Knowledge Base number", "kb_number"},
+				        {"Release date", "release_date"}
+				    }),
+				    Convert = Table.TransformColumnTypes(Rename, {{"release_date", type date}})
+				
+				in
+				    Convert
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

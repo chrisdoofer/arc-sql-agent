@@ -1,0 +1,150 @@
+{
+  "id": 0,
+  "layoutOptimization": 0,
+  "pods": [
+    {
+      "boundSection": "393b97d84c036f44a7b7",
+      "config": "{\"acceptsFilterContext\":1}",
+      "name": "74ec5b49cb56b615b7f0"
+    },
+    {
+      "boundSection": "88d9499600ae52e0e2e2",
+      "config": "{\"acceptsFilterContext\":1}",
+      "name": "f68c53a9dd50ec07c14e"
+    },
+    {
+      "boundSection": "a2d849044c461398e7fb",
+      "config": "{}",
+      "name": "63f8086ce05d375209f2"
+    },
+    {
+      "boundSection": "97236419e539c6ff554d",
+      "config": "{}",
+      "name": "ebe489887c868d22c028"
+    },
+    {
+      "boundSection": "9d80b9cb2c9dbd074e69",
+      "config": "{}",
+      "name": "9f659db2be1085f8632c"
+    },
+    {
+      "boundSection": "c4a3e7f5b9d24a1e8c62",
+      "config": "{}",
+      "name": "33e709af509659a48284"
+    }
+  ],
+  "publicCustomVisuals": [
+    "ChicletSlicer1448559807354"
+  ],
+  "resourcePackages": [
+    {
+      "resourcePackage": {
+        "disabled": false,
+        "items": [
+          {
+            "name": "CY24SU10",
+            "path": "BaseThemes/CY24SU10.json",
+            "type": 202
+          }
+        ],
+        "name": "SharedResources",
+        "type": 2
+      }
+    },
+    {
+      "resourcePackage": {
+        "disabled": false,
+        "items": [
+          {
+            "name": "SQLDB3766594354793116.svg",
+            "path": "SQLDB3766594354793116.svg",
+            "type": 100
+          },
+          {
+            "name": "SQLVM5263327629775685.svg",
+            "path": "SQLVM5263327629775685.svg",
+            "type": 100
+          },
+          {
+            "name": "ARCSQLVM4807566032032662.svg",
+            "path": "ARCSQLVM4807566032032662.svg",
+            "type": 100
+          },
+          {
+            "name": "AZUREA5796780707306022.svg",
+            "path": "AZUREA5796780707306022.svg",
+            "type": 100
+          },
+          {
+            "name": "ARCVM8860945754738883.svg",
+            "path": "ARCVM8860945754738883.svg",
+            "type": 100
+          },
+          {
+            "name": "ARCSQLVM59421963485664.svg",
+            "path": "ARCSQLVM59421963485664.svg",
+            "type": 100
+          },
+          {
+            "name": "AZUREVM11415718141416176.svg",
+            "path": "AZUREVM11415718141416176.svg",
+            "type": 100
+          },
+          {
+            "name": "COST7848410890353907.svg",
+            "path": "COST7848410890353907.svg",
+            "type": 100
+          },
+          {
+            "name": "AZURESQL5655743448751029.svg",
+            "path": "AZURESQL5655743448751029.svg",
+            "type": 100
+          },
+          {
+            "name": "Group_13213173694740174273628126.png",
+            "path": "Group_13213173694740174273628126.png",
+            "type": 100
+          },
+          {
+            "name": "Normal7962269511656253.json",
+            "path": "Normal7962269511656253.json",
+            "type": 201
+          },
+          {
+            "name": "00001-icon-service-Monitor23703274091378024.svg",
+            "path": "00001-icon-service-Monitor23703274091378024.svg",
+            "type": 100
+          },
+          {
+            "name": "10241-icon-service-Microsoft-D37591753939099215.svg",
+            "path": "10241-icon-service-Microsoft-D37591753939099215.svg",
+            "type": 100
+          },
+          {
+            "name": "03336-icon-service-Microsoft-D7035050058365675.svg",
+            "path": "03336-icon-service-Microsoft-D7035050058365675.svg",
+            "type": 100
+          },
+          {
+            "name": "10799-icon-service-Extensions2869584041588119.svg",
+            "path": "10799-icon-service-Extensions2869584041588119.svg",
+            "type": 100
+          },
+          {
+            "name": "Untitled6903665946992434.png",
+            "path": "Untitled6903665946992434.png",
+            "type": 100
+          },
+          {
+            "name": "changet5408873090732179.png",
+            "path": "changet5408873090732179.png",
+            "type": 100
+          }
+        ],
+        "name": "RegisteredResources",
+        "type": 1
+      }
+    }
+  ],
+  "theme": "Normal7962269511656253.json"
+}

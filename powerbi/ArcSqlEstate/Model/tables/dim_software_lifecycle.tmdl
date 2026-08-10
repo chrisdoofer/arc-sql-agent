@@ -1,0 +1,149 @@
+table dim_software_lifecycle
+	isHidden
+
+	column software_version
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: software_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column software_edition
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: software_edition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column software_status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: software_status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column software_esu_monthly
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: software_esu_monthly
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column software_esu_yearly
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: software_esu_yearly
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column software_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: software_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column esu_start_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		summarizeBy: none
+		sourceColumn: esu_start_date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column esu_end_date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		summarizeBy: none
+		sourceColumn: esu_end_date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column software_version_norm = ```
+			
+			LOWER ( TRIM ( dim_software_lifecycle[software_version] ) )
+			
+			```
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column software_edition_norm = ```
+			
+			LOWER ( TRIM ( dim_software_lifecycle[software_edition] ) )
+			
+			```
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_software_lifecycle = m
+		mode: import
+		queryGroup: Dimensions
+		source = ```
+				let
+				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/markjones-msft/ArcDashboard/refs/heads/main/Dimensions/dim_software_lifecycle.csv"),[Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    
+				    // Dynamically promote headers without hardcoding column count
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    
+				    // Select only what you need BEFORE transforming types (saves CPU)
+				    Selected = Table.SelectColumns(Headers, {"software_version", "software_edition", "software_status", "software_esu_monthly", "software_esu_yearly", "esu_start_date", "esu_end_date"}),
+				    
+				    // Transform types - using Culture can prevent date errors on different regional settings
+				    Convert = Table.TransformColumnTypes(Selected,{
+				        {"software_version", type text}, 
+				        {"software_edition", type text}, 
+				        {"software_status", type text}, 
+				        {"software_esu_monthly", type number}, 
+				        {"software_esu_yearly", type number}, 
+				        {"esu_start_date", type date}, 
+				        {"esu_end_date", type date}
+				    }, "en-US"),
+				
+				    // Add Index at the end so it doesn't interfere with transformations
+				    AddPK = Table.AddIndexColumn(Convert, "software_key", 1, 1, Int64.Type)
+				in
+				    AddPK
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

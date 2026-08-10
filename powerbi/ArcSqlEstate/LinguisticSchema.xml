@@ -1,0 +1,29 @@
+<LinguisticSchema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Language="en-US" DynamicImprovement="Default" xmlns="http://schemas.microsoft.com/sqlserver/2016/01/linguisticschema">
+  <Entities>
+    <Entity Name="SQL_VM_Databases" ConceptualEntity="74ec5b49cb56b615b7f0" Source="Generated">
+      <Words>
+        <Word>SQL VM Databases</Word>
+      </Words>
+    </Entity>
+    <Entity Name="Servers" ConceptualEntity="ebe489887c868d22c028" Source="Generated">
+      <Words>
+        <Word>Servers</Word>
+      </Words>
+    </Entity>
+    <Entity Name="Extensions" ConceptualEntity="f68c53a9dd50ec07c14e" Source="Generated">
+      <Words>
+        <Word>Extensions</Word>
+      </Words>
+    </Entity>
+    <Entity Name="ESU_Forecast" ConceptualEntity="63f8086ce05d375209f2" Source="Generated">
+      <Words>
+        <Word>ESU Forecast</Word>
+      </Words>
+    </Entity>
+    <Entity Name="SQL_Instances" ConceptualEntity="9f659db2be1085f8632c" Source="Generated">
+      <Words>
+        <Word>SQL Instances</Word>
+      </Words>
+    </Entity>
+  </Entities>
+</LinguisticSchema>
