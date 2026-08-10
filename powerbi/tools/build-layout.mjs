@@ -1025,7 +1025,7 @@ function buildSecurityPage() {
   stampVisualName(cveTable, page, 56002);
   bindTable(cveTable, "view_patch_cve_mappings", [
     { column: "cve_id", label: "CVE" },
-    { table: "dim_patch_kb", column: "kb_numeric", label: "KB" },
+    { column: "advisory_reference", label: "Advisory / KB" },
     { column: "machine_name", label: "Machine" },
     { column: "severity", label: "Severity" },
     { column: "product", label: "Vulnerability" },

@@ -53,6 +53,27 @@ table view_missing_patches
 		summarizeBy: none
 		sourceColumn: os_type
 
+	/// Package manager used by Azure Update Manager for the machine assessment.
+	column patch_service_used
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patch_service_used
+
+	/// Linux distribution resolved from the Arc machine resource.
+	column os_distribution
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_distribution
+
+	/// Distribution release codename used to select the authoritative advisory feed.
+	column release_codename
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: release_codename
+
 	/// Missing package version when available.
 	column package_version
 		dataType: string
@@ -117,7 +138,18 @@ table view_missing_patches
 				            patchassessmentresources
 				            | where type !has 'softwarepatches'
 				            | extend sprop = parse_json(properties)
-				            | project machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0])), os_type = tostring(sprop.osType)
+				            | project
+				                machine_resource_id = tolower(tostring(split(id, '/patchAssessmentResults/')[0])),
+				                os_type = tostring(sprop.osType),
+				                patch_service_used = tostring(sprop.patchServiceUsed)
+				        ) on machine_resource_id
+				        | join kind=leftouter (
+				            resources
+				            | where type =~ 'microsoft.hybridcompute/machines'
+				            | extend mprop = parse_json(properties)
+				            | project
+				                machine_resource_id = tolower(id),
+				                machine_os_sku = tostring(mprop.osSku)
 				        ) on machine_resource_id
 				        | project
 				            machine_resource_id,
@@ -127,6 +159,14 @@ table view_missing_patches
 				            kb_id = tostring(prop.kbId),
 				            classification = tostring(prop.classifications),
 				            os_type,
+				            patch_service_used,
+				            os_distribution = case(tolower(machine_os_sku) contains 'ubuntu', 'Ubuntu', ''),
+				            release_codename = case(
+				                machine_os_sku contains '24.04', 'noble',
+				                machine_os_sku contains '22.04', 'jammy',
+				                machine_os_sku contains '20.04', 'focal',
+				                ''
+				            ),
 				            package_version = tostring(prop.version),
 				            reboot_behavior = tostring(prop.rebootBehavior),
 				            assessment_time = todatetime(prop.lastModifiedDateTime),
@@ -164,7 +204,7 @@ table view_missing_patches
 				            }
 				        }
 				    ),
-				    Selected = Table.SelectColumns(NormalizedKbIds, {"machine_resource_id", "machine_name", "patch_id", "patch_name", "kb_id", "classification", "os_type", "package_version", "reboot_behavior", "assessment_time", "subscription_id", "resource_group", "tenant_id"}, MissingField.UseNull),
-				    Typed = Table.TransformColumnTypes(Selected, {{"machine_resource_id", type text}, {"machine_name", type text}, {"patch_id", type text}, {"patch_name", type text}, {"kb_id", type text}, {"classification", type text}, {"os_type", type text}, {"package_version", type text}, {"reboot_behavior", type text}, {"assessment_time", type datetime}, {"subscription_id", type text}, {"resource_group", type text}, {"tenant_id", type text}})
+				    Selected = Table.SelectColumns(NormalizedKbIds, {"machine_resource_id", "machine_name", "patch_id", "patch_name", "kb_id", "classification", "os_type", "patch_service_used", "os_distribution", "release_codename", "package_version", "reboot_behavior", "assessment_time", "subscription_id", "resource_group", "tenant_id"}, MissingField.UseNull),
+				    Typed = Table.TransformColumnTypes(Selected, {{"machine_resource_id", type text}, {"machine_name", type text}, {"patch_id", type text}, {"patch_name", type text}, {"kb_id", type text}, {"classification", type text}, {"os_type", type text}, {"patch_service_used", type text}, {"os_distribution", type text}, {"release_codename", type text}, {"package_version", type text}, {"reboot_behavior", type text}, {"assessment_time", type datetime}, {"subscription_id", type text}, {"resource_group", type text}, {"tenant_id", type text}})
 				in
 				    Typed

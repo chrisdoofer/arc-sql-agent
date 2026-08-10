@@ -40,15 +40,26 @@ subscriptions.
   missing patch counts by classification.
 - `view_missing_patches` - individual missing Windows and Linux patches.
 - `dim_patch_cve_mapping` - authoritative MSRC-only KB-to-CVE mappings.
+- `dim_linux_patch_cve_mapping` - normalized Linux vendor advisory mappings;
+  the initial provider imports Canonical Ubuntu Security Notices for supported
+  Ubuntu LTS releases and retains only exact package/version keys present in
+  the current estate.
 - `view_patch_cve_mappings` - calculated machine-level CVE exposure derived
-  from `view_missing_patches` and the MSRC mapping, without another Resource
-  Graph query.
+  from `view_missing_patches`, MSRC, and Linux vendor mappings without another
+  Resource Graph query.
 - `view_best_practice_findings` - calculated instance/database findings derived
   from the existing keyed Arc SQL inventory tables.
 
-Power BI prompts once for anonymous access to `api.msrc.microsoft.com` and the
-Microsoft Learn SQL build-reference page when the template is first opened.
+Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
+`ubuntu.com`, and the Microsoft Learn SQL build-reference page when the
+template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
+
+Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted only
+when the machine release, binary package name, and Update Manager target
+package version exactly match a Canonical USN package record. Candidate
+packages without a published matching advisory remain visible as missing
+patches but are not assigned speculative CVEs.
 
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.

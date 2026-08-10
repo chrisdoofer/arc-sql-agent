@@ -1,4 +1,4 @@
-/// Machine-level CVE exposure derived from the existing Update Manager patch evidence and the authoritative MSRC KB-to-CVE mapping.
+/// Machine-level CVE exposure derived from Update Manager patch evidence and authoritative Windows and Linux vendor advisories.
 table view_patch_cve_mappings
 	lineageTag: c5ac691d-8652-443e-8b44-a43148c72ba3
 
@@ -29,6 +29,32 @@ table view_patch_cve_mappings
 		isHidden
 		summarizeBy: none
 		sourceColumn: [kb_numeric]
+
+	column advisory_reference
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [advisory_reference]
+
+	column package_version
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [package_version]
+
+	column os_platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [os_platform]
+
+	column distribution
+		dataType: string
+		summarizeBy: none
+		sourceColumn: [distribution]
+
+	column release_codename
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: [release_codename]
 
 	column patch_name
 		dataType: string
@@ -89,7 +115,7 @@ table view_patch_cve_mappings
 	partition view_patch_cve_mappings = calculated
 		mode: import
 		source = ```
-				VAR _patches =
+				VAR _windowsPatches =
 				    SELECTCOLUMNS (
 				        FILTER (
 				            view_missing_patches,
@@ -102,12 +128,13 @@ table view_patch_cve_mappings
 				        "machine_name", view_missing_patches[machine_name],
 				        "kb_numeric", SUBSTITUTE ( UPPER ( TRIM ( view_missing_patches[kb_id] ) ), "KB", "" ),
 				        "patch_name", view_missing_patches[patch_name],
+				        "package_version", view_missing_patches[package_version],
 				        "classification", view_missing_patches[classification],
 				        "assessment_time", view_missing_patches[assessment_time],
 				        "subscription_id", view_missing_patches[subscription_id],
 				        "resource_group", view_missing_patches[resource_group]
 				    )
-				VAR _mappings =
+				VAR _windowsMappings =
 				    SELECTCOLUMNS (
 				        dim_patch_cve_mapping,
 				        "kb_numeric", dim_patch_cve_mapping[kb_numeric] & "",
@@ -116,15 +143,20 @@ table view_patch_cve_mappings
 				        "severity", dim_patch_cve_mapping[severity],
 				        "source_url", dim_patch_cve_mapping[source_url]
 				    )
-				VAR _joined = NATURALINNERJOIN ( _patches, _mappings )
-				RETURN
+				VAR _windowsJoined = NATURALINNERJOIN ( _windowsPatches, _windowsMappings )
+				VAR _windowsResult =
 				    SELECTCOLUMNS (
-				        _joined,
+				        _windowsJoined,
 				        "resource_key", [resource_key],
 				        "machine_resource_id", [machine_resource_id],
 				        "machine_name", [machine_name],
 				        "kb_id", "KB" & [kb_numeric],
 				        "kb_numeric", [kb_numeric],
+				        "advisory_reference", "KB" & [kb_numeric],
+				        "package_version", [package_version],
+				        "os_platform", "Windows",
+				        "distribution", "Windows",
+				        "release_codename", BLANK (),
 				        "patch_name", [patch_name],
 				        "classification", [classification],
 				        "cve_id", [cve_id],
@@ -137,4 +169,67 @@ table view_patch_cve_mappings
 				        "subscription_id", [subscription_id],
 				        "resource_group", [resource_group]
 				    )
+				VAR _linuxPatches =
+				    SELECTCOLUMNS (
+				        FILTER (
+				            view_missing_patches,
+				            NOT ISBLANK ( view_missing_patches[resource_key] )
+				                && LOWER ( view_missing_patches[os_type] ) = "linux"
+				                && NOT ISBLANK ( view_missing_patches[patch_name] )
+				                && NOT ISBLANK ( view_missing_patches[package_version] )
+				        ),
+				        "resource_key", view_missing_patches[resource_key],
+				        "machine_resource_id", view_missing_patches[machine_resource_id],
+				        "machine_name", view_missing_patches[machine_name],
+				        "package_name", LOWER ( TRIM ( view_missing_patches[patch_name] ) ),
+				        "package_version", TRIM ( view_missing_patches[package_version] ) & "",
+				        "release_codename", view_missing_patches[release_codename] & "",
+				        "patch_name", view_missing_patches[patch_name],
+				        "classification", view_missing_patches[classification],
+				        "assessment_time", view_missing_patches[assessment_time],
+				        "subscription_id", view_missing_patches[subscription_id],
+				        "resource_group", view_missing_patches[resource_group]
+				    )
+				VAR _linuxMappings =
+				    SELECTCOLUMNS (
+				        dim_linux_patch_cve_mapping,
+				        "package_name", dim_linux_patch_cve_mapping[package_name] & "",
+				        "package_version", dim_linux_patch_cve_mapping[package_version] & "",
+				        "release_codename", dim_linux_patch_cve_mapping[release_codename] & "",
+				        "distribution", dim_linux_patch_cve_mapping[distribution],
+				        "advisory_id", dim_linux_patch_cve_mapping[advisory_id],
+				        "cve_id", dim_linux_patch_cve_mapping[cve_id],
+				        "product", dim_linux_patch_cve_mapping[product],
+				        "severity", dim_linux_patch_cve_mapping[severity],
+				        "mapping_source", dim_linux_patch_cve_mapping[mapping_source],
+				        "source_url", dim_linux_patch_cve_mapping[source_url]
+				    )
+				VAR _linuxJoined = NATURALINNERJOIN ( _linuxPatches, _linuxMappings )
+				VAR _linuxResult =
+				    SELECTCOLUMNS (
+				        _linuxJoined,
+				        "resource_key", [resource_key],
+				        "machine_resource_id", [machine_resource_id],
+				        "machine_name", [machine_name],
+				        "kb_id", BLANK (),
+				        "kb_numeric", BLANK (),
+				        "advisory_reference", [advisory_id],
+				        "package_version", [package_version],
+				        "os_platform", "Linux",
+				        "distribution", [distribution],
+				        "release_codename", [release_codename],
+				        "patch_name", [patch_name],
+				        "classification", [classification],
+				        "cve_id", [cve_id],
+				        "product", [product],
+				        "severity", [severity],
+				        "confidence", "High",
+				        "mapping_source", [mapping_source],
+				        "source_url", [source_url],
+				        "assessment_time", [assessment_time],
+				        "subscription_id", [subscription_id],
+				        "resource_group", [resource_group]
+				    )
+				RETURN
+				    UNION ( _windowsResult, _linuxResult )
 				```

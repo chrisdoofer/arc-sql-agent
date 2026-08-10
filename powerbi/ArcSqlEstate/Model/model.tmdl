@@ -15,7 +15,7 @@ queryGroup 'Extenal-Resource Graph'
 
 	annotation PBI_QueryGroupOrder = 2
 
-annotation PBI_QueryOrder = ["dim_azure_regions","ext_all_extensions","ext_arc_sql_instances","ext_arc_sql_databases","ext_azure_sql_instances","ext_arc_servers","ext_azure_servers","dim_azure_vm_skus","dim_sql_patches","dim_patch_cve_mapping","dim_software_lifecycle","dim_date","dim_extension_types","all_measures","ext_resource_tags"]
+annotation PBI_QueryOrder = ["dim_azure_regions","ext_all_extensions","ext_arc_sql_instances","ext_arc_sql_databases","ext_azure_sql_instances","ext_arc_servers","ext_azure_servers","dim_azure_vm_skus","dim_sql_patches","dim_patch_cve_mapping","dim_linux_patch_cve_mapping","dim_software_lifecycle","dim_date","dim_extension_types","all_measures","ext_resource_tags"]
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
@@ -54,6 +54,7 @@ ref table view_migrate_projects
 ref table view_patch_assessment_summary
 ref table view_missing_patches
 ref table dim_patch_cve_mapping
+ref table dim_linux_patch_cve_mapping
 ref table dim_patch_kb
 ref table view_patch_cve_mappings
 ref table view_best_practice_findings
