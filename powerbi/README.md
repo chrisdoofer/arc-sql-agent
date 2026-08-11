@@ -113,6 +113,33 @@ the emitted package version preserves the raw Update Manager value used by the
 model join. Red Hat or AlmaLinux advisories and generic CPE inference are not
 reused for Rocky Linux.
 
+## Synthetic Linux CVE validation
+
+The Linux providers can be tested without adding machines to the tenant or
+changing the source-controlled template:
+
+```powershell
+.\powerbi\tools\test-linux-cve-mappings.ps1
+```
+
+Open the template in Power BI Desktop before running the command. The harness
+injects deterministic missing-patch and vendor-evidence fixtures into hidden
+temporary tables, evaluates a temporary copy of the production calculated CVE
+exposure expression, validates the expected advisory, CVE, source, and
+confidence through DAX, and removes every temporary table in a `finally`
+block. This default mode requires no test machines or vendor web credentials.
+Stale test tables from an interrupted prior run are removed automatically.
+
+Fixtures cover Ubuntu, RHEL, Debian, SLES, Oracle Linux, AlmaLinux, and Rocky
+Linux. Use `-Fixture rocky-linux` to run one fixture or `-Port <port>` when
+multiple Desktop models are open. The harness hashes the BIM, TMDL, and PBIT
+before and after execution and fails if any stable artifact changes.
+
+Use `-Mode live-provider` for the optional integration test that calls the
+actual provider Power Query logic and authoritative web feeds. The relevant
+vendor web sources must already be configured for Anonymous access in Desktop;
+this mode remains isolated to temporary tables and performs the same cleanup.
+
 The template already contained dedicated Resource Graph queries for Arc
 machines, Arc SQL instances, Arc SQL databases, extensions, and resource tags.
 The added evidence reuses those imports and resolves resource filters through

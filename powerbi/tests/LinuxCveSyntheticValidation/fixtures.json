@@ -1,0 +1,90 @@
+[
+  {
+    "name": "ubuntu-supersedence",
+    "provider": "function",
+    "functionName": "fnUbuntuPatchCveRows",
+    "distribution": "Ubuntu",
+    "release": "noble",
+    "packageName": "linux-cloud-tools-common",
+    "packageVersion": "6.8.0-137.137",
+    "expectedAdvisory": "USN-8567-1",
+    "expectedCve": "CVE-2025-21709",
+    "expectedMappingSource": "Canonical USN (superseded)",
+    "expectedConfidence": "Medium"
+  },
+  {
+    "name": "red-hat-enterprise-linux",
+    "provider": "base-partition",
+    "distribution": "Red Hat Enterprise Linux",
+    "release": "8",
+    "packageName": "osbuild-composer",
+    "packageVersion": "0:75-9.el8_8",
+    "expectedAdvisory": "RHSA-2026:52389",
+    "expectedCve": "CVE-2026-25679",
+    "expectedMappingSource": "Red Hat CSAF",
+    "expectedConfidence": "High"
+  },
+  {
+    "name": "debian",
+    "provider": "base-partition",
+    "distribution": "Debian GNU/Linux",
+    "release": "bookworm",
+    "packageName": "libssl3",
+    "packageVersion": "3.0.20-1~deb12u2",
+    "expectedAdvisory": "Debian CVE-2026-34180",
+    "expectedCve": "CVE-2026-34180",
+    "expectedMappingSource": "Debian Security Tracker",
+    "expectedConfidence": "High"
+  },
+  {
+    "name": "suse-linux-enterprise-server",
+    "provider": "base-partition",
+    "distribution": "SUSE Linux Enterprise Server",
+    "release": "15 SP7",
+    "packageName": "kernel-default",
+    "packageVersion": "6.4.0-150700.53.73.2",
+    "expectedAdvisory": "SUSE-SU-2026:3166-1",
+    "expectedCve": "CVE-2023-20585",
+    "expectedMappingSource": "SUSE CSAF",
+    "expectedConfidence": "High"
+  },
+  {
+    "name": "oracle-linux",
+    "provider": "function",
+    "functionName": "fnOracleLinuxPatchCveRows",
+    "distribution": "Oracle Linux",
+    "release": "9",
+    "packageName": "openssl",
+    "packageVersion": "1:3.2.2-6.0.1.el9_5",
+    "expectedAdvisory": "ELSA-2024-9333",
+    "expectedCve": "CVE-2024-4741",
+    "expectedMappingSource": "Oracle Linux Updateinfo",
+    "expectedConfidence": "High"
+  },
+  {
+    "name": "almalinux",
+    "provider": "function",
+    "functionName": "fnAlmaLinuxPatchCveRows",
+    "distribution": "AlmaLinux",
+    "release": "8",
+    "packageName": "xz",
+    "packageVersion": "0:5.2.4-4.el8_6",
+    "expectedAdvisory": "ALSA-2022:4991",
+    "expectedCve": "CVE-2022-1271",
+    "expectedMappingSource": "AlmaLinux Errata",
+    "expectedConfidence": "High"
+  },
+  {
+    "name": "rocky-linux",
+    "provider": "function",
+    "functionName": "fnRockyLinuxPatchCveRows",
+    "distribution": "Rocky Linux",
+    "release": "9",
+    "packageName": "kernel",
+    "packageVersion": "0:5.14.0-687.36.1.el9_8",
+    "expectedAdvisory": "RLSA-2026:51035",
+    "expectedCve": "CVE-2026-23415",
+    "expectedMappingSource": "Rocky Linux Errata (Apollo)",
+    "expectedConfidence": "High"
+  }
+]

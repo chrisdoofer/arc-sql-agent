@@ -17,3 +17,7 @@ NVD_API_KEY*
 **/.cache/
 **/cve-cache/
 **/security-exposure-run/
+
+# Local .NET build output for Power BI validation harnesses
+/powerbi/tests/**/bin/
+/powerbi/tests/**/obj/
