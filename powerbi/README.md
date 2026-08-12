@@ -59,6 +59,13 @@ Power BI prompts once for anonymous access to `api.msrc.microsoft.com`,
 Microsoft Learn SQL build-reference page when the template is first opened.
 Azure Resource Graph authentication remains organizational-account based.
 
+Publishing creates tenant-owned Fabric connection objects that cannot be
+embedded in a public PBIT. Follow the
+[Fabric refresh setup guide](FABRIC-REFRESH-SETUP.md) after publishing. The
+included `tools/configure-fabric-refresh.ps1` script aligns connection privacy,
+checks credentials and bindings, verifies that no gateway is required, and can
+start the first Service refresh.
+
 Linux CVE exposure uses strict vendor matching. Ubuntu rows are emitted when
 the machine release and binary package match a Canonical USN package record.
 Exact target-version matches remain high confidence. When Update Manager

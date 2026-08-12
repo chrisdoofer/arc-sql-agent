@@ -32,6 +32,7 @@ cd arc-sql-estate-analysis
 | [Prerequisites](docs/prerequisites.md) | Required software, RBAC permissions, Arc requirements |
 | [Workflow Flowchart](docs/workflow-flowchart.md) | Step-by-step execution flow with decision points |
 | [Data Transparency](docs/data-transparency.md) | Exactly what data is collected, where it goes, and what is NOT accessed |
+| [Power BI Fabric refresh setup](powerbi/FABRIC-REFRESH-SETUP.md) | Post-publish cloud connection, privacy, gateway, and scheduled-refresh configuration |
 | [Security exposure pipeline](.github/skills/arc-sql-estate-analysis/references/security-exposure.md) | Azure Update Manager + external CVE intelligence design (assessment-only) |
 | [Example Prompts](docs/example-prompts.md) | Sample prompts for different analysis scenarios |
 
