@@ -23,10 +23,11 @@ remain consistent:
   evidence-store, audit-domain, and planned-visual contract. It does not show
   fabricated DMV findings before a customer-owned data source is configured.
 - `Licensing Position` - an edition-matched comparison of owned SA cores and
-  Azure migration-assessment target cores. It uses the assessment's explicit
-  SQL PAYG licence component and optional customer-specific annualized
-  License+SA pricing to identify the cheaper treatment for uncovered target
-  cores without duplicating the server inventory.
+  Azure migration-assessment target cores for both a PaaS-first path and a SQL
+  VM-only path. It uses each scenario's explicit assessment SQL PAYG licence
+  component and optional customer-specific annualized License+SA pricing to
+  identify the cheaper treatment for uncovered target cores without
+  duplicating the server inventory.
 Detailed migration assessment results remain on the existing `ESU Forecast`
 report page.
 

@@ -82,6 +82,10 @@ $esuView = $model.model.tables | Where-Object name -eq 'view_esu'
 if ('service_type' -notin @($esuView.columns.name)) {
     throw 'The ESU forecast does not expose service_type for Engine-only target-core reconciliation.'
 }
+
+if ('dim_licensing_edition' -notin @($model.model.tables.name)) {
+    throw 'The stable Standard/Enterprise licensing chart axis is missing.'
+}
 foreach ($column in @(
     'mi_sql_license_cost',
     'db_sql_license_cost',
@@ -115,7 +119,20 @@ foreach ($measure in @(
     'kpi_license_sa_gap_option_monthly',
     'kpi_licensing_option_saving_monthly',
     'kpi_cheaper_licensing_option',
-    'licensing_cost_assumption_text'
+    'licensing_cost_assumption_text',
+    'kpi_paas_target_ahb_required_cores',
+    'kpi_vm_target_ahb_required_cores',
+    'kpi_paas_target_ahb_core_gap',
+    'kpi_vm_target_ahb_core_gap',
+    'kpi_paas_payg_gap_option_monthly',
+    'kpi_vm_payg_gap_option_monthly',
+    'kpi_paas_license_sa_gap_option_monthly',
+    'kpi_vm_license_sa_gap_option_monthly',
+    'kpi_paas_cheaper_licensing_option',
+    'kpi_vm_cheaper_licensing_option',
+    'licensing_scenario_assumption_text',
+    'kpi_paas_target_cores_by_edition',
+    'kpi_vm_target_cores_by_edition'
 )) {
     if ($measure -notin $measureNames) {
         throw "Missing licensing measure '$measure'."
@@ -174,6 +191,24 @@ if ($paygForGap -ne 800 -or $licenseSaForGap -ne 1100) {
     throw 'PAYG versus annualized License+SA shortfall comparison failed.'
 }
 
+$scenarioFixture = @(
+    [pscustomobject]@{ Edition = 'Enterprise'; LogicalCores = 2; MiReady = $true; MiCores = 4; VmReady = $true; VmCores = 2 },
+    [pscustomobject]@{ Edition = 'Enterprise'; LogicalCores = 2; MiReady = $false; MiCores = $null; VmReady = $true; VmCores = 2 },
+    [pscustomobject]@{ Edition = 'Enterprise'; LogicalCores = 4; MiReady = $false; MiCores = $null; VmReady = $true; VmCores = 4 }
+)
+$paasScenarioCores = ($scenarioFixture | ForEach-Object {
+    if ($_.MiReady) { $_.MiCores }
+    elseif ($_.VmReady) { $_.VmCores }
+    else { [Math]::Max($_.LogicalCores, 2) }
+} | Measure-Object -Sum).Sum
+$vmScenarioCores = ($scenarioFixture | ForEach-Object {
+    if ($_.VmReady) { $_.VmCores }
+    else { [Math]::Max($_.LogicalCores, 2) }
+} | Measure-Object -Sum).Sum
+if ($paasScenarioCores -ne 10 -or $vmScenarioCores -ne 8) {
+    throw 'PaaS-first and SQL VM-only target-core scenarios were not calculated independently.'
+}
+
 $additionalSsis = $currentFixture + [pscustomobject]@{
     ServiceType = 'SSIS'
     Edition = 'Enterprise'
@@ -195,11 +230,14 @@ if ($layoutBuilder.Contains('enhanceEsuForecastPage')) {
 }
 foreach ($measure in @(
     'kpi_owned_sa_cores',
-    'kpi_target_ahb_required_cores',
-    'kpi_target_ahb_core_gap',
-    'kpi_payg_gap_option_monthly',
-    'kpi_license_sa_gap_option_monthly',
-    'kpi_cheaper_licensing_option'
+    'kpi_paas_target_ahb_required_cores',
+    'kpi_vm_target_ahb_required_cores',
+    'kpi_paas_target_ahb_core_gap',
+    'kpi_vm_target_ahb_core_gap',
+    'kpi_paas_payg_gap_option_monthly',
+    'kpi_vm_payg_gap_option_monthly',
+    'kpi_paas_cheaper_licensing_option',
+    'kpi_vm_cheaper_licensing_option'
 )) {
     if (-not $layoutBuilder.Contains($measure)) {
         throw "The Licensing Position layout is missing '$measure'."
@@ -209,4 +247,4 @@ if (-not $layoutBuilder.Contains('"view_sql_instances.billing_mode"')) {
     throw 'The existing SQL licensing visuals are not rebound to billing mode.'
 }
 
-Write-Host 'PASS: the dedicated licensing decision page reconciles edition-matched SA cores and compares assessment PAYG with optional License+SA pricing.'
+Write-Host 'PASS: the dedicated licensing page compares PaaS-first and SQL VM-only target cores, gaps, PAYG, and optional License+SA pricing.'

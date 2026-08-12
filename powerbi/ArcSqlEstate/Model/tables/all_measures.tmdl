@@ -1615,6 +1615,423 @@ table all_measures
 		displayFolder: Licensing
 		lineageTag: c1ae0f3e-01da-4b4d-b7b5-55a9b2f1aee0
 
+	/// Standard Database Engine cores in the PaaS-first scenario: SQL DB, then SQL MI, then SQL VM fallback.
+	measure kpi_paas_target_standard_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			        ),
+			        VAR _dbReady = view_esu[db_status] = "Ready" && NOT ISBLANK ( view_esu[db_target_cores] )
+			        VAR _miReady = view_esu[mi_status] = "Ready" && NOT ISBLANK ( view_esu[mi_target_cores] )
+			        VAR _vmReady = view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_target_cores] )
+			        RETURN
+			            SWITCH (
+			                TRUE (),
+			                _dbReady, view_esu[db_target_cores],
+			                _miReady, view_esu[mi_target_cores],
+			                _vmReady, view_esu[vm_target_cores],
+			                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			            )
+			    ),
+			    0
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 25719a6c-d408-447f-aae8-346eb8097737
+
+	/// Enterprise Database Engine cores in the PaaS-first scenario: SQL DB, then SQL MI, then SQL VM fallback.
+	measure kpi_paas_target_enterprise_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			        ),
+			        VAR _dbReady = view_esu[db_status] = "Ready" && NOT ISBLANK ( view_esu[db_target_cores] )
+			        VAR _miReady = view_esu[mi_status] = "Ready" && NOT ISBLANK ( view_esu[mi_target_cores] )
+			        VAR _vmReady = view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_target_cores] )
+			        RETURN
+			            SWITCH (
+			                TRUE (),
+			                _dbReady, view_esu[db_target_cores],
+			                _miReady, view_esu[mi_target_cores],
+			                _vmReady, view_esu[vm_target_cores],
+			                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			            )
+			    ),
+			    0
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 1d050f77-218c-41cb-9759-8cc488ed54c4
+
+	/// Total edition-matched Database Engine cores in the PaaS-first target scenario.
+	measure kpi_paas_target_ahb_required_cores = [kpi_paas_target_standard_ahb_required_cores] + [kpi_paas_target_enterprise_ahb_required_cores]
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 2c04e3a2-597a-43bd-944b-e91d93ec52f8
+
+	/// Standard Database Engine cores in the SQL VM-only target scenario.
+	measure kpi_vm_target_standard_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			        ),
+			        IF (
+			            view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_target_cores] ),
+			            view_esu[vm_target_cores],
+			            MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			        )
+			    ),
+			    0
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 1681c4f1-f91d-4f99-afb4-85a075b78ee1
+
+	/// Enterprise Database Engine cores in the SQL VM-only target scenario.
+	measure kpi_vm_target_enterprise_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			        ),
+			        IF (
+			            view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_target_cores] ),
+			            view_esu[vm_target_cores],
+			            MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			        )
+			    ),
+			    0
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 2f9b9047-b84c-4328-9bcf-50b735973b20
+
+	/// Total edition-matched Database Engine cores in the SQL VM-only target scenario.
+	measure kpi_vm_target_ahb_required_cores = [kpi_vm_target_standard_ahb_required_cores] + [kpi_vm_target_enterprise_ahb_required_cores]
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 4b24e298-3338-413b-a764-3f35d2763c42
+
+	/// PaaS-first target cores that exceed edition-matched owned Software Assurance.
+	measure kpi_paas_target_ahb_core_gap =
+			MAX ( 0, [kpi_paas_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )
+			    + MAX ( 0, [kpi_paas_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: a2a0942c-602d-453f-85e9-d29f87079dc9
+
+	/// SQL VM-only target cores that exceed edition-matched owned Software Assurance.
+	measure kpi_vm_target_ahb_core_gap =
+			MAX ( 0, [kpi_vm_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )
+			    + MAX ( 0, [kpi_vm_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 43c185e4-e39d-4f4a-8f45-991e47e14f16
+
+	/// Absolute target-core difference between the PaaS-first and SQL VM-only scenarios.
+	measure kpi_target_scenario_core_delta = ABS ( [kpi_paas_target_ahb_required_cores] - [kpi_vm_target_ahb_required_cores] )
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 3a0afdf8-f0cb-48b7-bd66-2ccaabdc0eb8
+
+	/// PaaS-first target cores resolved against the stable Standard/Enterprise chart axis.
+	measure kpi_paas_target_cores_by_edition =
+			SWITCH (
+			    SELECTEDVALUE ( dim_licensing_edition[edition] ),
+			    "Standard", [kpi_paas_target_standard_ahb_required_cores],
+			    "Enterprise", [kpi_paas_target_enterprise_ahb_required_cores]
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: 3f59c83d-31cd-4ad2-b157-163888ba2d10
+
+	/// SQL VM-only target cores resolved against the stable Standard/Enterprise chart axis.
+	measure kpi_vm_target_cores_by_edition =
+			SWITCH (
+			    SELECTEDVALUE ( dim_licensing_edition[edition] ),
+			    "Standard", [kpi_vm_target_standard_ahb_required_cores],
+			    "Enterprise", [kpi_vm_target_enterprise_ahb_required_cores]
+			)
+		formatString: #,##0
+		displayFolder: Licensing\Scenarios
+		lineageTag: c31a68bf-5fe1-443b-91b1-3189185e66f3
+
+	/// Monthly assessed AHB infrastructure baseline for the PaaS-first scenario.
+	measure kpi_paas_ahb_baseline_cost_monthly =
+			SUMX (
+			    view_esu,
+			    VAR _dbReady = view_esu[db_status] = "Ready" && NOT ISBLANK ( view_esu[db_total_cost] )
+			    VAR _miReady = view_esu[mi_status] = "Ready" && NOT ISBLANK ( view_esu[mi_total_cost] )
+			    VAR _vmReady = view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_total_cost] )
+			    VAR _path =
+			        SWITCH ( TRUE (), _dbReady, "SQL DB", _miReady, "SQL MI", _vmReady, "VM", "VM*" )
+			    VAR _sqlType = SELECTEDVALUE ( dim_sql_savings_plan[type], "None - Pay As You Go" )
+			    VAR _serverType = SELECTEDVALUE ( dim_server_savings_plan[type], "None - Pay As You Go" )
+			    VAR _sqlDiscount =
+			        CALCULATE ( MAX ( dim_sql_savings_plan[discount] ), TREATAS ( { _sqlType }, dim_sql_savings_plan[type] ) )
+			    VAR _serverDiscount =
+			        CALCULATE ( MAX ( dim_server_savings_plan[discount] ), TREATAS ( { _serverType }, dim_server_savings_plan[type] ) )
+			    VAR _cores = MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			    VAR _compute =
+			        SWITCH (
+			            _path,
+			            "SQL DB", COALESCE ( view_esu[db_compute_cost], 0 ),
+			            "SQL MI", COALESCE ( view_esu[mi_compute_cost], 0 ),
+			            "VM", COALESCE ( view_esu[vm_compute_cost], 0 ),
+			            IF ( _cores > 2, 47.5 * _cores, 47.5 )
+			        )
+			    VAR _storage =
+			        SWITCH (
+			            _path,
+			            "SQL DB", COALESCE ( view_esu[db_storage_cost], 0 ),
+			            "SQL MI", COALESCE ( view_esu[mi_storage_cost], 0 ),
+			            "VM", COALESCE ( view_esu[vm_storage_cost], 0 ),
+			            25
+			        )
+			    VAR _discount = IF ( _path IN { "SQL DB", "SQL MI" }, _sqlDiscount, _serverDiscount )
+			    RETURN _compute * COALESCE ( _discount, 1 ) + _storage
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: b7947bf2-f12c-4a59-9d53-71454ba0713c
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly assessed AHB infrastructure baseline for the SQL VM-only scenario.
+	measure kpi_vm_ahb_baseline_cost_monthly =
+			SUMX (
+			    view_esu,
+			    VAR _vmReady = view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_total_cost] )
+			    VAR _serverType = SELECTEDVALUE ( dim_server_savings_plan[type], "None - Pay As You Go" )
+			    VAR _serverDiscount =
+			        CALCULATE ( MAX ( dim_server_savings_plan[discount] ), TREATAS ( { _serverType }, dim_server_savings_plan[type] ) )
+			    VAR _cores = MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			    VAR _compute = IF ( _vmReady, COALESCE ( view_esu[vm_compute_cost], 0 ), IF ( _cores > 2, 47.5 * _cores, 47.5 ) )
+			    VAR _storage = IF ( _vmReady, COALESCE ( view_esu[vm_storage_cost], 0 ), 25 )
+			    RETURN _compute * COALESCE ( _serverDiscount, 1 ) + _storage
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: a83374ec-e2f5-4c5b-8566-b488f8ebcb01
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence component for the PaaS-first scenario.
+	measure kpi_paas_sql_payg_license_cost_monthly =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && (
+			                    CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			                        || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			                )
+			        ),
+			        VAR _dbReady = view_esu[db_status] = "Ready" && NOT ISBLANK ( view_esu[db_sql_license_cost] )
+			        VAR _miReady = view_esu[mi_status] = "Ready" && NOT ISBLANK ( view_esu[mi_sql_license_cost] )
+			        VAR _vmReady = view_esu[vm_status] = "Ready" && NOT ISBLANK ( view_esu[vm_sql_license_cost] )
+			        RETURN SWITCH ( TRUE (), _dbReady, view_esu[db_sql_license_cost], _miReady, view_esu[mi_sql_license_cost], _vmReady, view_esu[vm_sql_license_cost] )
+			    ),
+			    0
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 1295fab8-f5cd-41ad-8a30-fc05701d043f
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence component for the SQL VM-only scenario.
+	measure kpi_vm_sql_payg_license_cost_monthly =
+			COALESCE (
+			    CALCULATE (
+			        SUM ( view_esu[vm_sql_license_cost] ),
+			        KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine" ),
+			        KEEPFILTERS ( view_esu[vm_status] = "Ready" ),
+			        KEEPFILTERS (
+			            CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			                || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			        )
+			    ),
+			    0
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: f50f918a-3fea-49d7-ad81-6df5c543f6a6
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence cost for the uncovered PaaS-first target-core share.
+	measure kpi_paas_gap_sql_payg_license_cost_monthly =
+			VAR _standardTarget = [kpi_paas_target_standard_ahb_required_cores]
+			VAR _enterpriseTarget = [kpi_paas_target_enterprise_ahb_required_cores]
+			VAR _standardGap = MAX ( 0, _standardTarget - [kpi_owned_standard_sa_cores] )
+			VAR _enterpriseGap = MAX ( 0, _enterpriseTarget - [kpi_owned_enterprise_sa_cores] )
+			VAR _standardCost =
+			    CALCULATE (
+			        [kpi_paas_sql_payg_license_cost_monthly],
+			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" ) )
+			    )
+			VAR _enterpriseCost =
+			    CALCULATE (
+			        [kpi_paas_sql_payg_license_cost_monthly],
+			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" ) )
+			    )
+			RETURN
+			    _standardCost * DIVIDE ( _standardGap, _standardTarget, 0 )
+			        + _enterpriseCost * DIVIDE ( _enterpriseGap, _enterpriseTarget, 0 )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 5cfb88ac-9a93-4afd-8ea0-914aa0fb138a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence cost for the uncovered SQL VM-only target-core share.
+	measure kpi_vm_gap_sql_payg_license_cost_monthly =
+			VAR _standardTarget = [kpi_vm_target_standard_ahb_required_cores]
+			VAR _enterpriseTarget = [kpi_vm_target_enterprise_ahb_required_cores]
+			VAR _standardGap = MAX ( 0, _standardTarget - [kpi_owned_standard_sa_cores] )
+			VAR _enterpriseGap = MAX ( 0, _enterpriseTarget - [kpi_owned_enterprise_sa_cores] )
+			VAR _standardCost =
+			    CALCULATE (
+			        [kpi_vm_sql_payg_license_cost_monthly],
+			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" ) )
+			    )
+			VAR _enterpriseCost =
+			    CALCULATE (
+			        [kpi_vm_sql_payg_license_cost_monthly],
+			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" ) )
+			    )
+			RETURN
+			    _standardCost * DIVIDE ( _standardGap, _standardTarget, 0 )
+			        + _enterpriseCost * DIVIDE ( _enterpriseGap, _enterpriseTarget, 0 )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 3bc7a9a7-61f3-4701-923c-1bdb150c00d3
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly equivalent License+SA acquisition cost for the PaaS-first target-core gap.
+	measure kpi_paas_gap_license_sa_cost_monthly =
+			VAR _standardGap = MAX ( 0, [kpi_paas_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )
+			VAR _enterpriseGap = MAX ( 0, [kpi_paas_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )
+			VAR _standardRate = [kpi_standard_license_sa_annual_cost_per_core]
+			VAR _enterpriseRate = [kpi_enterprise_license_sa_annual_cost_per_core]
+			RETURN
+			    IF (
+			        ( _standardGap > 0 && ISBLANK ( _standardRate ) ) || ( _enterpriseGap > 0 && ISBLANK ( _enterpriseRate ) ),
+			        BLANK (),
+			        DIVIDE ( _standardGap * COALESCE ( _standardRate, 0 ) + _enterpriseGap * COALESCE ( _enterpriseRate, 0 ), 12 )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 44cdf1c7-c07a-4cd8-b6cd-0c3fcd502828
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly equivalent License+SA acquisition cost for the SQL VM-only target-core gap.
+	measure kpi_vm_gap_license_sa_cost_monthly =
+			VAR _standardGap = MAX ( 0, [kpi_vm_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )
+			VAR _enterpriseGap = MAX ( 0, [kpi_vm_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )
+			VAR _standardRate = [kpi_standard_license_sa_annual_cost_per_core]
+			VAR _enterpriseRate = [kpi_enterprise_license_sa_annual_cost_per_core]
+			RETURN
+			    IF (
+			        ( _standardGap > 0 && ISBLANK ( _standardRate ) ) || ( _enterpriseGap > 0 && ISBLANK ( _enterpriseRate ) ),
+			        BLANK (),
+			        DIVIDE ( _standardGap * COALESCE ( _standardRate, 0 ) + _enterpriseGap * COALESCE ( _enterpriseRate, 0 ), 12 )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 25ef28d5-5d00-43d5-99db-61ef3abe6d69
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly PaaS-first run cost when uncovered target cores use SQL PAYG.
+	measure kpi_paas_payg_gap_option_monthly = [kpi_paas_ahb_baseline_cost_monthly] + [kpi_paas_gap_sql_payg_license_cost_monthly]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 0a299aaa-a0fb-453f-8d76-b9a815214b36
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly PaaS-first run cost when new License+SA closes the target-core gap.
+	measure kpi_paas_license_sa_gap_option_monthly =
+			VAR _purchase = [kpi_paas_gap_license_sa_cost_monthly]
+			RETURN IF ( ISBLANK ( _purchase ), BLANK (), [kpi_paas_ahb_baseline_cost_monthly] + _purchase )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: d8798f39-3dcc-48dd-8529-ae88251920da
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL VM-only run cost when uncovered target cores use SQL PAYG.
+	measure kpi_vm_payg_gap_option_monthly = [kpi_vm_ahb_baseline_cost_monthly] + [kpi_vm_gap_sql_payg_license_cost_monthly]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: ad52ca41-0c9d-436f-9d1d-bce183f123fd
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL VM-only run cost when new License+SA closes the target-core gap.
+	measure kpi_vm_license_sa_gap_option_monthly =
+			VAR _purchase = [kpi_vm_gap_license_sa_cost_monthly]
+			RETURN IF ( ISBLANK ( _purchase ), BLANK (), [kpi_vm_ahb_baseline_cost_monthly] + _purchase )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing\Scenarios
+		lineageTag: 8c917d26-8886-4828-b73c-bfc65d14bba3
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Cheaper licensing treatment for the uncovered PaaS-first target cores.
+	measure kpi_paas_cheaper_licensing_option =
+			VAR _payg = [kpi_paas_payg_gap_option_monthly]
+			VAR _licenseSa = [kpi_paas_license_sa_gap_option_monthly]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        [kpi_paas_target_ahb_core_gap] = 0, "PaaS-first: existing SA covers the target",
+			        ISBLANK ( _licenseSa ), "PaaS-first: enter License+SA prices",
+			        _payg < _licenseSa, "PaaS-first: SQL PAYG is cheaper",
+			        _licenseSa < _payg, "PaaS-first: License + SA is cheaper",
+			        "PaaS-first: options cost the same"
+			    )
+		displayFolder: Licensing\Scenarios
+		lineageTag: 6f863257-a653-4383-a54e-20d7bf6838a3
+
+	/// Cheaper licensing treatment for the uncovered SQL VM-only target cores.
+	measure kpi_vm_cheaper_licensing_option =
+			VAR _payg = [kpi_vm_payg_gap_option_monthly]
+			VAR _licenseSa = [kpi_vm_license_sa_gap_option_monthly]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        [kpi_vm_target_ahb_core_gap] = 0, "SQL VM-only: existing SA covers the target",
+			        ISBLANK ( _licenseSa ), "SQL VM-only: enter License+SA prices",
+			        _payg < _licenseSa, "SQL VM-only: SQL PAYG is cheaper",
+			        _licenseSa < _payg, "SQL VM-only: License + SA is cheaper",
+			        "SQL VM-only: options cost the same"
+			    )
+		displayFolder: Licensing\Scenarios
+		lineageTag: ef555f65-d20c-4923-819d-804b8f5c9163
+
+	/// Pricing scope disclosure for the side-by-side PaaS-first and SQL VM-only comparison.
+	measure licensing_scenario_assumption_text =
+			"PaaS-first: DB > MI > VM fallback. VM-only: VM for all. PAYG is assessment-based; License+SA uses customer core prices."
+		displayFolder: Licensing\Scenarios
+		lineageTag: 2762259c-36e5-477f-873c-14e6ef4ccb93
+
 	partition all_measures = m
 		mode: import
 		source =

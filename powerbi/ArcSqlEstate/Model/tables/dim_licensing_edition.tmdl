@@ -1,0 +1,22 @@
+/// Stable edition axis for side-by-side licensing scenario visuals.
+table dim_licensing_edition
+	isHidden
+	lineageTag: 587836af-56b8-44cf-9725-2329258608f0
+
+	column edition
+		dataType: string
+		lineageTag: 72ee0d27-f3a4-410c-8821-ec1ba2250c72
+		summarizeBy: none
+		sourceColumn: edition
+
+	partition dim_licensing_edition = calculated
+		mode: import
+		source =
+				DATATABLE (
+				    "edition", STRING,
+				    {
+				        { "Standard" },
+				        { "Enterprise" }
+				    }
+				)
+

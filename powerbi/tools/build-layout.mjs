@@ -1500,24 +1500,24 @@ function buildLicensingPage() {
     kpi_azure_sql_instance_count: "kpi_owned_sa_cores",
     "all_measures.kpi_azure_sql_instance_count":
       "all_measures.kpi_owned_sa_cores",
-    kpi_azure_sql_cores: "kpi_target_ahb_required_cores",
+    kpi_azure_sql_cores: "kpi_paas_target_ahb_required_cores",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_target_ahb_required_cores",
-    kpi_azure_sql_memory: "kpi_target_ahb_core_gap",
+      "all_measures.kpi_paas_target_ahb_required_cores",
+    kpi_azure_sql_memory: "kpi_vm_target_ahb_required_cores",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_target_ahb_core_gap",
+      "all_measures.kpi_vm_target_ahb_required_cores",
   });
   page.visualContainers.push(positionCard);
   setMeasureMetadata(
     page,
     70000,
-    ["Owned SA cores", "Target AHB cores", "Target core gap"],
+    ["Owned SA cores", "PaaS-first target", "SQL VM-only target"],
     ["#,##0", "#,##0", "#,##0"],
   );
   compactKpiCard(page, 70000, "all_measures.kpi_owned_sa_cores");
 
-  const costCard = structuredClone(templates.card);
-  setPosition(costCard, {
+  const gapCard = structuredClone(templates.card);
+  setPosition(gapCard, {
     x: 630,
     y: 60,
     z: 71000,
@@ -1525,36 +1525,36 @@ function buildLicensingPage() {
     height: 104,
     tabOrder: 71000,
   });
-  stampVisualName(costCard, page, 71000);
-  replaceVisual(costCard, {
-    kpi_azure_sql_instance_count: "kpi_payg_gap_option_monthly",
+  stampVisualName(gapCard, page, 71000);
+  replaceVisual(gapCard, {
+    kpi_azure_sql_instance_count: "kpi_paas_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_payg_gap_option_monthly",
-    kpi_azure_sql_cores: "kpi_license_sa_gap_option_monthly",
+      "all_measures.kpi_paas_target_ahb_core_gap",
+    kpi_azure_sql_cores: "kpi_vm_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_license_sa_gap_option_monthly",
-    kpi_azure_sql_memory: "kpi_licensing_option_saving_monthly",
+      "all_measures.kpi_vm_target_ahb_core_gap",
+    kpi_azure_sql_memory: "kpi_target_scenario_core_delta",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_licensing_option_saving_monthly",
+      "all_measures.kpi_target_scenario_core_delta",
   });
-  page.visualContainers.push(costCard);
+  page.visualContainers.push(gapCard);
   setMeasureMetadata(
     page,
     71000,
-    ["PAYG for gap / month", "Buy License+SA / month", "Cheaper by / month"],
-    ["$#,##0", "$#,##0", "$#,##0"],
+    ["PaaS-first gap", "SQL VM-only gap", "Target core difference"],
+    ["#,##0", "#,##0", "#,##0"],
   );
-  compactKpiCard(page, 71000, "all_measures.kpi_payg_gap_option_monthly");
+  compactKpiCard(page, 71000, "all_measures.kpi_paas_target_ahb_core_gap");
 
   addPanel(
     page,
     templates,
     72000,
     { x: 16, y: 174, z: 72000, width: 390, height: 208 },
-    "Standard edition position",
+    "PaaS-first licensing scenario",
   );
-  const standardCard = structuredClone(templates.card);
-  setPosition(standardCard, {
+  const paasCard = structuredClone(templates.card);
+  setPosition(paasCard, {
     x: 28,
     y: 206,
     z: 72002,
@@ -1562,29 +1562,29 @@ function buildLicensingPage() {
     height: 164,
     tabOrder: 72002,
   });
-  stampVisualName(standardCard, page, 72002);
-  replaceVisual(standardCard, {
-    kpi_azure_sql_instance_count: "kpi_owned_standard_sa_cores",
+  stampVisualName(paasCard, page, 72002);
+  replaceVisual(paasCard, {
+    kpi_azure_sql_instance_count: "kpi_paas_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_owned_standard_sa_cores",
-    kpi_azure_sql_cores: "kpi_target_standard_ahb_required_cores",
+      "all_measures.kpi_paas_target_ahb_core_gap",
+    kpi_azure_sql_cores: "kpi_paas_payg_gap_option_monthly",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_target_standard_ahb_required_cores",
-    kpi_azure_sql_memory: "kpi_target_standard_ahb_core_gap",
+      "all_measures.kpi_paas_payg_gap_option_monthly",
+    kpi_azure_sql_memory: "kpi_paas_license_sa_gap_option_monthly",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_target_standard_ahb_core_gap",
+      "all_measures.kpi_paas_license_sa_gap_option_monthly",
   });
-  page.visualContainers.push(standardCard);
+  page.visualContainers.push(paasCard);
   setMeasureMetadata(
     page,
     72002,
-    ["Owned SA", "Target cores", "Gap"],
-    ["#,##0", "#,##0", "#,##0"],
+    ["Core gap", "PAYG for gap / month", "Buy License+SA / month"],
+    ["#,##0", "$#,##0", "$#,##0"],
   );
   compactKpiCard(
     page,
     72002,
-    "all_measures.kpi_owned_standard_sa_cores",
+    "all_measures.kpi_paas_target_ahb_core_gap",
   );
 
   addPanel(
@@ -1592,10 +1592,10 @@ function buildLicensingPage() {
     templates,
     73000,
     { x: 422, y: 174, z: 73000, width: 390, height: 208 },
-    "Enterprise edition position",
+    "SQL VM-only licensing scenario",
   );
-  const enterpriseCard = structuredClone(templates.card);
-  setPosition(enterpriseCard, {
+  const vmCard = structuredClone(templates.card);
+  setPosition(vmCard, {
     x: 434,
     y: 206,
     z: 73002,
@@ -1603,29 +1603,29 @@ function buildLicensingPage() {
     height: 164,
     tabOrder: 73002,
   });
-  stampVisualName(enterpriseCard, page, 73002);
-  replaceVisual(enterpriseCard, {
-    kpi_azure_sql_instance_count: "kpi_owned_enterprise_sa_cores",
+  stampVisualName(vmCard, page, 73002);
+  replaceVisual(vmCard, {
+    kpi_azure_sql_instance_count: "kpi_vm_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_owned_enterprise_sa_cores",
-    kpi_azure_sql_cores: "kpi_target_enterprise_ahb_required_cores",
+      "all_measures.kpi_vm_target_ahb_core_gap",
+    kpi_azure_sql_cores: "kpi_vm_payg_gap_option_monthly",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_target_enterprise_ahb_required_cores",
-    kpi_azure_sql_memory: "kpi_target_enterprise_ahb_core_gap",
+      "all_measures.kpi_vm_payg_gap_option_monthly",
+    kpi_azure_sql_memory: "kpi_vm_license_sa_gap_option_monthly",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_target_enterprise_ahb_core_gap",
+      "all_measures.kpi_vm_license_sa_gap_option_monthly",
   });
-  page.visualContainers.push(enterpriseCard);
+  page.visualContainers.push(vmCard);
   setMeasureMetadata(
     page,
     73002,
-    ["Owned SA", "Target cores", "Gap"],
-    ["#,##0", "#,##0", "#,##0"],
+    ["Core gap", "PAYG for gap / month", "Buy License+SA / month"],
+    ["#,##0", "$#,##0", "$#,##0"],
   );
   compactKpiCard(
     page,
     73002,
-    "all_measures.kpi_owned_enterprise_sa_cores",
+    "all_measures.kpi_vm_target_ahb_core_gap",
   );
 
   addPanel(
@@ -1641,15 +1641,15 @@ function buildLicensingPage() {
     y: 206,
     z: 74002,
     width: 384,
-    height: 70,
+    height: 48,
     tabOrder: 74002,
   });
   stampVisualName(decisionTable, page, 74002);
   bindMeasureTable(decisionTable, [
     {
       table: "all_measures",
-      measure: "kpi_cheaper_licensing_option",
-      label: "Recommendation",
+      measure: "kpi_paas_cheaper_licensing_option",
+      label: "PaaS-first recommendation",
     },
   ]);
   const decisionConfig = getConfig(decisionTable);
@@ -1664,18 +1664,18 @@ function buildLicensingPage() {
   const assumptionTable = structuredClone(templates.table);
   setPosition(assumptionTable, {
     x: 840,
-    y: 282,
+    y: 258,
     z: 74003,
     width: 384,
-    height: 88,
+    height: 48,
     tabOrder: 74003,
   });
   stampVisualName(assumptionTable, page, 74003);
   bindMeasureTable(assumptionTable, [
     {
       table: "all_measures",
-      measure: "licensing_cost_assumption_text",
-      label: "Pricing basis",
+      measure: "kpi_vm_cheaper_licensing_option",
+      label: "SQL VM-only recommendation",
     },
   ]);
   const assumptionConfig = getConfig(assumptionTable);
@@ -1687,12 +1687,38 @@ function buildLicensingPage() {
   assumptionTable.config = JSON.stringify(assumptionConfig);
   page.visualContainers.push(assumptionTable);
 
+  const basisTable = structuredClone(templates.table);
+  setPosition(basisTable, {
+    x: 840,
+    y: 310,
+    z: 74004,
+    width: 384,
+    height: 60,
+    tabOrder: 74004,
+  });
+  stampVisualName(basisTable, page, 74004);
+  bindMeasureTable(basisTable, [
+    {
+      table: "all_measures",
+      measure: "licensing_scenario_assumption_text",
+      label: "Scenario basis",
+    },
+  ]);
+  const basisConfig = getConfig(basisTable);
+  basisConfig.singleVisual.objects.values ??= [{ properties: {} }];
+  basisConfig.singleVisual.objects.values[0].properties ??= {};
+  basisConfig.singleVisual.objects.values[0].properties.wordWrap = {
+    expr: { Literal: { Value: "true" } },
+  };
+  basisTable.config = JSON.stringify(basisConfig);
+  page.visualContainers.push(basisTable);
+
   addPanel(
     page,
     templates,
     75000,
     { x: 16, y: 392, z: 75000, width: 593, height: 344 },
-    "Assessed Azure target cores by SQL edition",
+    "PaaS-first target cores by SQL edition",
   );
   const coreChart = structuredClone(templates.bar);
   setPosition(coreChart, {
@@ -1706,10 +1732,10 @@ function buildLicensingPage() {
   stampVisualName(coreChart, page, 75002);
   bindCategoryMeasure(
     coreChart,
-    "view_esu",
-    "sql_edition",
+    "dim_licensing_edition",
+    "edition",
     "SQL edition",
-    "kpi_target_ahb_required_cores",
+    "kpi_paas_target_cores_by_edition",
     "Target cores",
   );
   showBarMetrics(coreChart);
@@ -1720,7 +1746,7 @@ function buildLicensingPage() {
     templates,
     76000,
     { x: 625, y: 392, z: 76000, width: 611, height: 344 },
-    "Assessment SQL PAYG licence premium by SQL edition",
+    "SQL VM-only target cores by SQL edition",
   );
   const paygChart = structuredClone(templates.bar);
   setPosition(paygChart, {
@@ -1734,12 +1760,11 @@ function buildLicensingPage() {
   stampVisualName(paygChart, page, 76002);
   bindCategoryMeasure(
     paygChart,
-    "view_esu",
-    "sql_edition",
+    "dim_licensing_edition",
+    "edition",
     "SQL edition",
-    "kpi_target_sql_payg_license_cost_monthly",
-    "SQL PAYG / month",
-    "$#,##0",
+    "kpi_vm_target_cores_by_edition",
+    "Target cores",
   );
   showBarMetrics(paygChart);
   page.visualContainers.push(paygChart);

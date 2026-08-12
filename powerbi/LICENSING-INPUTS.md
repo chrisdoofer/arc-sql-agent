@@ -38,8 +38,12 @@ semantic model's **Settings > Parameters**, followed by a refresh.
 - **Target AHB core gap** compares the same owned SA position with the
   edition-matched target cores predicted by the Azure migration assessment.
 - The dedicated `Licensing Position` page is a decision page, not another
-  server inventory. It shows total, Standard, and Enterprise core positions,
-  the target-core shortfall, and a cost comparison for that shortfall.
+  server inventory. It compares two target scenarios:
+  - **PaaS-first** selects SQL Database when ready, then SQL Managed Instance,
+    then SQL VM as the fallback for each assessed workload.
+  - **SQL VM-only** uses the SQL VM recommendation for every assessed workload.
+  Each scenario shows target cores by edition, the edition-matched SA
+  shortfall, and PAYG versus License+SA treatment for that shortfall.
 - **PAYG for gap** uses the assessment's own
   `monthlyCost.sqlLicenseCost` value in proportion to uncovered target cores.
   This is the authoritative SQL PAYG licence component produced by the same
@@ -47,8 +51,10 @@ semantic model's **Settings > Parameters**, followed by a refresh.
 - **Buy License+SA for gap** uses the optional customer-entered annualized
   Standard and Enterprise per-core prices, divided by 12 for a monthly
   equivalent.
-- Both options include the same assessed AHB infrastructure baseline, so the
-  decision isolates the licensing treatment of cores not covered by owned SA.
+- Within each scenario, both licensing options include the same assessed AHB
+  infrastructure baseline, so the decision isolates the treatment of cores not
+  covered by owned SA. PaaS-first and SQL VM-only have separate infrastructure
+  baselines and are not assumed to cost the same.
 - Reservation or savings-plan selection affects the shared infrastructure
   baseline. It does not discount the assessment SQL licence component or the
   customer-entered License+SA price.
