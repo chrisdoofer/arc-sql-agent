@@ -23,6 +23,7 @@ function Compress-JsonFile([string] $Path) {
 }
 
 Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Read-ZipText([string] $PackagePath, [string] $EntryName, [Text.Encoding] $Encoding) {
     $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
@@ -44,6 +45,47 @@ function Read-ZipText([string] $PackagePath, [string] $EntryName, [Text.Encoding
     }
 }
 
+function Assert-ZipJsonEntry([string] $PackagePath, [string] $EntryName, [Text.Encoding] $Encoding) {
+    $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
+    try {
+        $entry = $archive.GetEntry($EntryName)
+        if ($null -eq $entry) {
+            throw "Package entry '$EntryName' was not found in $PackagePath"
+        }
+
+        $memory = [IO.MemoryStream]::new()
+        try {
+            $entryStream = $entry.Open()
+            try {
+                $entryStream.CopyTo($memory)
+            }
+            finally {
+                $entryStream.Dispose()
+            }
+            $bytes = $memory.ToArray()
+        }
+        finally {
+            $memory.Dispose()
+        }
+    }
+    finally {
+        $archive.Dispose()
+    }
+
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+        throw "Package entry '$EntryName' contains a UTF-16 BOM. Power BI template JSON entries must be UTF-16 LE without a BOM."
+    }
+
+    $json = $Encoding.GetString($bytes)
+    try {
+        $null = $json | ConvertFrom-Json
+    }
+    catch {
+        throw "Package entry '$EntryName' is not valid JSON: $($_.Exception.Message)"
+    }
+}
+
+$utf16LeNoBom = [Text.UnicodeEncoding]::new($false, $false, $true)
 $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ("arc-sql-pbit-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $tempRoot | Out-Null
 
@@ -54,12 +96,12 @@ try {
     $baselineLayout = Read-ZipText $BaselinePbitPath 'Report/Layout' ([Text.Encoding]::Unicode)
     $modelJson = Get-Content -Raw -Encoding utf8 $ModelBimPath
 
-    [IO.File]::WriteAllText($baselineLayoutPath, $baselineLayout, [Text.Encoding]::Unicode)
+    [IO.File]::WriteAllText($baselineLayoutPath, $baselineLayout, $utf16LeNoBom)
     & node (Join-Path $PSScriptRoot 'build-layout.mjs') $baselineLayoutPath $layoutPath $ProjectPath
     if ($LASTEXITCODE -ne 0) {
         throw "Layout generation failed with exit code $LASTEXITCODE"
     }
-    [IO.File]::WriteAllText($modelPath, $modelJson, [Text.Encoding]::Unicode)
+    [IO.File]::WriteAllText($modelPath, $modelJson, $utf16LeNoBom)
 
     Copy-Item $BaselinePbitPath $OutputPbitPath -Force
     $stream = [IO.File]::Open($OutputPbitPath, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite)
@@ -105,6 +147,9 @@ try {
     finally {
         $stream.Dispose()
     }
+
+    Assert-ZipJsonEntry $OutputPbitPath 'DataModelSchema' $utf16LeNoBom
+    Assert-ZipJsonEntry $OutputPbitPath 'Report/Layout' $utf16LeNoBom
 }
 finally {
     Remove-Item $tempRoot -Recurse -Force
