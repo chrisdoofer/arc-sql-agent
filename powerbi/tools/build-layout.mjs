@@ -21,6 +21,10 @@ const generatedPages = [
     name: "ab568abcf57d47f68c03",
     displayName: "DMV Audit",
   },
+  {
+    name: "f4b8a9c2d7e64130a904",
+    displayName: "Licensing Position",
+  },
 ];
 
 const layout = JSON.parse(
@@ -645,6 +649,7 @@ function bindCategoryMeasure(
   categoryLabel,
   measure,
   measureLabel,
+  measureFormat = "#,##0",
 ) {
   const config = getConfig(visual);
   const query = {
@@ -713,7 +718,7 @@ function bindCategoryMeasure(
     [`${table}.${category}`]: { displayName: categoryLabel },
     [`all_measures.${measure}`]: {
       displayName: measureLabel,
-      formatString: "#,##0",
+      formatString: measureFormat,
     },
   };
   visual.config = JSON.stringify(config);
@@ -739,7 +744,7 @@ function bindCategoryMeasure(
         Restatement: measureLabel,
         Name: `all_measures.${measure}`,
         Type: 1,
-        Format: "#,##0",
+        Format: measureFormat,
       },
     ],
   };
@@ -1468,106 +1473,278 @@ function buildDmvPage() {
   return finalizePage(page, generatedPages[2], 7);
 }
 
-function enhanceEsuForecastPage() {
-  const removedTabOrders = new Set([45000, 46000, 53000, 54000]);
-  esuSource.visualContainers = esuSource.visualContainers.filter(
-    (visual) => !removedTabOrders.has(getTabOrder(visual)),
-  );
+function buildLicensingPage() {
+  const page = structuredClone(sqlSource);
+  const templates = {
+    shape: structuredClone(findVisual(page, 1000)),
+    heading: structuredClone(findVisual(page, 7000)),
+    card: structuredClone(findVisual(page, 28000)),
+    bar: structuredClone(findVisual(page, 0)),
+    table: structuredClone(findVisual(page, 32000)),
+  };
+  clearPageToChrome(page, [5000, 20000, 23000]);
+  updateTextbox(page, 5000, "Arc Jumpstart | Licensing");
+  updateTextbox(page, 20000, "Licensing Position");
 
-  updateTextbox(esuSource, 47000, "Pricing and AHB position:");
-
-  setPosition(findVisual(esuSource, 49000), {
-    x: 983,
-    y: 600,
-    z: 49000,
-    width: 122,
-    height: 30,
-    tabOrder: 49000,
-  });
-  setPosition(findVisual(esuSource, 51000), {
-    x: 1088,
-    y: 593,
-    z: 51000,
-    width: 170,
-    height: 36,
-    tabOrder: 51000,
-  });
-  setPosition(findVisual(esuSource, 50000), {
-    x: 984,
-    y: 638,
-    z: 50000,
-    width: 121,
-    height: 30,
-    tabOrder: 50000,
-  });
-  setPosition(findVisual(esuSource, 48000), {
-    x: 1089,
-    y: 631,
-    z: 48000,
-    width: 170,
-    height: 36,
-    tabOrder: 48000,
-  });
-
-  const positionCard = structuredClone(findVisual(sqlSource, 28000));
+  const positionCard = structuredClone(templates.card);
   setPosition(positionCard, {
-    x: 990,
-    y: 526,
-    z: 55000,
-    width: 268,
-    height: 60,
-    tabOrder: 55000,
+    x: 16,
+    y: 60,
+    z: 70000,
+    width: 600,
+    height: 104,
+    tabOrder: 70000,
   });
-  stampVisualName(positionCard, esuSource, 55000);
+  stampVisualName(positionCard, page, 70000);
   replaceVisual(positionCard, {
     kpi_azure_sql_instance_count: "kpi_owned_sa_cores",
     "all_measures.kpi_azure_sql_instance_count":
       "all_measures.kpi_owned_sa_cores",
-    kpi_azure_sql_cores: "kpi_engine_licensable_cores",
+    kpi_azure_sql_cores: "kpi_target_ahb_required_cores",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_engine_licensable_cores",
-    kpi_azure_sql_memory: "kpi_target_ahb_required_cores",
-    "all_measures.kpi_azure_sql_memory":
       "all_measures.kpi_target_ahb_required_cores",
-  });
-  esuSource.visualContainers.push(positionCard);
-  setMeasureMetadata(
-    esuSource,
-    55000,
-    ["Owned SA", "Current Engine", "Target AHB"],
-    ["#,##0", "#,##0", "#,##0"],
-  );
-  compactKpiCard(esuSource, 55000, "all_measures.kpi_owned_sa_cores");
-
-  const gapCard = structuredClone(findVisual(sqlSource, 28000));
-  setPosition(gapCard, {
-    x: 990,
-    y: 673,
-    z: 56000,
-    width: 268,
-    height: 39,
-    tabOrder: 56000,
-  });
-  stampVisualName(gapCard, esuSource, 56000);
-  replaceVisual(gapCard, {
-    kpi_azure_sql_instance_count: "kpi_current_sa_core_gap",
-    "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_current_sa_core_gap",
-    kpi_azure_sql_cores: "kpi_target_ahb_core_gap",
-    "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_target_ahb_core_gap",
-    kpi_azure_sql_memory: "kpi_target_ahb_covered_cores",
+    kpi_azure_sql_memory: "kpi_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_target_ahb_covered_cores",
+      "all_measures.kpi_target_ahb_core_gap",
   });
-  esuSource.visualContainers.push(gapCard);
+  page.visualContainers.push(positionCard);
   setMeasureMetadata(
-    esuSource,
-    56000,
-    ["Current gap", "Target gap", "Target covered"],
+    page,
+    70000,
+    ["Owned SA cores", "Target AHB cores", "Target core gap"],
     ["#,##0", "#,##0", "#,##0"],
   );
-  compactKpiCard(esuSource, 56000, "all_measures.kpi_current_sa_core_gap");
+  compactKpiCard(page, 70000, "all_measures.kpi_owned_sa_cores");
+
+  const costCard = structuredClone(templates.card);
+  setPosition(costCard, {
+    x: 630,
+    y: 60,
+    z: 71000,
+    width: 606,
+    height: 104,
+    tabOrder: 71000,
+  });
+  stampVisualName(costCard, page, 71000);
+  replaceVisual(costCard, {
+    kpi_azure_sql_instance_count: "kpi_payg_gap_option_monthly",
+    "all_measures.kpi_azure_sql_instance_count":
+      "all_measures.kpi_payg_gap_option_monthly",
+    kpi_azure_sql_cores: "kpi_license_sa_gap_option_monthly",
+    "all_measures.kpi_azure_sql_cores":
+      "all_measures.kpi_license_sa_gap_option_monthly",
+    kpi_azure_sql_memory: "kpi_licensing_option_saving_monthly",
+    "all_measures.kpi_azure_sql_memory":
+      "all_measures.kpi_licensing_option_saving_monthly",
+  });
+  page.visualContainers.push(costCard);
+  setMeasureMetadata(
+    page,
+    71000,
+    ["PAYG for gap / month", "Buy License+SA / month", "Cheaper by / month"],
+    ["$#,##0", "$#,##0", "$#,##0"],
+  );
+  compactKpiCard(page, 71000, "all_measures.kpi_payg_gap_option_monthly");
+
+  addPanel(
+    page,
+    templates,
+    72000,
+    { x: 16, y: 174, z: 72000, width: 390, height: 208 },
+    "Standard edition position",
+  );
+  const standardCard = structuredClone(templates.card);
+  setPosition(standardCard, {
+    x: 28,
+    y: 206,
+    z: 72002,
+    width: 366,
+    height: 164,
+    tabOrder: 72002,
+  });
+  stampVisualName(standardCard, page, 72002);
+  replaceVisual(standardCard, {
+    kpi_azure_sql_instance_count: "kpi_owned_standard_sa_cores",
+    "all_measures.kpi_azure_sql_instance_count":
+      "all_measures.kpi_owned_standard_sa_cores",
+    kpi_azure_sql_cores: "kpi_target_standard_ahb_required_cores",
+    "all_measures.kpi_azure_sql_cores":
+      "all_measures.kpi_target_standard_ahb_required_cores",
+    kpi_azure_sql_memory: "kpi_target_standard_ahb_core_gap",
+    "all_measures.kpi_azure_sql_memory":
+      "all_measures.kpi_target_standard_ahb_core_gap",
+  });
+  page.visualContainers.push(standardCard);
+  setMeasureMetadata(
+    page,
+    72002,
+    ["Owned SA", "Target cores", "Gap"],
+    ["#,##0", "#,##0", "#,##0"],
+  );
+  compactKpiCard(
+    page,
+    72002,
+    "all_measures.kpi_owned_standard_sa_cores",
+  );
+
+  addPanel(
+    page,
+    templates,
+    73000,
+    { x: 422, y: 174, z: 73000, width: 390, height: 208 },
+    "Enterprise edition position",
+  );
+  const enterpriseCard = structuredClone(templates.card);
+  setPosition(enterpriseCard, {
+    x: 434,
+    y: 206,
+    z: 73002,
+    width: 366,
+    height: 164,
+    tabOrder: 73002,
+  });
+  stampVisualName(enterpriseCard, page, 73002);
+  replaceVisual(enterpriseCard, {
+    kpi_azure_sql_instance_count: "kpi_owned_enterprise_sa_cores",
+    "all_measures.kpi_azure_sql_instance_count":
+      "all_measures.kpi_owned_enterprise_sa_cores",
+    kpi_azure_sql_cores: "kpi_target_enterprise_ahb_required_cores",
+    "all_measures.kpi_azure_sql_cores":
+      "all_measures.kpi_target_enterprise_ahb_required_cores",
+    kpi_azure_sql_memory: "kpi_target_enterprise_ahb_core_gap",
+    "all_measures.kpi_azure_sql_memory":
+      "all_measures.kpi_target_enterprise_ahb_core_gap",
+  });
+  page.visualContainers.push(enterpriseCard);
+  setMeasureMetadata(
+    page,
+    73002,
+    ["Owned SA", "Target cores", "Gap"],
+    ["#,##0", "#,##0", "#,##0"],
+  );
+  compactKpiCard(
+    page,
+    73002,
+    "all_measures.kpi_owned_enterprise_sa_cores",
+  );
+
+  addPanel(
+    page,
+    templates,
+    74000,
+    { x: 828, y: 174, z: 74000, width: 408, height: 208 },
+    "Decision and assumptions",
+  );
+  const decisionTable = structuredClone(templates.table);
+  setPosition(decisionTable, {
+    x: 840,
+    y: 206,
+    z: 74002,
+    width: 384,
+    height: 70,
+    tabOrder: 74002,
+  });
+  stampVisualName(decisionTable, page, 74002);
+  bindMeasureTable(decisionTable, [
+    {
+      table: "all_measures",
+      measure: "kpi_cheaper_licensing_option",
+      label: "Recommendation",
+    },
+  ]);
+  const decisionConfig = getConfig(decisionTable);
+  decisionConfig.singleVisual.objects.values ??= [{ properties: {} }];
+  decisionConfig.singleVisual.objects.values[0].properties ??= {};
+  decisionConfig.singleVisual.objects.values[0].properties.wordWrap = {
+    expr: { Literal: { Value: "true" } },
+  };
+  decisionTable.config = JSON.stringify(decisionConfig);
+  page.visualContainers.push(decisionTable);
+
+  const assumptionTable = structuredClone(templates.table);
+  setPosition(assumptionTable, {
+    x: 840,
+    y: 282,
+    z: 74003,
+    width: 384,
+    height: 88,
+    tabOrder: 74003,
+  });
+  stampVisualName(assumptionTable, page, 74003);
+  bindMeasureTable(assumptionTable, [
+    {
+      table: "all_measures",
+      measure: "licensing_cost_assumption_text",
+      label: "Pricing basis",
+    },
+  ]);
+  const assumptionConfig = getConfig(assumptionTable);
+  assumptionConfig.singleVisual.objects.values ??= [{ properties: {} }];
+  assumptionConfig.singleVisual.objects.values[0].properties ??= {};
+  assumptionConfig.singleVisual.objects.values[0].properties.wordWrap = {
+    expr: { Literal: { Value: "true" } },
+  };
+  assumptionTable.config = JSON.stringify(assumptionConfig);
+  page.visualContainers.push(assumptionTable);
+
+  addPanel(
+    page,
+    templates,
+    75000,
+    { x: 16, y: 392, z: 75000, width: 593, height: 344 },
+    "Assessed Azure target cores by SQL edition",
+  );
+  const coreChart = structuredClone(templates.bar);
+  setPosition(coreChart, {
+    x: 28,
+    y: 424,
+    z: 75002,
+    width: 569,
+    height: 300,
+    tabOrder: 75002,
+  });
+  stampVisualName(coreChart, page, 75002);
+  bindCategoryMeasure(
+    coreChart,
+    "view_esu",
+    "sql_edition",
+    "SQL edition",
+    "kpi_target_ahb_required_cores",
+    "Target cores",
+  );
+  showBarMetrics(coreChart);
+  page.visualContainers.push(coreChart);
+
+  addPanel(
+    page,
+    templates,
+    76000,
+    { x: 625, y: 392, z: 76000, width: 611, height: 344 },
+    "Assessment SQL PAYG licence premium by SQL edition",
+  );
+  const paygChart = structuredClone(templates.bar);
+  setPosition(paygChart, {
+    x: 637,
+    y: 424,
+    z: 76002,
+    width: 587,
+    height: 300,
+    tabOrder: 76002,
+  });
+  stampVisualName(paygChart, page, 76002);
+  bindCategoryMeasure(
+    paygChart,
+    "view_esu",
+    "sql_edition",
+    "SQL edition",
+    "kpi_target_sql_payg_license_cost_monthly",
+    "SQL PAYG / month",
+    "$#,##0",
+  );
+  showBarMetrics(paygChart);
+  page.visualContainers.push(paygChart);
+
+  return finalizePage(page, generatedPages[3], 8);
 }
 
 updateVisual(sqlSource, 32000, {
@@ -1583,8 +1760,6 @@ updateVisual(sqlSource, 35000, {
   "License Type": "Billing Mode",
 });
 
-enhanceEsuForecastPage();
-
 layout.sections = layout.sections.filter(
   (section) =>
     !generatedPages.some(
@@ -1596,5 +1771,6 @@ layout.sections.push(
   buildSecurityPage(),
   buildBestPracticesPage(),
   buildDmvPage(),
+  buildLicensingPage(),
 );
 fs.writeFileSync(outputPath, JSON.stringify(layout), "utf16le");

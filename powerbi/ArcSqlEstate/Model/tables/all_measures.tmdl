@@ -238,7 +238,7 @@ table all_measures
 			
 			SUMX (
 			    view_esu,
-			    VAR mstatus = [azure_modernisation_status]
+			    VAR mstatus = [azure_modernisation_path]
 			    VAR months = SELECTEDVALUE ( dim_period_selector[months], 1 )
 			    VAR cores = MAX ( COALESCE ( [logical_cores], 0 ), 2 )
 			
@@ -865,7 +865,7 @@ table all_measures
 			CALCULATE(
 			    SUMX(
 			        view_esu,
-			        VAR mstatus = [azure_modernisation_status]
+			        VAR mstatus = [azure_modernisation_path]
 			        VAR cores = MAX(COALESCE([logical_cores], 0), 2)
 			
 			        VAR mi_compute = COALESCE([mi_compute_cost], 0)
@@ -1304,6 +1304,22 @@ table all_measures
 		displayFolder: Licensing
 		lineageTag: cbf92d6c-5d43-4ca9-813f-b9bdd1d06efc
 
+	/// Optional annualized customer price per Standard core for a new licence with Software Assurance.
+	measure kpi_standard_license_sa_annual_cost_per_core = MAX ( licensing_inputs[standard_license_sa_annual_cost_per_core] )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: f1d2f084-33c0-4973-b245-6c570e20727c
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Optional annualized customer price per Enterprise core for a new licence with Software Assurance.
+	measure kpi_enterprise_license_sa_annual_cost_per_core = MAX ( licensing_inputs[enterprise_license_sa_annual_cost_per_core] )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: 87d2651f-ad2d-41ea-a343-7dbd53718ddb
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
 	/// Total customer-owned SQL Server cores covered by active Software Assurance.
 	measure kpi_owned_sa_cores = COALESCE ( [kpi_owned_standard_sa_cores], 0 ) + COALESCE ( [kpi_owned_enterprise_sa_cores], 0 )
 		formatString: #,##0
@@ -1338,34 +1354,71 @@ table all_measures
 		displayFolder: Licensing
 		lineageTag: 622877fe-6478-4bba-9348-fbaa3313fd12
 
-	/// Database Engine cores predicted for the Azure target estate by the ESU forecast assessment.
-	measure kpi_target_ahb_required_cores =
-			CALCULATE (
-			    SUM ( view_esu[azure_run_cores] ),
-			    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine" ),
-			    KEEPFILTERS (
-			        CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
-			            || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
-			    )
+	/// Standard Database Engine cores predicted for the selected Azure target path by the migration assessment.
+	measure kpi_target_standard_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			        ),
+			        VAR _path = [azure_modernisation_path]
+			        RETURN
+			            COALESCE (
+			                SWITCH (
+			                    _path,
+			                    "SQL MI", view_esu[mi_target_cores],
+			                    "SQL DB", view_esu[db_target_cores],
+			                    "VM", view_esu[vm_target_cores]
+			                ),
+			                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			            )
+			    ),
+			    0
 			)
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 13c76e13-1933-43d5-b191-239066591c99
+
+	/// Enterprise Database Engine cores predicted for the selected Azure target path by the migration assessment.
+	measure kpi_target_enterprise_ahb_required_cores =
+			COALESCE (
+			    SUMX (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			        ),
+			        VAR _path = [azure_modernisation_path]
+			        RETURN
+			            COALESCE (
+			                SWITCH (
+			                    _path,
+			                    "SQL MI", view_esu[mi_target_cores],
+			                    "SQL DB", view_esu[db_target_cores],
+			                    "VM", view_esu[vm_target_cores]
+			                ),
+			                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )
+			            )
+			    ),
+			    0
+			)
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: c7037c8e-d8a3-4443-86c4-b44713a56ee0
+
+	/// Database Engine cores predicted for the selected Azure target path by the migration assessment.
+	measure kpi_target_ahb_required_cores =
+			[kpi_target_standard_ahb_required_cores] + [kpi_target_enterprise_ahb_required_cores]
 		formatString: #,##0
 		displayFolder: Licensing
 		lineageTag: 57b68e77-735e-4526-ac5a-f0a1f9eba93a
 
 	/// Forecast Azure target cores covered by edition-matched owned Software Assurance.
 	measure kpi_target_ahb_covered_cores =
-			VAR _enterpriseTargetCores =
-			    CALCULATE (
-			        SUM ( view_esu[azure_run_cores] ),
-			        KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine" ),
-			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" ) )
-			    )
-			VAR _standardTargetCores =
-			    CALCULATE (
-			        SUM ( view_esu[azure_run_cores] ),
-			        KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine" ),
-			        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" ) )
-			    )
+			VAR _enterpriseTargetCores = [kpi_target_enterprise_ahb_required_cores]
+			VAR _standardTargetCores = [kpi_target_standard_ahb_required_cores]
 			VAR _enterpriseCovered = MIN ( COALESCE ( [kpi_owned_enterprise_sa_cores], 0 ), COALESCE ( _enterpriseTargetCores, 0 ) )
 			VAR _standardCovered = MIN ( COALESCE ( [kpi_owned_standard_sa_cores], 0 ), COALESCE ( _standardTargetCores, 0 ) )
 			RETURN
@@ -1379,6 +1432,188 @@ table all_measures
 		formatString: #,##0
 		displayFolder: Licensing
 		lineageTag: 2f181053-68b0-44eb-af40-64441e9dc7fa
+
+	/// Standard target cores that exceed the edition-matched owned Software Assurance position.
+	measure kpi_target_standard_ahb_core_gap = MAX ( 0, [kpi_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 62cc1d61-9364-46ad-9a51-e31d7d4ad568
+
+	/// Enterprise target cores that exceed the edition-matched owned Software Assurance position.
+	measure kpi_target_enterprise_ahb_core_gap = MAX ( 0, [kpi_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 0315780f-9a7c-479e-9239-2e78e2683f60
+
+	/// Monthly SQL PAYG licence component reported by the migration assessment for the selected target path.
+	measure kpi_target_sql_payg_license_cost_monthly =
+			SUMX (
+			    FILTER (
+			        view_esu,
+			        LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			            && (
+			                CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			                    || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			            )
+			    ),
+			    SWITCH (
+			        [azure_modernisation_path],
+			        "SQL MI", view_esu[mi_sql_license_cost],
+			        "SQL DB", view_esu[db_sql_license_cost],
+			        "VM", view_esu[vm_sql_license_cost]
+			    )
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: 02958854-e048-491e-a576-d03311390fc4
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence component attributable to Standard target cores.
+	measure kpi_target_standard_sql_payg_license_cost_monthly =
+			CALCULATE (
+			    [kpi_target_sql_payg_license_cost_monthly],
+			    KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" ) )
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: faea0fa4-943b-4fa8-b25f-253a09bb5935
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence component attributable to Enterprise target cores.
+	measure kpi_target_enterprise_sql_payg_license_cost_monthly =
+			CALCULATE (
+			    [kpi_target_sql_payg_license_cost_monthly],
+			    KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" ) )
+			)
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: f49333f5-523d-42b8-a070-f5dccbc1131d
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly SQL PAYG licence cost for only the target-core shortfall not covered by owned Software Assurance.
+	measure kpi_gap_sql_payg_license_cost_monthly =
+			VAR _standardRatio =
+			    DIVIDE ( [kpi_target_standard_ahb_core_gap], [kpi_target_standard_ahb_required_cores], 0 )
+			VAR _enterpriseRatio =
+			    DIVIDE ( [kpi_target_enterprise_ahb_core_gap], [kpi_target_enterprise_ahb_required_cores], 0 )
+			RETURN
+			    [kpi_target_standard_sql_payg_license_cost_monthly] * _standardRatio
+			        + [kpi_target_enterprise_sql_payg_license_cost_monthly] * _enterpriseRatio
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: 7ab40948-5cb3-49db-b520-02df4a20d95a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Annualized monthly cost of acquiring enough new Standard and Enterprise License+SA cores to close the target gap.
+	measure kpi_gap_license_sa_cost_monthly =
+			VAR _standardGap = [kpi_target_standard_ahb_core_gap]
+			VAR _enterpriseGap = [kpi_target_enterprise_ahb_core_gap]
+			VAR _standardRate = [kpi_standard_license_sa_annual_cost_per_core]
+			VAR _enterpriseRate = [kpi_enterprise_license_sa_annual_cost_per_core]
+			VAR _missingRequiredRate =
+			    ( _standardGap > 0 && ISBLANK ( _standardRate ) )
+			        || ( _enterpriseGap > 0 && ISBLANK ( _enterpriseRate ) )
+			RETURN
+			    IF (
+			        _missingRequiredRate,
+			        BLANK (),
+			        DIVIDE (
+			            _standardGap * COALESCE ( _standardRate, 0 )
+			                + _enterpriseGap * COALESCE ( _enterpriseRate, 0 ),
+			            12
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: be2fba7a-83a8-4355-a645-70809b3c6463
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly migration run cost when existing SA covers matched cores and the remaining SQL licence requirement uses PAYG.
+	measure kpi_payg_gap_option_monthly = [azure_run_cost_monthly] + [kpi_gap_sql_payg_license_cost_monthly]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: 9818e158-c6ad-4893-a32d-cdcb2ca2bedf
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Monthly migration run cost when existing SA covers matched cores and new License+SA is acquired for the remaining core gap.
+	measure kpi_license_sa_gap_option_monthly =
+			VAR _purchaseCost = [kpi_gap_license_sa_cost_monthly]
+			RETURN IF ( ISBLANK ( _purchaseCost ), BLANK (), [azure_run_cost_monthly] + _purchaseCost )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: ad03d716-ffb4-4148-b415-811b9501f4af
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Absolute monthly difference between using SQL PAYG and acquiring License+SA for the uncovered target cores.
+	measure kpi_licensing_option_saving_monthly =
+			VAR _payg = [kpi_payg_gap_option_monthly]
+			VAR _licenseSa = [kpi_license_sa_gap_option_monthly]
+			RETURN IF ( ISBLANK ( _licenseSa ), BLANK (), ABS ( _payg - _licenseSa ) )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Licensing
+		lineageTag: 221761dd-d2a9-45a1-b903-4edc9c452355
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Decision label for the cheaper treatment of target cores not covered by existing Software Assurance.
+	measure kpi_cheaper_licensing_option =
+			VAR _gap = [kpi_target_ahb_core_gap]
+			VAR _payg = [kpi_payg_gap_option_monthly]
+			VAR _licenseSa = [kpi_license_sa_gap_option_monthly]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _gap = 0, "Existing SA covers the assessed target",
+			        ISBLANK ( _licenseSa ), "Enter License+SA annual core prices",
+			        _payg < _licenseSa, "SQL PAYG is cheaper for the gap",
+			        _licenseSa < _payg, "License + SA is cheaper for the gap",
+			        "Options have the same monthly equivalent cost"
+			    )
+		displayFolder: Licensing
+		lineageTag: 801f7305-8570-4b35-899d-ed364c4235c0
+
+	/// Pricing scope and data-quality disclosure for the licensing comparison.
+	measure licensing_cost_assumption_text =
+			VAR _gap = [kpi_target_ahb_core_gap]
+			VAR _missingAssessmentCost =
+			    COUNTROWS (
+			        FILTER (
+			            view_esu,
+			            LOWER ( TRIM ( COALESCE ( view_esu[service_type], "" ) ) ) = "engine"
+			                && (
+			                    CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "standard" )
+			                        || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], "" ) ), "enterprise" )
+			                )
+			                && ISBLANK (
+			                    SWITCH (
+			                        [azure_modernisation_path],
+			                        "SQL MI", view_esu[mi_sql_license_cost],
+			                        "SQL DB", view_esu[db_sql_license_cost],
+			                        "VM", view_esu[vm_sql_license_cost]
+			                    )
+			                )
+			        )
+			    )
+			VAR _missingRate =
+			    ( [kpi_target_standard_ahb_core_gap] > 0 && ISBLANK ( [kpi_standard_license_sa_annual_cost_per_core] ) )
+			        || ( [kpi_target_enterprise_ahb_core_gap] > 0 && ISBLANK ( [kpi_enterprise_license_sa_annual_cost_per_core] ) )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _gap = 0, "No target-core shortfall: the owned edition-matched SA position covers the assessed target.",
+			        _missingAssessmentCost > 0, "Some selected targets do not expose an assessment SQL licence cost. PAYG totals exclude those rows and must be treated as incomplete.",
+			        _missingRate, "PAYG uses the assessment's SQL licence component. Enter the customer's annualized License+SA cost per core to enable the purchase comparison.",
+			        "PAYG uses the assessment's SQL licence component. License+SA uses customer-entered annualized per-core pricing. Both options include the same assessed AHB infrastructure baseline."
+			    )
+		displayFolder: Licensing
+		lineageTag: c1ae0f3e-01da-4b4d-b7b5-55a9b2f1aee0
 
 	partition all_measures = m
 		mode: import

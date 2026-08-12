@@ -254,6 +254,29 @@ table ext_arc_sql_instances
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column mi_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: mi_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: mi_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
 	column mi_storage_cost
 		dataType: double
 		isHidden
@@ -311,6 +334,29 @@ table ext_arc_sql_instances
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column vm_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: vm_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: vm_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
 	column vm_storage_cost
 		dataType: double
 		isHidden
@@ -367,6 +413,29 @@ table ext_arc_sql_instances
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: db_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: db_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
 
 	column db_storage_cost
 		dataType: double
@@ -653,16 +722,22 @@ table ext_arc_sql_instances
 				            mi_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.numberOfServerBlockerIssues),
 				            mi_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.recommendationStatus),
 				            mi_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.computeCost),
+				            mi_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.sqlLicenseCost),
+				            mi_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.targetSku.computeSize),
 				            mi_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.storageCost),
 				            mi_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.totalCost),
 				            vm_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.numberOfServerBlockerIssues),
 				            vm_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.recommendationStatus),
 				            vm_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.computeCost),
+				            vm_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.sqlLicenseCost),
+				            vm_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.targetSku.computeSize),
 				            vm_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.storageCost),
 				            vm_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.totalCost),
 				            db_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.numberOfServerBlockerIssues),
 				            db_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.recommendationStatus),
 				            db_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.computeCost),
+				            db_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.sqlLicenseCost),
+				            db_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.targetSku.computeSize),
 				            db_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.storageCost),
 				            db_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.totalCost)
 				            ",
@@ -686,10 +761,10 @@ table ext_arc_sql_instances
 				            is_hadr_enabled = logical, monitoring_enabled = logical, migration_enabled = logical,
 				            assessment_upload_time = datetime, backup_policy = text, is_fci = logical,
 				            client_connections = Int64.Type, mi_blockers = Int64.Type, mi_status = text,
-				            mi_compute_cost = number, mi_storage_cost = number, mi_total_cost = number,
-				            vm_blockers = Int64.Type, vm_status = text, vm_compute_cost = number,
+				            mi_compute_cost = number, mi_sql_license_cost = number, mi_target_cores = Int64.Type, mi_storage_cost = number, mi_total_cost = number,
+				            vm_blockers = Int64.Type, vm_status = text, vm_compute_cost = number, vm_sql_license_cost = number, vm_target_cores = Int64.Type,
 				            vm_storage_cost = number, vm_total_cost = number, db_blockers = Int64.Type,
-				            db_status = text, db_compute_cost = number, db_storage_cost = number, db_total_cost = number
+				            db_status = text, db_compute_cost = number, db_sql_license_cost = number, db_target_cores = Int64.Type, db_storage_cost = number, db_total_cost = number
 				        ]
 				    ),
 				
@@ -722,14 +797,20 @@ table ext_arc_sql_instances
 				            {"client_connections", Int64.Type},
 				            {"mi_blockers", Int64.Type},
 				            {"mi_compute_cost", type number},
+				            {"mi_sql_license_cost", type number},
+				            {"mi_target_cores", Int64.Type},
 				            {"mi_storage_cost", type number},
 				            {"mi_total_cost", type number},
 				            {"vm_blockers", Int64.Type},
 				            {"vm_compute_cost", type number},
+				            {"vm_sql_license_cost", type number},
+				            {"vm_target_cores", Int64.Type},
 				            {"vm_storage_cost", type number},
 				            {"vm_total_cost", type number},
 				            {"db_blockers", Int64.Type},
 				            {"db_compute_cost", type number},
+				            {"db_sql_license_cost", type number},
+				            {"db_target_cores", Int64.Type},
 				            {"db_storage_cost", type number},
 				            {"db_total_cost", type number},
 				            {"azure_defender_status_last_updated", type datetime},

@@ -426,3 +426,11 @@ expression Licensing_Standard_SA_Cores = "0" meta [IsParameterQuery=true, Type="
 /// Customer-owned SQL Server Enterprise edition cores covered by active Software Assurance.
 expression Licensing_Enterprise_SA_Cores = "0" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	lineageTag: a436d869-0fad-4620-af69-6dcea3ea0880
+
+/// Optional annualized customer price per SQL Server Standard core for a new licence with Software Assurance.
+expression Licensing_Standard_License_SA_Annual_Cost_Per_Core = "Not provided" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 28d5b43c-69a2-4ec3-9796-c22476b8990a
+
+/// Optional annualized customer price per SQL Server Enterprise core for a new licence with Software Assurance.
+expression Licensing_Enterprise_License_SA_Annual_Cost_Per_Core = "Not provided" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: b95fb53d-aec0-40b2-a241-a4678018fa26

@@ -189,6 +189,23 @@ table view_esu
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column mi_sql_license_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [mi_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_target_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [mi_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
 	column db_compute_cost
 		summarizeBy: sum
 		isNameInferred
@@ -198,6 +215,23 @@ table view_esu
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column db_sql_license_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [db_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_target_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [db_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
 	column vm_compute_cost
 		summarizeBy: sum
 		isNameInferred
@@ -206,6 +240,23 @@ table view_esu
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_sql_license_cost
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [vm_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_target_cores
+		formatString: 0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [vm_target_cores]
+
+		annotation SummarizationSetBy = Automatic
 
 	column mi_storage_cost
 		summarizeBy: sum
@@ -473,8 +524,14 @@ table view_esu
 				        "sql_version",              view_sql_instances[sql_version],
 				        "sql_edition",              view_sql_instances[sql_edition],
 				        "mi_compute_cost",          view_sql_instances[mi_compute_cost],
+				        "mi_sql_license_cost",      view_sql_instances[mi_sql_license_cost],
+				        "mi_target_cores",          view_sql_instances[mi_target_cores],
 				        "db_compute_cost",          view_sql_instances[db_compute_cost],
+				        "db_sql_license_cost",      view_sql_instances[db_sql_license_cost],
+				        "db_target_cores",          view_sql_instances[db_target_cores],
 				        "vm_compute_cost",          view_sql_instances[vm_compute_cost],
+				        "vm_sql_license_cost",      view_sql_instances[vm_sql_license_cost],
+				        "vm_target_cores",          view_sql_instances[vm_target_cores],
 				        "mi_storage_cost",          view_sql_instances[mi_storage_cost],
 				        "db_storage_cost",          view_sql_instances[db_storage_cost],
 				        "vm_storage_cost",          view_sql_instances[vm_storage_cost],
@@ -567,8 +624,14 @@ table view_esu
 				    "sql_version",              [sql_version],
 				    "sql_edition",              [sql_edition],
 				    "mi_compute_cost",          [mi_compute_cost],
+				    "mi_sql_license_cost",      [mi_sql_license_cost],
+				    "mi_target_cores",          [mi_target_cores],
 				    "db_compute_cost",          [db_compute_cost],
+				    "db_sql_license_cost",      [db_sql_license_cost],
+				    "db_target_cores",          [db_target_cores],
 				    "vm_compute_cost",          [vm_compute_cost],
+				    "vm_sql_license_cost",      [vm_sql_license_cost],
+				    "vm_target_cores",          [vm_target_cores],
 				    "mi_storage_cost",          [mi_storage_cost],
 				    "db_storage_cost",          [db_storage_cost],
 				    "vm_storage_cost",          [vm_storage_cost],

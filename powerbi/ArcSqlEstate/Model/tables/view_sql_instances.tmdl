@@ -291,6 +291,23 @@ table view_sql_instances
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column mi_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
 	column db_compute_cost
 		summarizeBy: none
 		isNameInferred
@@ -300,6 +317,23 @@ table view_sql_instances
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column db_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
 	column vm_compute_cost
 		summarizeBy: none
 		isNameInferred
@@ -308,6 +342,23 @@ table view_sql_instances
 		annotation SummarizationSetBy = Automatic
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_target_cores]
+
+		annotation SummarizationSetBy = Automatic
 
 	column mi_storage_cost
 		summarizeBy: none
@@ -632,13 +683,31 @@ table view_sql_instances
 				        "mi_compute_cost",
 				            LOOKUPVALUE ( ext_arc_sql_instances[mi_compute_cost],
 				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "mi_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "mi_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_target_cores],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
 				
 				        "db_compute_cost",
 				            LOOKUPVALUE ( ext_arc_sql_instances[db_compute_cost],
 				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "db_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "db_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_target_cores],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
 				
 				        "vm_compute_cost",
 				            LOOKUPVALUE ( ext_arc_sql_instances[vm_compute_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "vm_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "vm_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_target_cores],
 				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
 				
 				        "mi_storage_cost",
@@ -886,8 +955,14 @@ table view_sql_instances
 				    
 				    /* >>> the 12 cost/status fields  <<< */
 				    "mi_compute_cost", [mi_compute_cost],
+				    "mi_sql_license_cost", [mi_sql_license_cost],
+				    "mi_target_cores", [mi_target_cores],
 				    "db_compute_cost", [db_compute_cost],
+				    "db_sql_license_cost", [db_sql_license_cost],
+				    "db_target_cores", [db_target_cores],
 				    "vm_compute_cost", [vm_compute_cost],
+				    "vm_sql_license_cost", [vm_sql_license_cost],
+				    "vm_target_cores", [vm_target_cores],
 				    "mi_storage_cost", [mi_storage_cost],
 				    "db_storage_cost", [db_storage_cost],
 				    "vm_storage_cost", [vm_storage_cost],

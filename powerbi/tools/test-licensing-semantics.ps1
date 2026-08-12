@@ -10,7 +10,9 @@ $model = Get-Content -Raw -Encoding utf8 $bimPath | ConvertFrom-Json -Depth 100
 
 $requiredParameters = @(
     'Licensing_Standard_SA_Cores',
-    'Licensing_Enterprise_SA_Cores'
+    'Licensing_Enterprise_SA_Cores',
+    'Licensing_Standard_License_SA_Annual_Cost_Per_Core',
+    'Licensing_Enterprise_License_SA_Annual_Cost_Per_Core'
 )
 $removedParameters = @(
     'Licensing_SA_Status',
@@ -34,8 +36,8 @@ $inputs = $model.model.tables | Where-Object name -eq 'licensing_inputs'
 if ($null -eq $inputs) {
     throw 'The trusted Software Assurance core-input table is missing.'
 }
-if (@($inputs.columns.name | Sort-Object) -join ',' -ne 'enterprise_sa_cores,standard_sa_cores') {
-    throw 'The licensing input table must contain only Standard and Enterprise SA core counts.'
+if (@($inputs.columns.name | Sort-Object) -join ',' -ne 'enterprise_license_sa_annual_cost_per_core,enterprise_sa_cores,standard_license_sa_annual_cost_per_core,standard_sa_cores') {
+    throw 'The licensing input table must contain edition-level SA cores and optional annualized License+SA prices.'
 }
 if ($model.model.tables.name -contains 'licensing_declaration') {
     throw 'The removed licensing evidence table is still present.'
@@ -63,9 +65,34 @@ foreach ($column in @('software_assurance_status', 'ahb_eligibility', 'licensing
     }
 }
 
+foreach ($column in @(
+    'mi_sql_license_cost',
+    'db_sql_license_cost',
+    'vm_sql_license_cost',
+    'mi_target_cores',
+    'db_target_cores',
+    'vm_target_cores'
+)) {
+    if ($column -notin @($sqlView.columns.name)) {
+        throw "The migration assessment field '$column' is missing from the SQL view."
+    }
+}
+
 $esuView = $model.model.tables | Where-Object name -eq 'view_esu'
 if ('service_type' -notin @($esuView.columns.name)) {
     throw 'The ESU forecast does not expose service_type for Engine-only target-core reconciliation.'
+}
+foreach ($column in @(
+    'mi_sql_license_cost',
+    'db_sql_license_cost',
+    'vm_sql_license_cost',
+    'mi_target_cores',
+    'db_target_cores',
+    'vm_target_cores'
+)) {
+    if ($column -notin @($esuView.columns.name)) {
+        throw "The ESU forecast does not expose '$column'."
+    }
 }
 
 $measureNames = @(($model.model.tables | Where-Object name -eq 'all_measures').measures.name)
@@ -76,7 +103,19 @@ foreach ($measure in @(
     'kpi_current_sa_core_gap',
     'kpi_target_ahb_required_cores',
     'kpi_target_ahb_covered_cores',
-    'kpi_target_ahb_core_gap'
+    'kpi_target_ahb_core_gap',
+    'kpi_target_standard_ahb_required_cores',
+    'kpi_target_enterprise_ahb_required_cores',
+    'kpi_target_standard_ahb_core_gap',
+    'kpi_target_enterprise_ahb_core_gap',
+    'kpi_target_sql_payg_license_cost_monthly',
+    'kpi_gap_sql_payg_license_cost_monthly',
+    'kpi_gap_license_sa_cost_monthly',
+    'kpi_payg_gap_option_monthly',
+    'kpi_license_sa_gap_option_monthly',
+    'kpi_licensing_option_saving_monthly',
+    'kpi_cheaper_licensing_option',
+    'licensing_cost_assumption_text'
 )) {
     if ($measure -notin $measureNames) {
         throw "Missing licensing measure '$measure'."
@@ -90,11 +129,12 @@ $currentFixture = @(
     [pscustomobject]@{ ServiceType = 'SSIS'; Edition = 'Enterprise'; Cores = 21 }
 )
 $targetFixture = @(
-    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Enterprise'; Cores = 12 },
-    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Enterprise'; Cores = 18 },
-    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Developer'; Cores = 10 },
-    [pscustomobject]@{ ServiceType = 'SSIS'; Edition = 'Enterprise'; Cores = 64 }
+    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Standard'; Cores = 8; MonthlySqlPayg = 400 },
+    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Enterprise'; Cores = 12; MonthlySqlPayg = 1200 },
+    [pscustomobject]@{ ServiceType = 'Engine'; Edition = 'Developer'; Cores = 10; MonthlySqlPayg = 0 },
+    [pscustomobject]@{ ServiceType = 'SSIS'; Edition = 'Enterprise'; Cores = 64; MonthlySqlPayg = 6400 }
 )
+$ownedStandardCores = 4
 $ownedEnterpriseCores = 6
 $engineCores = ($currentFixture |
     Where-Object { $_.ServiceType -eq 'Engine' -and $_.Edition -in @('Standard', 'Enterprise') } |
@@ -104,18 +144,34 @@ $currentGap = $engineCores - $currentCoveredCores
 $targetCores = ($targetFixture |
     Where-Object { $_.ServiceType -eq 'Engine' -and $_.Edition -in @('Standard', 'Enterprise') } |
     Measure-Object Cores -Sum).Sum
-$targetCoveredCores = [Math]::Min($ownedEnterpriseCores, $targetCores)
+$targetCoveredCores =
+    [Math]::Min($ownedStandardCores, 8) +
+    [Math]::Min($ownedEnterpriseCores, 12)
 $targetGap = $targetCores - $targetCoveredCores
 
 if (
     $engineCores -ne 25 -or
     $currentCoveredCores -ne 6 -or
     $currentGap -ne 19 -or
-    $targetCores -ne 30 -or
-    $targetCoveredCores -ne 6 -or
-    $targetGap -ne 24
+    $targetCores -ne 20 -or
+    $targetCoveredCores -ne 10 -or
+    $targetGap -ne 10
 ) {
     throw 'Current and forecast Engine core reconciliation failed.'
+}
+
+$standardGap = 8 - $ownedStandardCores
+$enterpriseGap = 12 - $ownedEnterpriseCores
+$paygForGap =
+    (400 * ($standardGap / 8)) +
+    (1200 * ($enterpriseGap / 12))
+$standardAnnualLicenseSaPerCore = 600
+$enterpriseAnnualLicenseSaPerCore = 1800
+$licenseSaForGap =
+    (($standardGap * $standardAnnualLicenseSaPerCore) +
+     ($enterpriseGap * $enterpriseAnnualLicenseSaPerCore)) / 12
+if ($paygForGap -ne 800 -or $licenseSaForGap -ne 1100) {
+    throw 'PAYG versus annualized License+SA shortfall comparison failed.'
 }
 
 $additionalSsis = $currentFixture + [pscustomobject]@{
@@ -131,25 +187,26 @@ if ($engineCoresWithAdditionalSsis -ne $engineCores) {
 }
 
 $layoutBuilder = Get-Content -Raw -Encoding utf8 $layoutBuilderPath
-if ($layoutBuilder.Contains('buildLicensingPage(),')) {
-    throw 'The duplicate Licensing Position page is still generated.'
+if (-not $layoutBuilder.Contains('buildLicensingPage(),')) {
+    throw 'The dedicated Licensing Position page is not generated.'
 }
-if (-not $layoutBuilder.Contains('enhanceEsuForecastPage();')) {
-    throw 'The ESU Forecast page is not enhanced with the focused SA/AHB core position.'
+if ($layoutBuilder.Contains('enhanceEsuForecastPage')) {
+    throw 'The licensing overlays are still applied to the ESU Forecast page.'
 }
 foreach ($measure in @(
     'kpi_owned_sa_cores',
-    'kpi_engine_licensable_cores',
     'kpi_target_ahb_required_cores',
-    'kpi_current_sa_core_gap',
-    'kpi_target_ahb_core_gap'
+    'kpi_target_ahb_core_gap',
+    'kpi_payg_gap_option_monthly',
+    'kpi_license_sa_gap_option_monthly',
+    'kpi_cheaper_licensing_option'
 )) {
     if (-not $layoutBuilder.Contains($measure)) {
-        throw "The ESU Forecast layout is missing '$measure'."
+        throw "The Licensing Position layout is missing '$measure'."
     }
 }
 if (-not $layoutBuilder.Contains('"view_sql_instances.billing_mode"')) {
     throw 'The existing SQL licensing visuals are not rebound to billing mode.'
 }
 
-Write-Host 'PASS: trusted SA core inputs reconcile current and forecast Engine demand without a duplicate licensing page or evidence capture.'
+Write-Host 'PASS: the dedicated licensing decision page reconciles edition-matched SA cores and compares assessment PAYG with optional License+SA pricing.'

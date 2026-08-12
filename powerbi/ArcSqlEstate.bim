@@ -2161,6 +2161,47 @@
             ]
           },
           {
+            "name": "mi_sql_license_cost",
+            "dataType": "double",
+            "isHidden": true,
+            "sourceColumn": "mi_sql_license_cost",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "name": "mi_target_cores",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "mi_target_cores",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
             "name": "mi_storage_cost",
             "dataType": "double",
             "isHidden": true,
@@ -2264,6 +2305,47 @@
             ]
           },
           {
+            "name": "vm_sql_license_cost",
+            "dataType": "double",
+            "isHidden": true,
+            "sourceColumn": "vm_sql_license_cost",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "name": "vm_target_cores",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "vm_target_cores",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
             "name": "vm_storage_cost",
             "dataType": "double",
             "isHidden": true,
@@ -2363,6 +2445,47 @@
               {
                 "name": "PBI_FormatHint",
                 "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "name": "db_sql_license_cost",
+            "dataType": "double",
+            "isHidden": true,
+            "sourceColumn": "db_sql_license_cost",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "name": "db_target_cores",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "db_target_cores",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "changedProperties": [
+              {
+                "property": "IsHidden"
+              }
+            ],
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
               }
             ]
           },
@@ -2819,16 +2942,22 @@
                 "            mi_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.numberOfServerBlockerIssues),",
                 "            mi_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.recommendationStatus),",
                 "            mi_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.computeCost),",
+                "            mi_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.sqlLicenseCost),",
+                "            mi_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.targetSku.computeSize),",
                 "            mi_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.storageCost),",
                 "            mi_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.totalCost),",
                 "            vm_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.numberOfServerBlockerIssues),",
                 "            vm_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.recommendationStatus),",
                 "            vm_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.computeCost),",
+                "            vm_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.sqlLicenseCost),",
+                "            vm_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.targetSku.computeSize),",
                 "            vm_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.storageCost),",
                 "            vm_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.totalCost),",
                 "            db_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.numberOfServerBlockerIssues),",
                 "            db_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.recommendationStatus),",
                 "            db_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.computeCost),",
+                "            db_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.sqlLicenseCost),",
+                "            db_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.targetSku.computeSize),",
                 "            db_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.storageCost),",
                 "            db_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.totalCost)",
                 "            \",",
@@ -2852,10 +2981,10 @@
                 "            is_hadr_enabled = logical, monitoring_enabled = logical, migration_enabled = logical,",
                 "            assessment_upload_time = datetime, backup_policy = text, is_fci = logical,",
                 "            client_connections = Int64.Type, mi_blockers = Int64.Type, mi_status = text,",
-                "            mi_compute_cost = number, mi_storage_cost = number, mi_total_cost = number,",
-                "            vm_blockers = Int64.Type, vm_status = text, vm_compute_cost = number,",
+                "            mi_compute_cost = number, mi_sql_license_cost = number, mi_target_cores = Int64.Type, mi_storage_cost = number, mi_total_cost = number,",
+                "            vm_blockers = Int64.Type, vm_status = text, vm_compute_cost = number, vm_sql_license_cost = number, vm_target_cores = Int64.Type,",
                 "            vm_storage_cost = number, vm_total_cost = number, db_blockers = Int64.Type,",
-                "            db_status = text, db_compute_cost = number, db_storage_cost = number, db_total_cost = number",
+                "            db_status = text, db_compute_cost = number, db_sql_license_cost = number, db_target_cores = Int64.Type, db_storage_cost = number, db_total_cost = number",
                 "        ]",
                 "    ),",
                 "",
@@ -2888,14 +3017,20 @@
                 "            {\"client_connections\", Int64.Type},",
                 "            {\"mi_blockers\", Int64.Type},",
                 "            {\"mi_compute_cost\", type number},",
+                "            {\"mi_sql_license_cost\", type number},",
+                "            {\"mi_target_cores\", Int64.Type},",
                 "            {\"mi_storage_cost\", type number},",
                 "            {\"mi_total_cost\", type number},",
                 "            {\"vm_blockers\", Int64.Type},",
                 "            {\"vm_compute_cost\", type number},",
+                "            {\"vm_sql_license_cost\", type number},",
+                "            {\"vm_target_cores\", Int64.Type},",
                 "            {\"vm_storage_cost\", type number},",
                 "            {\"vm_total_cost\", type number},",
                 "            {\"db_blockers\", Int64.Type},",
                 "            {\"db_compute_cost\", type number},",
+                "            {\"db_sql_license_cost\", type number},",
+                "            {\"db_target_cores\", Int64.Type},",
                 "            {\"db_storage_cost\", type number},",
                 "            {\"db_total_cost\", type number},",
                 "            {\"azure_defender_status_last_updated\", type datetime},",
@@ -5377,93 +5512,37 @@
         "measures": [
           {
             "name": "kpi_arc_instance_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_sql_instances),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        view_sql_instances[platform] = \"Arc\"",
-              "    ))"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_sql_instances),\n    FILTER(\n        view_sql_instances,\n        view_sql_instances[platform] = \"Arc\"\n    ))",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_arc_sql_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[memory_gb]),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        view_sql_instances[platform] = \"Arc\"",
-              "    )",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[memory_gb]),\n    FILTER(\n        view_sql_instances,\n        view_sql_instances[platform] = \"Arc\"\n    )\n)\n\n",
             "formatString": "0.0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_arc_sql_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[logical_cores]),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        view_sql_instances[platform] = \"Arc\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[logical_cores]),\n    FILTER(\n        view_sql_instances,\n        view_sql_instances[platform] = \"Arc\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_azure_sql_instance_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_sql_instances),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        view_sql_instances[platform] = \"Azure\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_sql_instances),\n    FILTER(\n        view_sql_instances,\n        view_sql_instances[platform] = \"Azure\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_azure_sql_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[logical_cores]),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        view_sql_instances[platform] = \"Azure\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[logical_cores]),\n    FILTER(\n        view_sql_instances,\n        view_sql_instances[platform] = \"Azure\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_azure_sql_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[memory_gb]),",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "         view_sql_instances[platform] = \"Azure\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[memory_gb]),\n    FILTER(\n        view_sql_instances,\n         view_sql_instances[platform] = \"Azure\"\n    )\n)\n",
             "formatString": "0.0",
             "displayFolder": "kpi\\sql instances"
           },
@@ -5475,23 +5554,13 @@
           },
           {
             "name": "kpi_all_sql_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[memory_gb])",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[memory_gb])\n)",
             "formatString": "0.0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_all_sql_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_sql_instances[logical_cores])",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_sql_instances[logical_cores])\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
@@ -5503,134 +5572,55 @@
           },
           {
             "name": "kpi_all_server_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[logical_cores])",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[logical_cores])\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_all_server_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[memory_gb])",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[memory_gb])\n)",
             "formatString": "0.0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_azure_server_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_servers),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"Azure\"",
-              "    ))"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_servers),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"Azure\"\n    ))",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_azure_server_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[logical_cores]),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"Azure\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[logical_cores]),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"Azure\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_azure_server_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[memory_gb]),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"Azure\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[memory_gb]),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"Azure\"\n    )\n)",
             "formatString": "0.0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_arc_server_cores",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[logical_cores]),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"Arc\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[logical_cores]),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"Arc\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_arc_server_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_servers),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"Arc\"",
-              "    ))"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_servers),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"Arc\"\n    ))",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_arc_server_memory",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUM(view_servers[memory_gb]),",
-              "    FILTER(",
-              "        view_servers,",
-              "        view_servers[platform] = \"arc\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUM(view_servers[memory_gb]),\n    FILTER(\n        view_servers,\n        view_servers[platform] = \"arc\"\n    )\n)",
             "formatString": "0.0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "server_esu_cost_total",
-            "expression": [
-              "",
-              "VAR SelectedMonths =",
-              "    SELECTEDVALUE(dim_period_selector[months], 0)",
-              "RETURN",
-              "SUMX(",
-              "    FILTER(",
-              "        view_esu,",
-              "        view_esu[resource_type_group] = \"Arc\"",
-              "            && view_esu[esu_status] =\"True\"",
-              "    ),",
-              "    VAR Cores = view_esu[os_esu_cores]",
-              "    RETURN",
-              "        COALESCE( Cores * view_esu[os_esu_basecost_monthly] * SelectedMonths, 0)",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nVAR SelectedMonths =\n    SELECTEDVALUE(dim_period_selector[months], 0)\nRETURN\nSUMX(\n    FILTER(\n        view_esu,\n        view_esu[resource_type_group] = \"Arc\"\n            && view_esu[esu_status] =\"True\"\n    ),\n    VAR Cores = view_esu[os_esu_cores]\n    RETURN\n        COALESCE( Cores * view_esu[os_esu_basecost_monthly] * SelectedMonths, 0)\n)\n\n",
             "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
             "displayFolder": "kpi\\esu",
             "annotations": [
@@ -5643,24 +5633,7 @@
           {
             "name": "sql_esu_cost_total",
             "description": "SQL Server ESU cost from lifecycle pricing and observed licensable cores. Owned Software Assurance does not automatically alter this source estimate.",
-            "expression": [
-              "",
-              "VAR SelectedMonths =",
-              "    SELECTEDVALUE(dim_period_selector[months], 0)",
-              "RETURN",
-              "SUMX(",
-              "    FILTER(",
-              "        view_esu,",
-              "        view_esu[resource_type_group] = \"Arc\"",
-              "            && view_esu[esu_status] = \"True\"",
-              "    ),",
-              "    VAR Cores = view_esu[sql_esu_cores]",
-              "    RETURN",
-              "        COALESCE( Cores * view_esu[sql_esu_basecost_monthly] * SelectedMonths, 0 )",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nVAR SelectedMonths =\n    SELECTEDVALUE(dim_period_selector[months], 0)\nRETURN\nSUMX(\n    FILTER(\n        view_esu,\n        view_esu[resource_type_group] = \"Arc\"\n            && view_esu[esu_status] = \"True\"\n    ),\n    VAR Cores = view_esu[sql_esu_cores]\n    RETURN\n        COALESCE( Cores * view_esu[sql_esu_basecost_monthly] * SelectedMonths, 0 )\n)\n\n",
             "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
             "displayFolder": "kpi\\esu",
             "annotations": [
@@ -5673,50 +5646,7 @@
           {
             "name": "azure_run_cost",
             "description": "Azure target run cost sourced from Azure migration evidence. Owned Software Assurance does not automatically alter this source estimate.",
-            "expression": [
-              "",
-              "SUMX (",
-              "    view_esu,",
-              "    VAR mstatus = [azure_modernisation_status]",
-              "    VAR months = SELECTEDVALUE ( dim_period_selector[months], 1 )",
-              "    VAR cores = MAX ( COALESCE ( [logical_cores], 0 ), 2 )",
-              "",
-              "    VAR mi_compute = COALESCE ( [mi_compute_cost], 0 )",
-              "    VAR db_compute = COALESCE ( [db_compute_cost], 0 )",
-              "    VAR vm_compute = COALESCE ( [vm_compute_cost], 0 )",
-              "",
-              "    VAR mi_storage = COALESCE ( [mi_storage_cost], 0 )",
-              "    VAR db_storage = COALESCE ( [db_storage_cost], 0 )",
-              "    VAR vm_storage = COALESCE ( [vm_storage_cost], 0 )",
-              "",
-              "    VAR discount = COALESCE ( [azure_run_cost_discount], 1 )",
-              "",
-              "    VAR user_db_count = COALESCE ( [user_db_count], 0 )",
-              "",
-              "    VAR compute_cost =",
-              "        SWITCH (",
-              "            TRUE(),",
-              "            mstatus = \"VM*\", IF ( cores > 2, 47.5 * cores, 47.5 ),",
-              "            mstatus = \"VM\",    vm_compute,",
-              "            mstatus = \"SQL MI\", mi_compute,",
-              "            mstatus = \"SQL DB\", db_compute,",
-              "            0",
-              "        )",
-              "",
-              "    VAR storage_cost =",
-              "        SWITCH (",
-              "            TRUE(),",
-              "            mstatus = \"VM*\", 25,",
-              "            mstatus = \"VM\",    vm_storage,",
-              "            mstatus = \"SQL MI\", mi_storage,",
-              "            mstatus = \"SQL DB\", db_storage,",
-              "            0",
-              "        )",
-              "",
-              "    VAR total_cost = ( compute_cost * discount + storage_cost ) * months",
-              "    RETURN total_cost",
-              ")"
-            ],
+            "expression": "\nSUMX (\n    view_esu,\n    VAR mstatus = [azure_modernisation_path]\n    VAR months = SELECTEDVALUE ( dim_period_selector[months], 1 )\n    VAR cores = MAX ( COALESCE ( [logical_cores], 0 ), 2 )\n\n    VAR mi_compute = COALESCE ( [mi_compute_cost], 0 )\n    VAR db_compute = COALESCE ( [db_compute_cost], 0 )\n    VAR vm_compute = COALESCE ( [vm_compute_cost], 0 )\n\n    VAR mi_storage = COALESCE ( [mi_storage_cost], 0 )\n    VAR db_storage = COALESCE ( [db_storage_cost], 0 )\n    VAR vm_storage = COALESCE ( [vm_storage_cost], 0 )\n\n    VAR discount = COALESCE ( [azure_run_cost_discount], 1 )\n\n    VAR user_db_count = COALESCE ( [user_db_count], 0 )\n\n    VAR compute_cost =\n        SWITCH (\n            TRUE(),\n            mstatus = \"VM*\", IF ( cores > 2, 47.5 * cores, 47.5 ),\n            mstatus = \"VM\",    vm_compute,\n            mstatus = \"SQL MI\", mi_compute,\n            mstatus = \"SQL DB\", db_compute,\n            0\n        )\n\n    VAR storage_cost =\n        SWITCH (\n            TRUE(),\n            mstatus = \"VM*\", 25,\n            mstatus = \"VM\",    vm_storage,\n            mstatus = \"SQL MI\", mi_storage,\n            mstatus = \"SQL DB\", db_storage,\n            0\n        )\n\n    VAR total_cost = ( compute_cost * discount + storage_cost ) * months\n    RETURN total_cost\n)",
             "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
             "displayFolder": "kpi\\esu\\azure",
             "annotations": [
@@ -5728,10 +5658,7 @@
           },
           {
             "name": "total_esu_cost",
-            "expression": [
-              "[server_esu_cost_total] + [sql_esu_cost_total] ",
-              ""
-            ],
+            "expression": "[server_esu_cost_total] + [sql_esu_cost_total] \n",
             "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
             "displayFolder": "kpi\\esu",
             "annotations": [
@@ -5756,72 +5683,25 @@
           },
           {
             "name": "azure_saving_vs_esu_pct",
-            "expression": [
-              "",
-              "VAR esu_cost = [total_esu_cost]  -- your existing ESU cost measure",
-              "VAR modern_cost = [azure_run_cost]  -- the new modernisation cost measure",
-              "RETURN",
-              "    DIVIDE(esu_cost - modern_cost, esu_cost, 0)",
-              ""
-            ],
+            "expression": "\nVAR esu_cost = [total_esu_cost]  -- your existing ESU cost measure\nVAR modern_cost = [azure_run_cost]  -- the new modernisation cost measure\nRETURN\n    DIVIDE(esu_cost - modern_cost, esu_cost, 0)\n",
             "formatString": "0.0%;-0.0%;0.0%",
             "displayFolder": "kpi\\esu"
           },
           {
             "name": "azure_ready_pct",
-            "expression": [
-              "",
-              "VAR total = COUNTROWS(view_esu)",
-              "VAR ready =",
-              "    CALCULATE(",
-              "        COUNTROWS(view_esu),",
-              "        view_esu[azure_modernisation_status] IN { \"VM\", \"SQL MI\", \"SQL DB\", \"VM*\"}",
-              "    )",
-              "RETURN",
-              "    DIVIDE(ready, total, 0)",
-              ""
-            ],
+            "expression": "\nVAR total = COUNTROWS(view_esu)\nVAR ready =\n    CALCULATE(\n        COUNTROWS(view_esu),\n        view_esu[azure_modernisation_status] IN { \"VM\", \"SQL MI\", \"SQL DB\", \"VM*\"}\n    )\nRETURN\n    DIVIDE(ready, total, 0)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\esu\\azure"
           },
           {
             "name": "azure_paas_ready_pct",
-            "expression": [
-              "",
-              "DIVIDE(",
-              "    CALCULATE(COUNTROWS(view_esu), view_esu[azure_modernisation_type] = \"PaaS\"),",
-              "    COUNTROWS(view_esu)",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nDIVIDE(\n    CALCULATE(COUNTROWS(view_esu), view_esu[azure_modernisation_type] = \"PaaS\"),\n    COUNTROWS(view_esu)\n)\n\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\esu\\azure"
           },
           {
             "name": "os_esu_cost_by_quarter_full_timeline",
-            "expression": [
-              "",
-              "VAR QuarterStart = STARTOFQUARTER('dim_date'[Date])",
-              "VAR QuarterEnd = ENDOFQUARTER('dim_date'[Date])",
-              "",
-              "RETURN",
-              "SUMX(",
-              "    view_esu,",
-              "    VAR MonthlyCost = [os_esu_basecost_monthly]",
-              "    VAR Cores = [os_esu_cores]",
-              "    VAR ESUStart = [os_esu_start_date]",
-              "    VAR ESUEnd = [os_esu_end_date]",
-              "    VAR Overlaps =",
-              "        NOT (",
-              "            QuarterEnd < ESUStart || QuarterStart > ESUEnd",
-              "        )",
-              "    RETURN",
-              "        IF(Overlaps, MonthlyCost * Cores * 3, 0)",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nVAR QuarterStart = STARTOFQUARTER('dim_date'[Date])\nVAR QuarterEnd = ENDOFQUARTER('dim_date'[Date])\n\nRETURN\nSUMX(\n    view_esu,\n    VAR MonthlyCost = [os_esu_basecost_monthly]\n    VAR Cores = [os_esu_cores]\n    VAR ESUStart = [os_esu_start_date]\n    VAR ESUEnd = [os_esu_end_date]\n    VAR Overlaps =\n        NOT (\n            QuarterEnd < ESUStart || QuarterStart > ESUEnd\n        )\n    RETURN\n        IF(Overlaps, MonthlyCost * Cores * 3, 0)\n)\n\n",
             "displayFolder": "kpi\\esu",
             "annotations": [
               {
@@ -5832,27 +5712,7 @@
           },
           {
             "name": "sql_esu_cost_by_quarter_full_timeline",
-            "expression": [
-              "",
-              "VAR QuarterStart = STARTOFQUARTER('dim_date'[Date])",
-              "VAR QuarterEnd = ENDOFQUARTER('dim_date'[Date])",
-              "",
-              "RETURN",
-              "SUMX(",
-              "    view_esu,",
-              "    VAR MonthlyCost = [sql_esu_basecost_monthly]",
-              "    VAR Cores = [sql_esu_cores]",
-              "    VAR ESUStart = [sql_esu_start_date]",
-              "    VAR ESUEnd = [sql_esu_end_date]",
-              "    VAR Overlaps =",
-              "        NOT (",
-              "            QuarterEnd < ESUStart || QuarterStart > ESUEnd",
-              "        )",
-              "    RETURN",
-              "        IF(Overlaps, MonthlyCost * Cores * 3, 0)",
-              ")",
-              ""
-            ],
+            "expression": "\nVAR QuarterStart = STARTOFQUARTER('dim_date'[Date])\nVAR QuarterEnd = ENDOFQUARTER('dim_date'[Date])\n\nRETURN\nSUMX(\n    view_esu,\n    VAR MonthlyCost = [sql_esu_basecost_monthly]\n    VAR Cores = [sql_esu_cores]\n    VAR ESUStart = [sql_esu_start_date]\n    VAR ESUEnd = [sql_esu_end_date]\n    VAR Overlaps =\n        NOT (\n            QuarterEnd < ESUStart || QuarterStart > ESUEnd\n        )\n    RETURN\n        IF(Overlaps, MonthlyCost * Cores * 3, 0)\n)\n",
             "displayFolder": "kpi\\esu",
             "annotations": [
               {
@@ -5863,43 +5723,19 @@
           },
           {
             "name": "sql_license_payg_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    CALCULATE (",
-              "        COUNTROWS ( view_sql_instances ),",
-              "        view_sql_instances[sql_license_type] = \"PAYG\"",
-              "    ),",
-              "    COUNTROWS ( view_sql_instances )",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    CALCULATE (\n        COUNTROWS ( view_sql_instances ),\n        view_sql_instances[sql_license_type] = \"PAYG\"\n    ),\n    COUNTROWS ( view_sql_instances )\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "sql_esu_cost_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [sql_esu_cost_total],",
-              "    [total_esu_cost]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [sql_esu_cost_total],\n    [total_esu_cost]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\esu"
           },
           {
             "name": "server_esu_cost_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [server_esu_cost_total],",
-              "    [total_esu_cost]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [server_esu_cost_total],\n    [total_esu_cost]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\esu"
           },
@@ -5943,30 +5779,13 @@
           },
           {
             "name": "sql_database_type_system",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS(view_arc_sql_databases), FILTER (",
-              "    view_arc_sql_databases,",
-              "    view_arc_sql_databases[sql_database_type] = \"System\"",
-              ")",
-              ")"
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS(view_arc_sql_databases), FILTER (\n    view_arc_sql_databases,\n    view_arc_sql_databases[sql_database_type] = \"System\"\n)\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql databases"
           },
           {
             "name": "sql_database_type_user",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS(view_arc_sql_databases), FILTER (",
-              "    view_arc_sql_databases,",
-              "    view_arc_sql_databases[sql_database_type] = \"User\"",
-              ")",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS(view_arc_sql_databases), FILTER (\n    view_arc_sql_databases,\n    view_arc_sql_databases[sql_database_type] = \"User\"\n)\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\sql databases"
           },
@@ -5996,342 +5815,151 @@
           },
           {
             "name": "kpi_azure_monitor_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_azure_monitor_windows_count] + [kpi_azure_monitor_linux_count],",
-              "    [kpi_azure_monitor_windows_count] + [kpi_azure_monitor_linux_count] + [kpi_azure_monitor_not_installed]",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_azure_monitor_windows_count] + [kpi_azure_monitor_linux_count],\n    [kpi_azure_monitor_windows_count] + [kpi_azure_monitor_linux_count] + [kpi_azure_monitor_not_installed]\n)\n\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_azure_monitor_linux_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"linux\" )",
-              ")"
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"linux\" )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_azure_monitor_not_installed",
-            "expression": [
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"notdeployed\" )",
-              ")"
-            ],
+            "expression": "CALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"notdeployed\" )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_azure_monitor_windows_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"windows\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[azure_monitor] ) ) = \"windows\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_linux_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"linux\" )",
-              ")"
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"linux\" )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_windows_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"windows\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"windows\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_not_installed",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"notdeployed\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[extension_defender] ) ) = \"notdeployed\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_defender_windows_count] + [kpi_defender_linux_count],",
-              "    [kpi_defender_windows_count] + [kpi_defender_linux_count] + [kpi_defender_not_installed]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_defender_windows_count] + [kpi_defender_linux_count],\n    [kpi_defender_windows_count] + [kpi_defender_linux_count] + [kpi_defender_not_installed]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_sql_extension_windowsagent_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"arc\" )",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"arc\" )\n)\n\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_sql_extension_sqliaas_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"azure\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"azure\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_sql_extension_not_installed",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"notdeployed\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_extension] ) ) = \"notdeployed\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_sql_extension_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_sql_extension_windowsagent_count] + [kpi_sql_extension_sqliaas_count],",
-              "    [kpi_sql_extension_windowsagent_count] + [kpi_sql_extension_sqliaas_count] + [kpi_sql_extension_not_installed]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_sql_extension_windowsagent_count] + [kpi_sql_extension_sqliaas_count],\n    [kpi_sql_extension_windowsagent_count] + [kpi_sql_extension_sqliaas_count] + [kpi_sql_extension_not_installed]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_change_tracking_linux_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS (",
-              "        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"linux\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS (\n        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"linux\"\n    )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_change_tracking_windows_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS (",
-              "        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"windows\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS (\n        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"windows\"\n    )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_change_tracking_not_installed",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS (",
-              "        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"notdeployed\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS (\n        LOWER ( TRIM ( view_extension_deployments[extension_change_tracking] ) ) = \"notdeployed\"\n    )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_change_tracking_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_change_tracking_windows_count] + [kpi_change_tracking_linux_count],",
-              "    [kpi_change_tracking_windows_count] + [kpi_change_tracking_linux_count] + [kpi_change_tracking_not_installed]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_change_tracking_windows_count] + [kpi_change_tracking_linux_count],\n    [kpi_change_tracking_windows_count] + [kpi_change_tracking_linux_count] + [kpi_change_tracking_not_installed]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_windows_server_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_servers),",
-              "    FILTER(",
-              "        view_servers,",
-              "        SEARCH(\"windows\", LOWER(view_servers[os_version]), 1, 0) > 0",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_servers),\n    FILTER(\n        view_servers,\n        SEARCH(\"windows\", LOWER(view_servers[os_version]), 1, 0) > 0\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_admin_center_count",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS (",
-              "        LOWER ( TRIM ( view_extension_deployments[extension_admin_center] ) ) = \"windows\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS (\n        LOWER ( TRIM ( view_extension_deployments[extension_admin_center] ) ) = \"windows\"\n    )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_admin_center_not_installed",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS (",
-              "        LOWER ( TRIM ( view_extension_deployments[extension_admin_center] ) ) = \"notdeployed\"",
-              "    )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS (\n        LOWER ( TRIM ( view_extension_deployments[extension_admin_center] ) ) = \"notdeployed\"\n    )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_admin_center_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_admin_center_count],",
-              "    [kpi_admin_center_count] + [kpi_admin_center_not_installed]",
-              ")",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_admin_center_count],\n    [kpi_admin_center_count] + [kpi_admin_center_not_installed]\n)\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_sql_count",
-            "expression": [
-              "",
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_defender] ) ) in {\"arc\", \"azure\"} )",
-              ")",
-              ""
-            ],
+            "expression": "\n\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_defender] ) ) in {\"arc\", \"azure\"} )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_sql_not_installed",
-            "expression": [
-              "",
-              "CALCULATE (",
-              "    COUNTROWS ( view_extension_deployments ),",
-              "    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_defender] ) ) = \"notdeployed\" )",
-              ")",
-              ""
-            ],
+            "expression": "\nCALCULATE (\n    COUNTROWS ( view_extension_deployments ),\n    KEEPFILTERS ( LOWER ( TRIM ( view_extension_deployments[sql_defender] ) ) = \"notdeployed\" )\n)\n",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_defender_sql_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    [kpi_defender_sql_count] ,",
-              "    [kpi_defender_sql_count] + [kpi_defender_sql_not_installed]",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nDIVIDE (\n    [kpi_defender_sql_count] ,\n    [kpi_defender_sql_count] + [kpi_defender_sql_not_installed]\n)\n\n",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_arc_extension_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_extensions),",
-              "    FILTER(",
-              "        view_extensions,",
-              "        view_extensions[platform] = \"Arc\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_extensions),\n    FILTER(\n        view_extensions,\n        view_extensions[platform] = \"Arc\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_azure_extension_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_extensions),",
-              "    FILTER(",
-              "        view_extensions,",
-              "        view_extensions[platform] = \"Azure\"",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_extensions),\n    FILTER(\n        view_extensions,\n        view_extensions[platform] = \"Azure\"\n    )\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
@@ -6348,35 +5976,7 @@
           },
           {
             "name": "azure_run_cost_discount",
-            "expression": [
-              "",
-              "VAR selected_discount_SQL = SELECTEDVALUE(dim_sql_savings_plan[type], \"None - Pay As You Go\")",
-              "VAR selected_discount_Server = SELECTEDVALUE(dim_server_savings_plan[type], \"None - Pay As You Go\")",
-              "",
-              "-- Get SQL discount",
-              "VAR sql_discount =",
-              "    CALCULATE(",
-              "        MAX(dim_sql_savings_plan[discount]),",
-              "        TREATAS({ selected_discount_SQL }, dim_sql_savings_plan[type])",
-              "    )",
-              "",
-              "-- Get Server (VM) discount",
-              "VAR server_discount =",
-              "    CALCULATE(",
-              "        MAX(dim_server_savings_plan[discount]),",
-              "        TREATAS({ selected_discount_Server }, dim_server_savings_plan[type])",
-              "    )",
-              "",
-              "VAR ModernisationType = [azure_modernisation_path]",
-              "",
-              "RETURN",
-              "    SWITCH(",
-              "        TRUE(),",
-              "        ModernisationType IN { \"SQL DB\", \"SQL MI\" }, sql_discount,",
-              "        ModernisationType IN { \"VM\", \"VM*\" }, server_discount,",
-              "        1.0",
-              "    )"
-            ],
+            "expression": "\nVAR selected_discount_SQL = SELECTEDVALUE(dim_sql_savings_plan[type], \"None - Pay As You Go\")\nVAR selected_discount_Server = SELECTEDVALUE(dim_server_savings_plan[type], \"None - Pay As You Go\")\n\n-- Get SQL discount\nVAR sql_discount =\n    CALCULATE(\n        MAX(dim_sql_savings_plan[discount]),\n        TREATAS({ selected_discount_SQL }, dim_sql_savings_plan[type])\n    )\n\n-- Get Server (VM) discount\nVAR server_discount =\n    CALCULATE(\n        MAX(dim_server_savings_plan[discount]),\n        TREATAS({ selected_discount_Server }, dim_server_savings_plan[type])\n    )\n\nVAR ModernisationType = [azure_modernisation_path]\n\nRETURN\n    SWITCH(\n        TRUE(),\n        ModernisationType IN { \"SQL DB\", \"SQL MI\" }, sql_discount,\n        ModernisationType IN { \"VM\", \"VM*\" }, server_discount,\n        1.0\n    )",
             "displayFolder": "kpi\\esu\\azure",
             "annotations": [
               {
@@ -6387,111 +5987,17 @@
           },
           {
             "name": "azure_modernisation_type",
-            "expression": [
-              "",
-              "IF (",
-              "    HASONEVALUE(view_esu[resource_key]),",
-              "    SWITCH (",
-              "        [azure_modernisation_path],",
-              "        \"SQL MI\", \"PaaS\",",
-              "        \"SQL DB\", \"PaaS\",",
-              "        \"VM\", \"IaaS\",",
-              "        \"VM*\", \"IaaS\",",
-              "        BLANK()",
-              "    ),",
-              "    BLANK()",
-              ")",
-              ""
-            ],
+            "expression": "\nIF (\n    HASONEVALUE(view_esu[resource_key]),\n    SWITCH (\n        [azure_modernisation_path],\n        \"SQL MI\", \"PaaS\",\n        \"SQL DB\", \"PaaS\",\n        \"VM\", \"IaaS\",\n        \"VM*\", \"IaaS\",\n        BLANK()\n    ),\n    BLANK()\n)\n",
             "displayFolder": "kpi\\esu\\azure"
           },
           {
             "name": "azure_modernisation_path",
-            "expression": [
-              "",
-              "VAR Strategy =",
-              "    SELECTEDVALUE ( dim_migration_strategy[migration_strategy], \"Modernize to PaaS\" )",
-              "",
-              "-- Pull from the *bridge* row that the visual is rendering",
-              "VAR db_status = SELECTEDVALUE ( view_esu[db_status] )",
-              "VAR mi_status = SELECTEDVALUE ( view_esu[mi_status] )",
-              "VAR vm_status = SELECTEDVALUE ( view_esu[vm_status] )",
-              "",
-              "VAR db_cost = SELECTEDVALUE ( view_esu[db_total_cost] )",
-              "VAR mi_cost = SELECTEDVALUE ( view_esu[mi_total_cost] )",
-              "VAR vm_cost = SELECTEDVALUE ( view_esu[vm_total_cost] )",
-              "",
-              "VAR db_ready = db_status = \"Ready\" && NOT ISBLANK ( db_cost )",
-              "VAR mi_ready = mi_status = \"Ready\" && NOT ISBLANK ( mi_cost )",
-              "VAR vm_ready = vm_status = \"Ready\" && NOT ISBLANK ( vm_cost )",
-              "",
-              "VAR CheapestReady =",
-              "    SWITCH (",
-              "        TRUE(),",
-              "        db_ready && (NOT mi_ready || db_cost <= mi_cost) && (NOT vm_ready || db_cost <= vm_cost), \"SQL DB\",",
-              "        mi_ready && (NOT db_ready || mi_cost <= db_cost) && (NOT vm_ready || mi_cost <= vm_cost), \"SQL MI\",",
-              "        vm_ready, \"VM\",",
-              "        \"VM*\"",
-              "    )",
-              "",
-              "VAR PaasChoice =",
-              "    SWITCH ( TRUE(),",
-              "        db_ready, \"SQL DB\",",
-              "        mi_ready, \"SQL MI\",",
-              "        vm_ready, \"VM\",",
-              "        \"VM*\"",
-              "    )",
-              "",
-              "RETURN",
-              "    IF ( Strategy = \"Minimize cost\", CheapestReady, PaasChoice )"
-            ],
+            "expression": "\nVAR Strategy =\n    SELECTEDVALUE ( dim_migration_strategy[migration_strategy], \"Modernize to PaaS\" )\n\n-- Pull from the *bridge* row that the visual is rendering\nVAR db_status = SELECTEDVALUE ( view_esu[db_status] )\nVAR mi_status = SELECTEDVALUE ( view_esu[mi_status] )\nVAR vm_status = SELECTEDVALUE ( view_esu[vm_status] )\n\nVAR db_cost = SELECTEDVALUE ( view_esu[db_total_cost] )\nVAR mi_cost = SELECTEDVALUE ( view_esu[mi_total_cost] )\nVAR vm_cost = SELECTEDVALUE ( view_esu[vm_total_cost] )\n\nVAR db_ready = db_status = \"Ready\" && NOT ISBLANK ( db_cost )\nVAR mi_ready = mi_status = \"Ready\" && NOT ISBLANK ( mi_cost )\nVAR vm_ready = vm_status = \"Ready\" && NOT ISBLANK ( vm_cost )\n\nVAR CheapestReady =\n    SWITCH (\n        TRUE(),\n        db_ready && (NOT mi_ready || db_cost <= mi_cost) && (NOT vm_ready || db_cost <= vm_cost), \"SQL DB\",\n        mi_ready && (NOT db_ready || mi_cost <= db_cost) && (NOT vm_ready || mi_cost <= vm_cost), \"SQL MI\",\n        vm_ready, \"VM\",\n        \"VM*\"\n    )\n\nVAR PaasChoice =\n    SWITCH ( TRUE(),\n        db_ready, \"SQL DB\",\n        mi_ready, \"SQL MI\",\n        vm_ready, \"VM\",\n        \"VM*\"\n    )\n\nRETURN\n    IF ( Strategy = \"Minimize cost\", CheapestReady, PaasChoice )",
             "displayFolder": "kpi\\esu\\azure"
           },
           {
             "name": "azure_run_cost_monthly",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    SUMX(",
-              "        view_esu,",
-              "        VAR mstatus = [azure_modernisation_status]",
-              "        VAR cores = MAX(COALESCE([logical_cores], 0), 2)",
-              "",
-              "        VAR mi_compute = COALESCE([mi_compute_cost], 0)",
-              "        VAR db_compute = COALESCE([db_compute_cost], 0)",
-              "        VAR vm_compute = COALESCE([vm_compute_cost], 0)",
-              "",
-              "        VAR mi_storage = COALESCE([mi_storage_cost], 0)",
-              "        VAR db_storage = COALESCE([db_storage_cost], 0)",
-              "        VAR vm_storage = COALESCE([vm_storage_cost], 0)",
-              "",
-              "        VAR discount = COALESCE([azure_run_cost_discount], 1)",
-              "        VAR user_db_count = COALESCE([user_db_count], 0)",
-              "",
-              "        VAR compute_cost =",
-              "            SWITCH(",
-              "                TRUE(),",
-              "                mstatus = \"VM*\", IF(cores > 2, 47.5 * cores, 47.5),",
-              "                mstatus = \"VM\", vm_compute,",
-              "                mstatus = \"SQL MI\", mi_compute,",
-              "                mstatus = \"SQL DB\", db_compute,",
-              "                0",
-              "            )",
-              "",
-              "        VAR storage_cost =",
-              "            SWITCH(",
-              "                TRUE(),",
-              "                mstatus = \"VM*\", 25,",
-              "                mstatus = \"VM\", vm_storage,",
-              "                mstatus = \"SQL MI\", mi_storage,",
-              "                mstatus = \"SQL DB\", db_storage,",
-              "                0",
-              "            )",
-              "",
-              "        RETURN (compute_cost * discount + storage_cost)",
-              "    )",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    SUMX(\n        view_esu,\n        VAR mstatus = [azure_modernisation_path]\n        VAR cores = MAX(COALESCE([logical_cores], 0), 2)\n\n        VAR mi_compute = COALESCE([mi_compute_cost], 0)\n        VAR db_compute = COALESCE([db_compute_cost], 0)\n        VAR vm_compute = COALESCE([vm_compute_cost], 0)\n\n        VAR mi_storage = COALESCE([mi_storage_cost], 0)\n        VAR db_storage = COALESCE([db_storage_cost], 0)\n        VAR vm_storage = COALESCE([vm_storage_cost], 0)\n\n        VAR discount = COALESCE([azure_run_cost_discount], 1)\n        VAR user_db_count = COALESCE([user_db_count], 0)\n\n        VAR compute_cost =\n            SWITCH(\n                TRUE(),\n                mstatus = \"VM*\", IF(cores > 2, 47.5 * cores, 47.5),\n                mstatus = \"VM\", vm_compute,\n                mstatus = \"SQL MI\", mi_compute,\n                mstatus = \"SQL DB\", db_compute,\n                0\n            )\n\n        VAR storage_cost =\n            SWITCH(\n                TRUE(),\n                mstatus = \"VM*\", 25,\n                mstatus = \"VM\", vm_storage,\n                mstatus = \"SQL MI\", mi_storage,\n                mstatus = \"SQL DB\", db_storage,\n                0\n            )\n\n        RETURN (compute_cost * discount + storage_cost)\n    )\n)",
             "displayFolder": "kpi\\esu\\azure",
             "annotations": [
               {
@@ -6502,15 +6008,7 @@
           },
           {
             "name": "azure_run_cost_quarterly",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    [azure_run_cost_monthly] * 3,",
-              "    REMOVEFILTERS(dim_period_selector) // Ignore slicer if needed",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nCALCULATE(\n    [azure_run_cost_monthly] * 3,\n    REMOVEFILTERS(dim_period_selector) // Ignore slicer if needed\n)\n\n",
             "displayFolder": "kpi\\esu\\azure",
             "annotations": [
               {
@@ -6521,59 +6019,25 @@
           },
           {
             "name": "sql_patch_status_pct",
-            "expression": [
-              "",
-              "DIVIDE(",
-              "    CALCULATE(",
-              "        COUNTROWS(view_sql_instances),",
-              "        view_sql_instances[sql_patch_status] = \"OK\"",
-              "    ),",
-              "    COUNTROWS(view_sql_instances),",
-              "    0",
-              ")"
-            ],
+            "expression": "\nDIVIDE(\n    CALCULATE(\n        COUNTROWS(view_sql_instances),\n        view_sql_instances[sql_patch_status] = \"OK\"\n    ),\n    COUNTROWS(view_sql_instances),\n    0\n)",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "kpi_arc_instance_count_database",
-            "expression": [
-              "",
-              "VAR inst_keys_from_db =",
-              "    CALCULATETABLE (",
-              "        VALUES ( fact_resources[parent_resource_key] ),",
-              "        KEEPFILTERS ( LOWER ( TRIM ( fact_resources[platform] ) ) = \"arc\" ),",
-              "        KEEPFILTERS ( LOWER ( TRIM ( fact_resources[resource_kind] ) ) = \"sql database\" )",
-              "    )",
-              "RETURN",
-              " COUNTROWS ( inst_keys_from_db )",
-              "",
-              ""
-            ],
+            "expression": "\nVAR inst_keys_from_db =\n    CALCULATETABLE (\n        VALUES ( fact_resources[parent_resource_key] ),\n        KEEPFILTERS ( LOWER ( TRIM ( fact_resources[platform] ) ) = \"arc\" ),\n        KEEPFILTERS ( LOWER ( TRIM ( fact_resources[resource_kind] ) ) = \"sql database\" )\n    )\nRETURN\n COUNTROWS ( inst_keys_from_db )\n\n",
             "formatString": "0",
             "displayFolder": "kpi\\sql databases"
           },
           {
             "name": "kpi_extensions_arc_server_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    DISTINCTCOUNT('view_extensions'[parent_resource_key]),",
-              "    KEEPFILTERS('view_extensions'[platform] = \"Arc\")",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    DISTINCTCOUNT('view_extensions'[parent_resource_key]),\n    KEEPFILTERS('view_extensions'[platform] = \"Arc\")\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
           {
             "name": "kpi_extensions_azure_server_count",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    DISTINCTCOUNT('view_extensions'[parent_resource_key]),",
-              "    KEEPFILTERS('view_extensions'[platform] = \"Azure\")",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    DISTINCTCOUNT('view_extensions'[parent_resource_key]),\n    KEEPFILTERS('view_extensions'[platform] = \"Azure\")\n)",
             "formatString": "0",
             "displayFolder": "kpi\\extensions"
           },
@@ -6585,17 +6049,7 @@
           },
           {
             "name": "os_vm_migration_cost",
-            "expression": [
-              "",
-              "VAR SelectedMonths = SELECTEDVALUE(dim_period_selector[months], 0)",
-              "RETURN",
-              "SUMX(",
-              "    ext_arc_servers,",
-              "    COALESCE([logical_cores], 0) * SelectedMonths * 47.5",
-              ")",
-              "",
-              ""
-            ],
+            "expression": "\nVAR SelectedMonths = SELECTEDVALUE(dim_period_selector[months], 0)\nRETURN\nSUMX(\n    ext_arc_servers,\n    COALESCE([logical_cores], 0) * SelectedMonths * 47.5\n)\n\n",
             "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
             "isHidden": true,
             "displayFolder": "kpi\\esu",
@@ -6613,18 +6067,7 @@
           },
           {
             "name": "os_vm_migration_ready",
-            "expression": [
-              "",
-              "VAR Total = COUNTROWS(ext_arc_servers)",
-              "VAR VMReady =",
-              "    CALCULATE(",
-              "        COUNTROWS(ext_arc_servers),",
-              "        SEARCH(\"Virtual Machine\", ext_arc_servers[Model], 1, 0) > 0",
-              "    )",
-              "RETURN",
-              "DIVIDE(VMReady, Total, 0)",
-              ""
-            ],
+            "expression": "\nVAR Total = COUNTROWS(ext_arc_servers)\nVAR VMReady =\n    CALCULATE(\n        COUNTROWS(ext_arc_servers),\n        SEARCH(\"Virtual Machine\", ext_arc_servers[Model], 1, 0) > 0\n    )\nRETURN\nDIVIDE(VMReady, Total, 0)\n",
             "isHidden": true,
             "displayFolder": "kpi\\esu",
             "changedProperties": [
@@ -6641,18 +6084,7 @@
           },
           {
             "name": "os_vm_migration_ready_%",
-            "expression": [
-              "",
-              "VAR Total = COUNTROWS(ext_arc_servers)",
-              "VAR VMReady =",
-              "    CALCULATE(",
-              "        COUNTROWS(ext_arc_servers),",
-              "        SEARCH(\"Virtual Machine\", ext_arc_servers[Model], 1, 0) > 0",
-              "    )",
-              "RETURN",
-              "DIVIDE(VMReady, Total, 0)",
-              ""
-            ],
+            "expression": "\nVAR Total = COUNTROWS(ext_arc_servers)\nVAR VMReady =\n    CALCULATE(\n        COUNTROWS(ext_arc_servers),\n        SEARCH(\"Virtual Machine\", ext_arc_servers[Model], 1, 0) > 0\n    )\nRETURN\nDIVIDE(VMReady, Total, 0)\n",
             "formatString": "0%;-0%;0%",
             "isHidden": true,
             "displayFolder": "kpi\\esu",
@@ -6694,132 +6126,60 @@
           },
           {
             "name": "sql_cores_license_type",
-            "expression": [
-              "",
-              "VAR SelectedType = SELECTEDVALUE('view_sql_instances'[sql_license_type])",
-              "RETURN",
-              "IF(",
-              "    ISFILTERED('view_sql_instances'[sql_license_type]),",
-              "    CALCULATE([kpi_all_sql_cores], 'view_sql_instances'[sql_license_type] = SelectedType),",
-              "    CALCULATE([kpi_all_sql_cores], 'view_sql_instances'[sql_license_type] = \"AHUB\")",
-              ")"
-            ],
+            "expression": "\nVAR SelectedType = SELECTEDVALUE('view_sql_instances'[sql_license_type])\nRETURN\nIF(\n    ISFILTERED('view_sql_instances'[sql_license_type]),\n    CALCULATE([kpi_all_sql_cores], 'view_sql_instances'[sql_license_type] = SelectedType),\n    CALCULATE([kpi_all_sql_cores], 'view_sql_instances'[sql_license_type] = \"AHUB\")\n)",
             "formatString": "0",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "sql_license_card_label_text",
-            "expression": [
-              "",
-              "VAR SelectedType = SELECTEDVALUE('view_sql_instances'[sql_license_type], \"AHUB\")",
-              "RETURN ",
-              "\"SQL Cores under \" & SelectedType"
-            ],
+            "expression": "\nVAR SelectedType = SELECTEDVALUE('view_sql_instances'[sql_license_type], \"AHUB\")\nRETURN \n\"SQL Cores under \" & SelectedType",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "server_cores_license_type",
-            "expression": [
-              "",
-              "VAR SelectedType = SELECTEDVALUE('view_servers'[server_license_type])",
-              "RETURN",
-              "IF(",
-              "    ISFILTERED('view_servers'[server_license_type]),",
-              "    CALCULATE([kpi_all_server_cores], 'view_servers'[server_license_type] = SelectedType),",
-              "    CALCULATE([kpi_all_server_cores], 'view_servers'[server_license_type] = \"AHUB\")",
-              ")"
-            ],
+            "expression": "\nVAR SelectedType = SELECTEDVALUE('view_servers'[server_license_type])\nRETURN\nIF(\n    ISFILTERED('view_servers'[server_license_type]),\n    CALCULATE([kpi_all_server_cores], 'view_servers'[server_license_type] = SelectedType),\n    CALCULATE([kpi_all_server_cores], 'view_servers'[server_license_type] = \"AHUB\")\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "server_license_card_label_text",
-            "expression": [
-              "",
-              "VAR SelectedType = SELECTEDVALUE('view_servers'[server_license_type], \"AHUB\")",
-              "RETURN ",
-              "\"Server Cores under \" & SelectedType"
-            ],
+            "expression": "\nVAR SelectedType = SELECTEDVALUE('view_servers'[server_license_type], \"AHUB\")\nRETURN \n\"Server Cores under \" & SelectedType",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_server_cores_ahub",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    [kpi_all_server_cores], ",
-              "    'view_servers'[server_license_type] = \"AHUB\"",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    [kpi_all_server_cores], \n    'view_servers'[server_license_type] = \"AHUB\"\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_server_cores_payg",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    [kpi_all_server_cores], ",
-              "    'view_servers'[server_license_type] = \"PAYG\"",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    [kpi_all_server_cores], \n    'view_servers'[server_license_type] = \"PAYG\"\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "service_type_engine_pct",
-            "expression": [
-              "",
-              "DIVIDE (",
-              "    CALCULATE (",
-              "        COUNTROWS ( view_sql_instances ),",
-              "        view_sql_instances[service_type] = \"Engine\"",
-              "    ),",
-              "    COUNTROWS ( view_sql_instances )",
-              ")"
-            ],
+            "expression": "\nDIVIDE (\n    CALCULATE (\n        COUNTROWS ( view_sql_instances ),\n        view_sql_instances[service_type] = \"Engine\"\n    ),\n    COUNTROWS ( view_sql_instances )\n)",
             "formatString": "0.00%;-0.00%;0.00%",
             "displayFolder": "kpi\\sql instances"
           },
           {
             "name": "sql_version_filter",
-            "expression": [
-              "",
-              "VAR is_esu_only = SELECTEDVALUE('view_esu'[esu_status]) = \"TRUE\"",
-              "VAR sql_status = SELECTEDVALUE('view_esu'[sql_esu_status])",
-              "",
-              "RETURN",
-              "IF(",
-              "    is_esu_only,",
-              "    IF(LOWER(TRIM(sql_status)) IN { \"upcoming\", \"esu\" }, 1, 0),",
-              "    1",
-              ")"
-            ],
+            "expression": "\nVAR is_esu_only = SELECTEDVALUE('view_esu'[esu_status]) = \"TRUE\"\nVAR sql_status = SELECTEDVALUE('view_esu'[sql_esu_status])\n\nRETURN\nIF(\n    is_esu_only,\n    IF(LOWER(TRIM(sql_status)) IN { \"upcoming\", \"esu\" }, 1, 0),\n    1\n)",
             "formatString": "0",
             "displayFolder": "kpi\\esu"
           },
           {
             "name": "kpi_sql_servers_discovered",
-            "expression": [
-              "",
-              "CALCULATE(",
-              "    COUNTROWS(view_servers),",
-              "    view_servers[mssql_discovered] = TRUE()",
-              ")"
-            ],
+            "expression": "\nCALCULATE(\n    COUNTROWS(view_servers),\n    view_servers[mssql_discovered] = TRUE()\n)",
             "formatString": "0",
             "displayFolder": "kpi\\servers"
           },
           {
             "name": "kpi_enterprise_sql_instance_count",
             "description": "Number of Arc-enabled SQL Server instances running an Enterprise edition.",
-            "expression": [
-              "CALCULATE(",
-              "    COUNTROWS(view_sql_instances),",
-              "    view_sql_instances[platform] = \"Arc\",",
-              "    FILTER(view_sql_instances, CONTAINSSTRING(LOWER(view_sql_instances[sql_edition]), \"enterprise\"))",
-              ")"
-            ],
+            "expression": "CALCULATE(\n    COUNTROWS(view_sql_instances),\n    view_sql_instances[platform] = \"Arc\",\n    FILTER(view_sql_instances, CONTAINSSTRING(LOWER(view_sql_instances[sql_edition]), \"enterprise\"))\n)",
             "formatString": "#,##0",
             "displayFolder": "Arc SQL Strategy",
             "lineageTag": "befbc92a-630c-41e0-9c3f-f9852e7968b4"
@@ -6827,16 +6187,7 @@
           {
             "name": "kpi_mi_ready_sql_instance_count",
             "description": "Arc-enabled SQL instances reported as ready or conditionally ready for Azure SQL Managed Instance.",
-            "expression": [
-              "CALCULATE(",
-              "    COUNTROWS(view_sql_instances),",
-              "    view_sql_instances[platform] = \"Arc\",",
-              "    FILTER(",
-              "        view_sql_instances,",
-              "        LOWER(view_sql_instances[mi_status]) IN { \"ready\", \"suitable\", \"conditionallysuitable\", \"readywithconditions\", \"conditionally ready\", \"ready with conditions\" }",
-              "    )",
-              ")"
-            ],
+            "expression": "CALCULATE(\n    COUNTROWS(view_sql_instances),\n    view_sql_instances[platform] = \"Arc\",\n    FILTER(\n        view_sql_instances,\n        LOWER(view_sql_instances[mi_status]) IN { \"ready\", \"suitable\", \"conditionallysuitable\", \"readywithconditions\", \"conditionally ready\", \"ready with conditions\" }\n    )\n)",
             "formatString": "#,##0",
             "displayFolder": "Arc SQL Strategy",
             "lineageTag": "e4c595f0-c12e-40b6-85a7-30f60b218ca0"
@@ -6868,14 +6219,7 @@
           {
             "name": "kpi_missing_security_patch_count",
             "description": "Missing patches whose Update Manager classification contains Security.",
-            "expression": [
-              "COUNTROWS(",
-              "    FILTER(",
-              "        view_missing_patches,",
-              "        CONTAINSSTRING(LOWER(view_missing_patches[classification]), \"security\")",
-              "    )",
-              ")"
-            ],
+            "expression": "COUNTROWS(\n    FILTER(\n        view_missing_patches,\n        CONTAINSSTRING(LOWER(view_missing_patches[classification]), \"security\")\n    )\n)",
             "formatString": "#,##0",
             "displayFolder": "Arc SQL Strategy",
             "lineageTag": "4e8cbc17-1fa9-4b98-bc47-cb3523016661"
@@ -6883,14 +6227,7 @@
           {
             "name": "kpi_missing_critical_patch_count",
             "description": "Missing patches whose Update Manager classification contains Critical.",
-            "expression": [
-              "COUNTROWS(",
-              "    FILTER(",
-              "        view_missing_patches,",
-              "        CONTAINSSTRING(LOWER(view_missing_patches[classification]), \"critical\")",
-              "    )",
-              ")"
-            ],
+            "expression": "COUNTROWS(\n    FILTER(\n        view_missing_patches,\n        CONTAINSSTRING(LOWER(view_missing_patches[classification]), \"critical\")\n    )\n)",
             "formatString": "#,##0",
             "displayFolder": "Arc SQL Strategy",
             "lineageTag": "bd76ef00-29a2-4414-b501-d8d6f785c2d3"
@@ -7008,6 +6345,34 @@
             "lineageTag": "cbf92d6c-5d43-4ca9-813f-b9bdd1d06efc"
           },
           {
+            "name": "kpi_standard_license_sa_annual_cost_per_core",
+            "description": "Optional annualized customer price per Standard core for a new licence with Software Assurance.",
+            "expression": "MAX ( licensing_inputs[standard_license_sa_annual_cost_per_core] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "f1d2f084-33c0-4973-b245-6c570e20727c",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_enterprise_license_sa_annual_cost_per_core",
+            "description": "Optional annualized customer price per Enterprise core for a new licence with Software Assurance.",
+            "expression": "MAX ( licensing_inputs[enterprise_license_sa_annual_cost_per_core] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "87d2651f-ad2d-41ea-a343-7dbd53718ddb",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
             "name": "kpi_owned_sa_cores",
             "description": "Total customer-owned SQL Server cores covered by active Software Assurance.",
             "expression": "COALESCE ( [kpi_owned_standard_sa_cores], 0 ) + COALESCE ( [kpi_owned_enterprise_sa_cores], 0 )",
@@ -7032,9 +6397,25 @@
             "lineageTag": "622877fe-6478-4bba-9348-fbaa3313fd12"
           },
           {
+            "name": "kpi_target_standard_ahb_required_cores",
+            "description": "Standard Database Engine cores predicted for the selected Azure target path by the migration assessment.",
+            "expression": "COALESCE (\n    SUMX (\n        FILTER (\n            view_esu,\n            LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\"\n                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" )\n        ),\n        VAR _path = [azure_modernisation_path]\n        RETURN\n            COALESCE (\n                SWITCH (\n                    _path,\n                    \"SQL MI\", view_esu[mi_target_cores],\n                    \"SQL DB\", view_esu[db_target_cores],\n                    \"VM\", view_esu[vm_target_cores]\n                ),\n                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )\n            )\n    ),\n    0\n)",
+            "formatString": "#,##0",
+            "displayFolder": "Licensing",
+            "lineageTag": "13c76e13-1933-43d5-b191-239066591c99"
+          },
+          {
+            "name": "kpi_target_enterprise_ahb_required_cores",
+            "description": "Enterprise Database Engine cores predicted for the selected Azure target path by the migration assessment.",
+            "expression": "COALESCE (\n    SUMX (\n        FILTER (\n            view_esu,\n            LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\"\n                && CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" )\n        ),\n        VAR _path = [azure_modernisation_path]\n        RETURN\n            COALESCE (\n                SWITCH (\n                    _path,\n                    \"SQL MI\", view_esu[mi_target_cores],\n                    \"SQL DB\", view_esu[db_target_cores],\n                    \"VM\", view_esu[vm_target_cores]\n                ),\n                MAX ( COALESCE ( view_esu[logical_cores], 0 ), 2 )\n            )\n    ),\n    0\n)",
+            "formatString": "#,##0",
+            "displayFolder": "Licensing",
+            "lineageTag": "c7037c8e-d8a3-4443-86c4-b44713a56ee0"
+          },
+          {
             "name": "kpi_target_ahb_required_cores",
-            "description": "Database Engine cores predicted for the Azure target estate by the ESU forecast assessment.",
-            "expression": "CALCULATE (\n    SUM ( view_esu[azure_run_cores] ),\n    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\" ),\n    KEEPFILTERS (\n        CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" )\n            || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" )\n    )\n)",
+            "description": "Database Engine cores predicted for the selected Azure target path by the migration assessment.",
+            "expression": "[kpi_target_standard_ahb_required_cores] + [kpi_target_enterprise_ahb_required_cores]",
             "formatString": "#,##0",
             "displayFolder": "Licensing",
             "lineageTag": "57b68e77-735e-4526-ac5a-f0a1f9eba93a"
@@ -7042,7 +6423,7 @@
           {
             "name": "kpi_target_ahb_covered_cores",
             "description": "Forecast Azure target cores covered by edition-matched owned Software Assurance.",
-            "expression": "VAR _enterpriseTargetCores =\n    CALCULATE (\n        SUM ( view_esu[azure_run_cores] ),\n        KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\" ),\n        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" ) )\n    )\nVAR _standardTargetCores =\n    CALCULATE (\n        SUM ( view_esu[azure_run_cores] ),\n        KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\" ),\n        KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" ) )\n    )\nVAR _enterpriseCovered = MIN ( COALESCE ( [kpi_owned_enterprise_sa_cores], 0 ), COALESCE ( _enterpriseTargetCores, 0 ) )\nVAR _standardCovered = MIN ( COALESCE ( [kpi_owned_standard_sa_cores], 0 ), COALESCE ( _standardTargetCores, 0 ) )\nRETURN\n    _enterpriseCovered + _standardCovered",
+            "expression": "VAR _enterpriseTargetCores = [kpi_target_enterprise_ahb_required_cores]\nVAR _standardTargetCores = [kpi_target_standard_ahb_required_cores]\nVAR _enterpriseCovered = MIN ( COALESCE ( [kpi_owned_enterprise_sa_cores], 0 ), COALESCE ( _enterpriseTargetCores, 0 ) )\nVAR _standardCovered = MIN ( COALESCE ( [kpi_owned_standard_sa_cores], 0 ), COALESCE ( _standardTargetCores, 0 ) )\nRETURN\n    _enterpriseCovered + _standardCovered",
             "formatString": "#,##0",
             "displayFolder": "Licensing",
             "lineageTag": "d76fb6a2-70b8-4806-b053-674489ffeb51"
@@ -7054,6 +6435,148 @@
             "formatString": "#,##0",
             "displayFolder": "Licensing",
             "lineageTag": "2f181053-68b0-44eb-af40-64441e9dc7fa"
+          },
+          {
+            "name": "kpi_target_standard_ahb_core_gap",
+            "description": "Standard target cores that exceed the edition-matched owned Software Assurance position.",
+            "expression": "MAX ( 0, [kpi_target_standard_ahb_required_cores] - [kpi_owned_standard_sa_cores] )",
+            "formatString": "#,##0",
+            "displayFolder": "Licensing",
+            "lineageTag": "62cc1d61-9364-46ad-9a51-e31d7d4ad568"
+          },
+          {
+            "name": "kpi_target_enterprise_ahb_core_gap",
+            "description": "Enterprise target cores that exceed the edition-matched owned Software Assurance position.",
+            "expression": "MAX ( 0, [kpi_target_enterprise_ahb_required_cores] - [kpi_owned_enterprise_sa_cores] )",
+            "formatString": "#,##0",
+            "displayFolder": "Licensing",
+            "lineageTag": "0315780f-9a7c-479e-9239-2e78e2683f60"
+          },
+          {
+            "name": "kpi_target_sql_payg_license_cost_monthly",
+            "description": "Monthly SQL PAYG licence component reported by the migration assessment for the selected target path.",
+            "expression": "SUMX (\n    FILTER (\n        view_esu,\n        LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\"\n            && (\n                CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" )\n                    || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" )\n            )\n    ),\n    SWITCH (\n        [azure_modernisation_path],\n        \"SQL MI\", view_esu[mi_sql_license_cost],\n        \"SQL DB\", view_esu[db_sql_license_cost],\n        \"VM\", view_esu[vm_sql_license_cost]\n    )\n)",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "02958854-e048-491e-a576-d03311390fc4",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_target_standard_sql_payg_license_cost_monthly",
+            "description": "Monthly SQL PAYG licence component attributable to Standard target cores.",
+            "expression": "CALCULATE (\n    [kpi_target_sql_payg_license_cost_monthly],\n    KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" ) )\n)",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "faea0fa4-943b-4fa8-b25f-253a09bb5935",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_target_enterprise_sql_payg_license_cost_monthly",
+            "description": "Monthly SQL PAYG licence component attributable to Enterprise target cores.",
+            "expression": "CALCULATE (\n    [kpi_target_sql_payg_license_cost_monthly],\n    KEEPFILTERS ( CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" ) )\n)",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "f49333f5-523d-42b8-a070-f5dccbc1131d",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_gap_sql_payg_license_cost_monthly",
+            "description": "Monthly SQL PAYG licence cost for only the target-core shortfall not covered by owned Software Assurance.",
+            "expression": "VAR _standardRatio =\n    DIVIDE ( [kpi_target_standard_ahb_core_gap], [kpi_target_standard_ahb_required_cores], 0 )\nVAR _enterpriseRatio =\n    DIVIDE ( [kpi_target_enterprise_ahb_core_gap], [kpi_target_enterprise_ahb_required_cores], 0 )\nRETURN\n    [kpi_target_standard_sql_payg_license_cost_monthly] * _standardRatio\n        + [kpi_target_enterprise_sql_payg_license_cost_monthly] * _enterpriseRatio",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "7ab40948-5cb3-49db-b520-02df4a20d95a",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_gap_license_sa_cost_monthly",
+            "description": "Annualized monthly cost of acquiring enough new Standard and Enterprise License+SA cores to close the target gap.",
+            "expression": "VAR _standardGap = [kpi_target_standard_ahb_core_gap]\nVAR _enterpriseGap = [kpi_target_enterprise_ahb_core_gap]\nVAR _standardRate = [kpi_standard_license_sa_annual_cost_per_core]\nVAR _enterpriseRate = [kpi_enterprise_license_sa_annual_cost_per_core]\nVAR _missingRequiredRate =\n    ( _standardGap > 0 && ISBLANK ( _standardRate ) )\n        || ( _enterpriseGap > 0 && ISBLANK ( _enterpriseRate ) )\nRETURN\n    IF (\n        _missingRequiredRate,\n        BLANK (),\n        DIVIDE (\n            _standardGap * COALESCE ( _standardRate, 0 )\n                + _enterpriseGap * COALESCE ( _enterpriseRate, 0 ),\n            12\n        )\n    )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "be2fba7a-83a8-4355-a645-70809b3c6463",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_payg_gap_option_monthly",
+            "description": "Monthly migration run cost when existing SA covers matched cores and the remaining SQL licence requirement uses PAYG.",
+            "expression": "[azure_run_cost_monthly] + [kpi_gap_sql_payg_license_cost_monthly]",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "9818e158-c6ad-4893-a32d-cdcb2ca2bedf",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_license_sa_gap_option_monthly",
+            "description": "Monthly migration run cost when existing SA covers matched cores and new License+SA is acquired for the remaining core gap.",
+            "expression": "VAR _purchaseCost = [kpi_gap_license_sa_cost_monthly]\nRETURN IF ( ISBLANK ( _purchaseCost ), BLANK (), [azure_run_cost_monthly] + _purchaseCost )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "ad03d716-ffb4-4148-b415-811b9501f4af",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_licensing_option_saving_monthly",
+            "description": "Absolute monthly difference between using SQL PAYG and acquiring License+SA for the uncovered target cores.",
+            "expression": "VAR _payg = [kpi_payg_gap_option_monthly]\nVAR _licenseSa = [kpi_license_sa_gap_option_monthly]\nRETURN IF ( ISBLANK ( _licenseSa ), BLANK (), ABS ( _payg - _licenseSa ) )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing",
+            "lineageTag": "221761dd-d2a9-45a1-b903-4edc9c452355",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_cheaper_licensing_option",
+            "description": "Decision label for the cheaper treatment of target cores not covered by existing Software Assurance.",
+            "expression": "VAR _gap = [kpi_target_ahb_core_gap]\nVAR _payg = [kpi_payg_gap_option_monthly]\nVAR _licenseSa = [kpi_license_sa_gap_option_monthly]\nRETURN\n    SWITCH (\n        TRUE (),\n        _gap = 0, \"Existing SA covers the assessed target\",\n        ISBLANK ( _licenseSa ), \"Enter License+SA annual core prices\",\n        _payg < _licenseSa, \"SQL PAYG is cheaper for the gap\",\n        _licenseSa < _payg, \"License + SA is cheaper for the gap\",\n        \"Options have the same monthly equivalent cost\"\n    )",
+            "displayFolder": "Licensing",
+            "lineageTag": "801f7305-8570-4b35-899d-ed364c4235c0"
+          },
+          {
+            "name": "licensing_cost_assumption_text",
+            "description": "Pricing scope and data-quality disclosure for the licensing comparison.",
+            "expression": "VAR _gap = [kpi_target_ahb_core_gap]\nVAR _missingAssessmentCost =\n    COUNTROWS (\n        FILTER (\n            view_esu,\n            LOWER ( TRIM ( COALESCE ( view_esu[service_type], \"\" ) ) ) = \"engine\"\n                && (\n                    CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"standard\" )\n                        || CONTAINSSTRING ( LOWER ( COALESCE ( view_esu[sql_edition], \"\" ) ), \"enterprise\" )\n                )\n                && ISBLANK (\n                    SWITCH (\n                        [azure_modernisation_path],\n                        \"SQL MI\", view_esu[mi_sql_license_cost],\n                        \"SQL DB\", view_esu[db_sql_license_cost],\n                        \"VM\", view_esu[vm_sql_license_cost]\n                    )\n                )\n        )\n    )\nVAR _missingRate =\n    ( [kpi_target_standard_ahb_core_gap] > 0 && ISBLANK ( [kpi_standard_license_sa_annual_cost_per_core] ) )\n        || ( [kpi_target_enterprise_ahb_core_gap] > 0 && ISBLANK ( [kpi_enterprise_license_sa_annual_cost_per_core] ) )\nRETURN\n    SWITCH (\n        TRUE (),\n        _gap = 0, \"No target-core shortfall: the owned edition-matched SA position covers the assessed target.\",\n        _missingAssessmentCost > 0, \"Some selected targets do not expose an assessment SQL licence cost. PAYG totals exclude those rows and must be treated as incomplete.\",\n        _missingRate, \"PAYG uses the assessment's SQL licence component. Enter the customer's annualized License+SA cost per core to enable the purchase comparison.\",\n        \"PAYG uses the assessment's SQL licence component. License+SA uses customer-entered annualized per-core pricing. Both options include the same assessed AHB infrastructure baseline.\"\n    )",
+            "displayFolder": "Licensing",
+            "lineageTag": "c1ae0f3e-01da-4b4d-b7b5-55a9b2f1aee0"
           }
         ],
         "annotations": [
@@ -9357,6 +8880,37 @@
           },
           {
             "type": "calculatedTableColumn",
+            "name": "mi_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[mi_sql_license_cost]",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "mi_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[mi_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
             "name": "db_compute_cost",
             "isNameInferred": true,
             "sourceColumn": "[db_compute_cost]",
@@ -9374,6 +8928,37 @@
           },
           {
             "type": "calculatedTableColumn",
+            "name": "db_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[db_sql_license_cost]",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "db_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[db_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
             "name": "vm_compute_cost",
             "isNameInferred": true,
             "sourceColumn": "[vm_compute_cost]",
@@ -9386,6 +8971,37 @@
               {
                 "name": "PBI_FormatHint",
                 "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "vm_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[vm_sql_license_cost]",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "vm_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[vm_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "none",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
               }
             ]
           },
@@ -9547,9 +9163,9 @@
           {
             "type": "calculatedTableColumn",
             "name": "sql_license_type",
+            "isNameInferred": true,
             "description": "Deprecated compatibility field. Do not use for entitlement analysis because it historically conflated billing mode with Azure Hybrid Benefit.",
             "isHidden": true,
-            "isNameInferred": true,
             "sourceColumn": "[sql_license_type]",
             "summarizeBy": "none",
             "annotations": [
@@ -9564,7 +9180,36 @@
             "name": "billing_mode",
             "dataType": "string",
             "description": "Normalized Arc extension or Azure SQL VM billing/licence configuration. This field does not prove Software Assurance entitlement.",
-            "expression": "VAR _resourceKey = view_sql_instances[resource_key]\nVAR _rawValue =\n    COALESCE (\n        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),\n        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )\n    )\nVAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, \"\" ) ) )\nVAR _compact =\n    SUBSTITUTE (\n        SUBSTITUTE (\n            SUBSTITUTE ( _normalized, \" \", \"\" ),\n            \"/\",\n            \"\"\n        ),\n        \"+\",\n        \"\"\n    )\nRETURN\n    SWITCH (\n        TRUE (),\n        _compact = \"\", \"Unknown\",\n        _compact = \"paid\", \"Paid\",\n        _compact = \"payg\", \"PAYG\",\n        _compact = \"licenseonly\", \"License only\",\n        _compact IN { \"ahub\", \"azurehybridbenefit\" }, \"AHB configured\",\n        _compact = \"servercal\", \"Server/CAL source signal\",\n        _rawValue\n    )",
+            "expression": [
+              "VAR _resourceKey = view_sql_instances[resource_key]",
+              "VAR _rawValue =",
+              "    COALESCE (",
+              "        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),",
+              "        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )",
+              "    )",
+              "VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, \"\" ) ) )",
+              "VAR _compact =",
+              "    SUBSTITUTE (",
+              "        SUBSTITUTE (",
+              "            SUBSTITUTE ( _normalized, \" \", \"\" ),",
+              "            \"/\",",
+              "            \"\"",
+              "        ),",
+              "        \"+\",",
+              "        \"\"",
+              "    )",
+              "RETURN",
+              "    SWITCH (",
+              "        TRUE (),",
+              "        _compact = \"\", \"Unknown\",",
+              "        _compact = \"paid\", \"Paid\",",
+              "        _compact = \"payg\", \"PAYG\",",
+              "        _compact = \"licenseonly\", \"License only\",",
+              "        _compact IN { \"ahub\", \"azurehybridbenefit\" }, \"AHB configured\",",
+              "        _compact = \"servercal\", \"Server/CAL source signal\",",
+              "        _rawValue",
+              "    )"
+            ],
             "lineageTag": "831f2ea5-43ca-429f-abb4-b7c3e2e2ec9d",
             "summarizeBy": "none"
           },
@@ -9573,7 +9218,22 @@
             "name": "licensing_model",
             "dataType": "string",
             "description": "Current SQL licensing model where explicitly supported by source evidence; ambiguous billing values remain Unknown.",
-            "expression": "VAR _resourceKey = view_sql_instances[resource_key]\nVAR _rawValue =\n    COALESCE (\n        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),\n        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )\n    )\nVAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, \"\" ) ) )\nRETURN\n    SWITCH (\n        TRUE (),\n        _normalized IN { \"servercal\", \"server/cal\", \"server + cal\" }, \"Server/CAL\",\n        _normalized IN { \"core\", \"percore\", \"per core\" }, \"Core\",\n        \"Unknown\"\n    )",
+            "expression": [
+              "VAR _resourceKey = view_sql_instances[resource_key]",
+              "VAR _rawValue =",
+              "    COALESCE (",
+              "        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),",
+              "        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )",
+              "    )",
+              "VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, \"\" ) ) )",
+              "RETURN",
+              "    SWITCH (",
+              "        TRUE (),",
+              "        _normalized IN { \"servercal\", \"server/cal\", \"server + cal\" }, \"Server/CAL\",",
+              "        _normalized IN { \"core\", \"percore\", \"per core\" }, \"Core\",",
+              "        \"Unknown\"",
+              "    )"
+            ],
             "lineageTag": "52ff3815-2d31-42a1-ac48-d495751119d3",
             "summarizeBy": "none"
           },
@@ -9582,7 +9242,15 @@
             "name": "licensable_cores",
             "dataType": "int64",
             "description": "Core count used for licensing reconciliation at SQL resource grain, preferring reported SQL vCores/cores and then parent logical cores.",
-            "expression": "VAR _resourceKey = view_sql_instances[resource_key]\nRETURN\n    COALESCE (\n        LOOKUPVALUE ( ext_arc_sql_instances[vcore], ext_arc_sql_instances[resource_key], _resourceKey ),\n        LOOKUPVALUE ( ext_arc_sql_instances[cores], ext_arc_sql_instances[resource_key], _resourceKey ),\n        view_sql_instances[logical_cores]\n    )",
+            "expression": [
+              "VAR _resourceKey = view_sql_instances[resource_key]",
+              "RETURN",
+              "    COALESCE (",
+              "        LOOKUPVALUE ( ext_arc_sql_instances[vcore], ext_arc_sql_instances[resource_key], _resourceKey ),",
+              "        LOOKUPVALUE ( ext_arc_sql_instances[cores], ext_arc_sql_instances[resource_key], _resourceKey ),",
+              "        view_sql_instances[logical_cores]",
+              "    )"
+            ],
             "formatString": "#,##0",
             "lineageTag": "6d190ab7-6c59-4bfa-bcfd-797ace444664",
             "summarizeBy": "none"
@@ -9755,13 +9423,31 @@
                 "        \"mi_compute_cost\",",
                 "            LOOKUPVALUE ( ext_arc_sql_instances[mi_compute_cost],",
                 "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"mi_sql_license_cost\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[mi_sql_license_cost],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"mi_target_cores\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[mi_target_cores],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
                 "",
                 "        \"db_compute_cost\",",
                 "            LOOKUPVALUE ( ext_arc_sql_instances[db_compute_cost],",
                 "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"db_sql_license_cost\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[db_sql_license_cost],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"db_target_cores\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[db_target_cores],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
                 "",
                 "        \"vm_compute_cost\",",
                 "            LOOKUPVALUE ( ext_arc_sql_instances[vm_compute_cost],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"vm_sql_license_cost\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[vm_sql_license_cost],",
+                "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
+                "        \"vm_target_cores\",",
+                "            LOOKUPVALUE ( ext_arc_sql_instances[vm_target_cores],",
                 "                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),",
                 "",
                 "        \"mi_storage_cost\",",
@@ -10009,8 +9695,14 @@
                 "    ",
                 "    /* >>> the 12 cost/status fields  <<< */",
                 "    \"mi_compute_cost\", [mi_compute_cost],",
+                "    \"mi_sql_license_cost\", [mi_sql_license_cost],",
+                "    \"mi_target_cores\", [mi_target_cores],",
                 "    \"db_compute_cost\", [db_compute_cost],",
+                "    \"db_sql_license_cost\", [db_sql_license_cost],",
+                "    \"db_target_cores\", [db_target_cores],",
                 "    \"vm_compute_cost\", [vm_compute_cost],",
+                "    \"vm_sql_license_cost\", [vm_sql_license_cost],",
+                "    \"vm_target_cores\", [vm_target_cores],",
                 "    \"mi_storage_cost\", [mi_storage_cost],",
                 "    \"db_storage_cost\", [db_storage_cost],",
                 "    \"vm_storage_cost\", [vm_storage_cost],",
@@ -11736,6 +11428,37 @@
           },
           {
             "type": "calculatedTableColumn",
+            "name": "mi_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[mi_sql_license_cost]",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "mi_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[mi_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
             "name": "db_compute_cost",
             "isNameInferred": true,
             "sourceColumn": "[db_compute_cost]",
@@ -11753,6 +11476,37 @@
           },
           {
             "type": "calculatedTableColumn",
+            "name": "db_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[db_sql_license_cost]",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "db_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[db_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
             "name": "vm_compute_cost",
             "isNameInferred": true,
             "sourceColumn": "[vm_compute_cost]",
@@ -11765,6 +11519,37 @@
               {
                 "name": "PBI_FormatHint",
                 "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "vm_sql_license_cost",
+            "isNameInferred": true,
+            "sourceColumn": "[vm_sql_license_cost]",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
+              },
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"isGeneralNumber\":true}"
+              }
+            ]
+          },
+          {
+            "type": "calculatedTableColumn",
+            "name": "vm_target_cores",
+            "isNameInferred": true,
+            "sourceColumn": "[vm_target_cores]",
+            "formatString": "0",
+            "summarizeBy": "sum",
+            "annotations": [
+              {
+                "name": "SummarizationSetBy",
+                "value": "Automatic"
               }
             ]
           },
@@ -12180,8 +11965,14 @@
                 "        \"sql_version\",              view_sql_instances[sql_version],",
                 "        \"sql_edition\",              view_sql_instances[sql_edition],",
                 "        \"mi_compute_cost\",          view_sql_instances[mi_compute_cost],",
+                "        \"mi_sql_license_cost\",      view_sql_instances[mi_sql_license_cost],",
+                "        \"mi_target_cores\",          view_sql_instances[mi_target_cores],",
                 "        \"db_compute_cost\",          view_sql_instances[db_compute_cost],",
+                "        \"db_sql_license_cost\",      view_sql_instances[db_sql_license_cost],",
+                "        \"db_target_cores\",          view_sql_instances[db_target_cores],",
                 "        \"vm_compute_cost\",          view_sql_instances[vm_compute_cost],",
+                "        \"vm_sql_license_cost\",      view_sql_instances[vm_sql_license_cost],",
+                "        \"vm_target_cores\",          view_sql_instances[vm_target_cores],",
                 "        \"mi_storage_cost\",          view_sql_instances[mi_storage_cost],",
                 "        \"db_storage_cost\",          view_sql_instances[db_storage_cost],",
                 "        \"vm_storage_cost\",          view_sql_instances[vm_storage_cost],",
@@ -12274,8 +12065,14 @@
                 "    \"sql_version\",              [sql_version],",
                 "    \"sql_edition\",              [sql_edition],",
                 "    \"mi_compute_cost\",          [mi_compute_cost],",
+                "    \"mi_sql_license_cost\",      [mi_sql_license_cost],",
+                "    \"mi_target_cores\",          [mi_target_cores],",
                 "    \"db_compute_cost\",          [db_compute_cost],",
+                "    \"db_sql_license_cost\",      [db_sql_license_cost],",
+                "    \"db_target_cores\",          [db_target_cores],",
                 "    \"vm_compute_cost\",          [vm_compute_cost],",
+                "    \"vm_sql_license_cost\",      [vm_sql_license_cost],",
+                "    \"vm_target_cores\",          [vm_target_cores],",
                 "    \"mi_storage_cost\",          [mi_storage_cost],",
                 "    \"db_storage_cost\",          [db_storage_cost],",
                 "    \"vm_storage_cost\",          [vm_storage_cost],",
@@ -14887,6 +14684,24 @@
             "sourceColumn": "enterprise_sa_cores",
             "lineageTag": "fe6e02ac-5d4d-4979-a609-dbf534b39cc3",
             "summarizeBy": "none"
+          },
+          {
+            "name": "standard_license_sa_annual_cost_per_core",
+            "dataType": "decimal",
+            "description": "Optional annualized customer price per Standard core for a new licence with Software Assurance.",
+            "isHidden": true,
+            "sourceColumn": "standard_license_sa_annual_cost_per_core",
+            "lineageTag": "82499478-642e-4c6f-bb72-b2038200c005",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "enterprise_license_sa_annual_cost_per_core",
+            "dataType": "decimal",
+            "description": "Optional annualized customer price per Enterprise core for a new licence with Software Assurance.",
+            "isHidden": true,
+            "sourceColumn": "enterprise_license_sa_annual_cost_per_core",
+            "lineageTag": "4ec3102f-d8ce-4418-9341-e22ac80a451e",
+            "summarizeBy": "none"
           }
         ],
         "partitions": [
@@ -14895,7 +14710,40 @@
             "mode": "import",
             "source": {
               "type": "m",
-              "expression": "let\n    ParseCores = (value as any) as number =>\n        let parsed = try Number.RoundDown(Number.FromText(Text.Trim(Text.From(value)), \"en-GB\")) otherwise 0\n        in if parsed < 0 then 0 else parsed,\n    Raw = #table(\n        type table [\n            standard_sa_cores = number,\n            enterprise_sa_cores = number\n        ],\n        {{\n            ParseCores(Licensing_Standard_SA_Cores),\n            ParseCores(Licensing_Enterprise_SA_Cores)\n        }}\n    ),\n    Source = Table.TransformColumnTypes(\n        Raw,\n        {\n            {\"standard_sa_cores\", Int64.Type},\n            {\"enterprise_sa_cores\", Int64.Type}\n        }\n    )\nin\n    Source"
+              "expression": [
+                "let",
+                "    ParseCores = (value as any) as number =>",
+                "        let parsed = try Number.RoundDown(Number.FromText(Text.Trim(Text.From(value)), \"en-GB\")) otherwise 0",
+                "        in if parsed < 0 then 0 else parsed,",
+                "    ParseOptionalCost = (value as any) as nullable number =>",
+                "        let parsed = try Number.FromText(Text.Trim(Text.From(value)), \"en-GB\") otherwise null",
+                "        in if parsed = null or parsed < 0 then null else parsed,",
+                "    Raw = #table(",
+                "        type table [",
+                "            standard_sa_cores = number,",
+                "            enterprise_sa_cores = number,",
+                "            standard_license_sa_annual_cost_per_core = nullable number,",
+                "            enterprise_license_sa_annual_cost_per_core = nullable number",
+                "        ],",
+                "        {{",
+                "            ParseCores(Licensing_Standard_SA_Cores),",
+                "            ParseCores(Licensing_Enterprise_SA_Cores),",
+                "            ParseOptionalCost(Licensing_Standard_License_SA_Annual_Cost_Per_Core),",
+                "            ParseOptionalCost(Licensing_Enterprise_License_SA_Annual_Cost_Per_Core)",
+                "        }}",
+                "    ),",
+                "    Source = Table.TransformColumnTypes(",
+                "        Raw,",
+                "        {",
+                "            {\"standard_sa_cores\", Int64.Type},",
+                "            {\"enterprise_sa_cores\", Int64.Type},",
+                "            {\"standard_license_sa_annual_cost_per_core\", Currency.Type},",
+                "            {\"enterprise_license_sa_annual_cost_per_core\", Currency.Type}",
+                "        }",
+                "    )",
+                "in",
+                "    Source"
+              ]
             }
           }
         ]
@@ -86371,6 +86219,20 @@
         "kind": "m",
         "expression": "\"0\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
         "lineageTag": "a436d869-0fad-4620-af69-6dcea3ea0880"
+      },
+      {
+        "name": "Licensing_Standard_License_SA_Annual_Cost_Per_Core",
+        "description": "Optional annualized customer price per SQL Server Standard core for a new licence with Software Assurance.",
+        "kind": "m",
+        "expression": "\"Not provided\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
+        "lineageTag": "28d5b43c-69a2-4ec3-9796-c22476b8990a"
+      },
+      {
+        "name": "Licensing_Enterprise_License_SA_Annual_Cost_Per_Core",
+        "description": "Optional annualized customer price per SQL Server Enterprise core for a new licence with Software Assurance.",
+        "kind": "m",
+        "expression": "\"Not provided\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
+        "lineageTag": "b95fb53d-aec0-40b2-a241-a4678018fa26"
       }
     ],
     "queryGroups": [
