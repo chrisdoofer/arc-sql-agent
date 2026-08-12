@@ -1516,8 +1516,8 @@ function buildLicensingPage() {
   );
   compactKpiCard(page, 70000, "all_measures.kpi_owned_sa_cores");
 
-  const gapCard = structuredClone(templates.card);
-  setPosition(gapCard, {
+  const comparisonCard = structuredClone(templates.card);
+  setPosition(comparisonCard, {
     x: 630,
     y: 60,
     z: 71000,
@@ -1525,26 +1525,30 @@ function buildLicensingPage() {
     height: 104,
     tabOrder: 71000,
   });
-  stampVisualName(gapCard, page, 71000);
-  replaceVisual(gapCard, {
-    kpi_azure_sql_instance_count: "kpi_paas_target_ahb_core_gap",
+  stampVisualName(comparisonCard, page, 71000);
+  replaceVisual(comparisonCard, {
+    kpi_azure_sql_instance_count: "kpi_paas_best_available_cost_monthly",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_paas_target_ahb_core_gap",
-    kpi_azure_sql_cores: "kpi_vm_target_ahb_core_gap",
+      "all_measures.kpi_paas_best_available_cost_monthly",
+    kpi_azure_sql_cores: "kpi_vm_best_available_cost_monthly",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_vm_target_ahb_core_gap",
-    kpi_azure_sql_memory: "kpi_target_scenario_core_delta",
+      "all_measures.kpi_vm_best_available_cost_monthly",
+    kpi_azure_sql_memory: "kpi_scenario_cost_difference_monthly",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_target_scenario_core_delta",
+      "all_measures.kpi_scenario_cost_difference_monthly",
   });
-  page.visualContainers.push(gapCard);
+  page.visualContainers.push(comparisonCard);
   setMeasureMetadata(
     page,
     71000,
-    ["PaaS-first gap", "SQL VM-only gap", "Target core difference"],
-    ["#,##0", "#,##0", "#,##0"],
+    ["PaaS-first / month", "SQL VM-only / month", "Cheaper by / month"],
+    ["$#,##0", "$#,##0", "$#,##0"],
   );
-  compactKpiCard(page, 71000, "all_measures.kpi_paas_target_ahb_core_gap");
+  compactKpiCard(
+    page,
+    71000,
+    "all_measures.kpi_paas_best_available_cost_monthly",
+  );
 
   addPanel(
     page,
@@ -1648,8 +1652,8 @@ function buildLicensingPage() {
   bindMeasureTable(decisionTable, [
     {
       table: "all_measures",
-      measure: "kpi_paas_cheaper_licensing_option",
-      label: "PaaS-first recommendation",
+      measure: "kpi_quantified_scenario_recommendation",
+      label: "Quantified run-rate decision",
     },
   ]);
   const decisionConfig = getConfig(decisionTable);
@@ -1674,8 +1678,8 @@ function buildLicensingPage() {
   bindMeasureTable(assumptionTable, [
     {
       table: "all_measures",
-      measure: "kpi_vm_cheaper_licensing_option",
-      label: "SQL VM-only recommendation",
+      measure: "kpi_tco_scenario_interpretation",
+      label: "TCO interpretation",
     },
   ]);
   const assumptionConfig = getConfig(assumptionTable);

@@ -132,10 +132,29 @@ foreach ($measure in @(
     'kpi_vm_cheaper_licensing_option',
     'licensing_scenario_assumption_text',
     'kpi_paas_target_cores_by_edition',
-    'kpi_vm_target_cores_by_edition'
+    'kpi_vm_target_cores_by_edition',
+    'kpi_paas_best_available_cost_monthly',
+    'kpi_vm_best_available_cost_monthly',
+    'kpi_scenario_cost_difference_monthly',
+    'kpi_quantified_scenario_recommendation',
+    'kpi_paas_tco_break_even_operational_saving_monthly',
+    'kpi_tco_scenario_interpretation'
 )) {
     if ($measure -notin $measureNames) {
         throw "Missing licensing measure '$measure'."
+    }
+}
+
+$tcoInterpretation = ($model.model.tables |
+    Where-Object name -eq 'all_measures').measures |
+    Where-Object name -eq 'kpi_tco_scenario_interpretation'
+$tcoExpression = [string]$tcoInterpretation.expression
+foreach ($requiredText in @(
+    'patching, backup, HA platform, monitoring, capacity and admin effort',
+    'Not sourced from ARG'
+)) {
+    if (-not $tcoExpression.Contains($requiredText)) {
+        throw "The TCO interpretation must disclose '$requiredText'."
     }
 }
 
@@ -236,8 +255,10 @@ foreach ($measure in @(
     'kpi_vm_target_ahb_core_gap',
     'kpi_paas_payg_gap_option_monthly',
     'kpi_vm_payg_gap_option_monthly',
-    'kpi_paas_cheaper_licensing_option',
-    'kpi_vm_cheaper_licensing_option'
+    'kpi_paas_best_available_cost_monthly',
+    'kpi_vm_best_available_cost_monthly',
+    'kpi_quantified_scenario_recommendation',
+    'kpi_tco_scenario_interpretation'
 )) {
     if (-not $layoutBuilder.Contains($measure)) {
         throw "The Licensing Position layout is missing '$measure'."

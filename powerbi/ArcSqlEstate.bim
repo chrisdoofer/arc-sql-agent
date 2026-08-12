@@ -6835,6 +6835,76 @@
             ]
           },
           {
+            "name": "kpi_paas_best_available_cost_monthly",
+            "description": "Lowest quantified monthly PaaS-first cost using PAYG or customer-priced License+SA for the uncovered cores.",
+            "expression": "VAR _payg = [kpi_paas_payg_gap_option_monthly]\nVAR _licenseSa = [kpi_paas_license_sa_gap_option_monthly]\nRETURN IF ( ISBLANK ( _licenseSa ), _payg, MIN ( _payg, _licenseSa ) )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "111d14de-1a68-453b-97bb-022eb11fe59b",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_vm_best_available_cost_monthly",
+            "description": "Lowest quantified monthly SQL VM-only cost using PAYG or customer-priced License+SA for the uncovered cores.",
+            "expression": "VAR _payg = [kpi_vm_payg_gap_option_monthly]\nVAR _licenseSa = [kpi_vm_license_sa_gap_option_monthly]\nRETURN IF ( ISBLANK ( _licenseSa ), _payg, MIN ( _payg, _licenseSa ) )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "b6a725fa-3293-4ba2-9e58-6586a6507f1c",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_scenario_cost_difference_monthly",
+            "description": "Absolute monthly difference between the lowest quantified PaaS-first and SQL VM-only run rates.",
+            "expression": "ABS ( [kpi_paas_best_available_cost_monthly] - [kpi_vm_best_available_cost_monthly] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "41ad2239-0463-4339-921e-fdf0953bdd17",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_quantified_scenario_recommendation",
+            "description": "Evidence-based recommendation from the quantified Azure infrastructure and SQL licensing run rate.",
+            "expression": "VAR _paas = [kpi_paas_best_available_cost_monthly]\nVAR _vm = [kpi_vm_best_available_cost_monthly]\nVAR _difference = [kpi_scenario_cost_difference_monthly]\nRETURN\n    SWITCH (\n        TRUE (),\n        _paas < _vm, \"PaaS-first is cheaper by \" & FORMAT ( _difference, \"$#,##0\" ) & \" per month\",\n        _vm < _paas, \"SQL VM-only is cheaper by \" & FORMAT ( _difference, \"$#,##0\" ) & \" per month\",\n        \"PaaS-first and SQL VM-only have the same quantified monthly cost\"\n    )",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "f4956f7f-63d2-477a-82c8-4df8d07761e6"
+          },
+          {
+            "name": "kpi_paas_tco_break_even_operational_saving_monthly",
+            "description": "Monthly operational saving required for PaaS-first to beat SQL VM-only on total cost of ownership.",
+            "expression": "MAX ( 0, [kpi_paas_best_available_cost_monthly] - [kpi_vm_best_available_cost_monthly] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "3ced5033-e9af-4d10-a8b9-f5f0a5a37c00",
+            "annotations": [
+              {
+                "name": "PBI_FormatHint",
+                "value": "{\"currencyCulture\":\"en-US\"}"
+              }
+            ]
+          },
+          {
+            "name": "kpi_tco_scenario_interpretation",
+            "description": "TCO interpretation that quantifies the operational-savings threshold without inventing customer operating costs.",
+            "expression": "VAR _breakEven = [kpi_paas_tco_break_even_operational_saving_monthly]\nRETURN\n    IF (\n        _breakEven = 0,\n        \"PaaS is already cheaper before operational savings; patching, backup, HA platform, monitoring, capacity and admin effort strengthen TCO.\",\n        \"PaaS wins TCO if avoided VM operations exceed \" & FORMAT ( _breakEven, \"$#,##0\" ) & \"/month: patching, backup, HA platform, monitoring, capacity and admin effort. Not sourced from ARG.\"\n    )",
+            "displayFolder": "Licensing\\Scenarios",
+            "lineageTag": "ca23a404-4f84-43c7-b6ed-9256e2d889ea"
+          },
+          {
             "name": "kpi_paas_cheaper_licensing_option",
             "description": "Cheaper licensing treatment for the uncovered PaaS-first target cores.",
             "expression": "VAR _payg = [kpi_paas_payg_gap_option_monthly]\nVAR _licenseSa = [kpi_paas_license_sa_gap_option_monthly]\nRETURN\n    SWITCH (\n        TRUE (),\n        [kpi_paas_target_ahb_core_gap] = 0, \"PaaS-first: existing SA covers the target\",\n        ISBLANK ( _licenseSa ), \"PaaS-first: enter License+SA prices\",\n        _payg < _licenseSa, \"PaaS-first: SQL PAYG is cheaper\",\n        _licenseSa < _payg, \"PaaS-first: License + SA is cheaper\",\n        \"PaaS-first: options cost the same\"\n    )",

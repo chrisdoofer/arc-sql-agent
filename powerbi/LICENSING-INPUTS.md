@@ -55,6 +55,13 @@ semantic model's **Settings > Parameters**, followed by a refresh.
   infrastructure baseline, so the decision isolates the treatment of cores not
   covered by owned SA. PaaS-first and SQL VM-only have separate infrastructure
   baselines and are not assumed to cost the same.
+- The page compares the lowest quantified licensing option available for each
+  scenario and states which Azure run rate is cheaper.
+- Full TCO also includes OS and SQL patching, backup management, HA platform
+  maintenance, monitoring, capacity management, and administration. Because
+  those customer operating costs are not present in ARG, the page shows the
+  monthly operational-savings threshold at which PaaS-first becomes the
+  lower-TCO option instead of fabricating an operational-cost estimate.
 - Reservation or savings-plan selection affects the shared infrastructure
   baseline. It does not discount the assessment SQL licence component or the
   customer-entered License+SA price.

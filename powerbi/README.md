@@ -26,8 +26,10 @@ remain consistent:
   Azure migration-assessment target cores for both a PaaS-first path and a SQL
   VM-only path. It uses each scenario's explicit assessment SQL PAYG licence
   component and optional customer-specific annualized License+SA pricing to
-  identify the cheaper treatment for uncovered target cores without
-  duplicating the server inventory.
+  identify the cheaper quantified Azure run rate. It also shows the savings
+  threshold required across VM patching, backup, HA platform, monitoring,
+  capacity, and administration for PaaS-first to become the lower-TCO option,
+  without fabricating customer operating costs or duplicating inventory.
 Detailed migration assessment results remain on the existing `ESU Forecast`
 report page.
 
