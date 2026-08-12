@@ -455,33 +455,6 @@ table view_sql_instances
 		lineageTag: 52ff3815-2d31-42a1-ac48-d495751119d3
 		summarizeBy: none
 
-	/// Customer-declared Software Assurance status from the Licensing parameters; never inferred from Arc or Azure billing properties.
-	column software_assurance_status = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[software_assurance_status] ), "Unknown" )
-		dataType: string
-		lineageTag: 9cd65b37-b239-4ce6-9086-cb8d343c1965
-		summarizeBy: none
-
-	/// Azure Hybrid Benefit eligibility based on declared Software Assurance and edition entitlement. SSIS is deliberately assessed separately.
-	column ahb_eligibility =
-			VAR _serviceType = LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) )
-			VAR _edition = LOWER ( TRIM ( COALESCE ( view_sql_instances[sql_edition], "" ) ) )
-			VAR _saStatus = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[software_assurance_status] ), "Unknown" )
-			VAR _standardCores = MAXX ( licensing_declaration, licensing_declaration[standard_sa_cores] )
-			VAR _enterpriseCores = MAXX ( licensing_declaration, licensing_declaration[enterprise_sa_cores] )
-			RETURN
-			    SWITCH (
-			        TRUE (),
-			        _serviceType <> "engine", "Separate SSIS assessment",
-			        _saStatus = "Not confirmed", "Not confirmed",
-			        _saStatus <> "Confirmed", "Unknown",
-			        CONTAINSSTRING ( _edition, "enterprise" ) && COALESCE ( _enterpriseCores, 0 ) > 0, "Eligible - declared Enterprise SA",
-			        CONTAINSSTRING ( _edition, "standard" ) && COALESCE ( _standardCores, 0 ) > 0, "Eligible - declared Standard SA",
-			        "No matching declared entitlement"
-			    )
-		dataType: string
-		lineageTag: 68d13886-5238-4e6a-8d43-860322221f26
-		summarizeBy: none
-
 	/// Core count used for licensing reconciliation at SQL resource grain, preferring reported SQL vCores/cores and then parent logical cores.
 	column licensable_cores =
 			VAR _resourceKey = view_sql_instances[resource_key]
@@ -494,12 +467,6 @@ table view_sql_instances
 		dataType: int64
 		formatString: #,##0
 		lineageTag: 6d190ab7-6c59-4bfa-bcfd-797ace444664
-		summarizeBy: none
-
-	/// Confidence in the licensing interpretation based on the customer declaration and evidence metadata.
-	column licensing_confidence = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[declaration_confidence] ), "Low" )
-		dataType: string
-		lineageTag: 1b59ba2b-2535-46e2-b0a0-b73eef79d7f1
 		summarizeBy: none
 
 	partition view_sql_instances = calculated

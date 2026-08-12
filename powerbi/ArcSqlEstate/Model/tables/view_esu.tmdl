@@ -119,6 +119,13 @@ table view_esu
 
 		annotation SummarizationSetBy = Automatic
 
+	column service_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [service_type]
+
+		annotation SummarizationSetBy = Automatic
+
 	column sql_esu_status
 		summarizeBy: none
 		isNameInferred
@@ -457,6 +464,7 @@ table view_esu
 				        "parent_resource_key",      view_sql_instances[parent_resource_key],
 				        "sql_resource_key",         view_sql_instances[resource_key],
 				        "sql_instance_name",        view_sql_instances[sql_instance_name],
+				        "service_type",             view_sql_instances[service_type],
 				        "sql_esu_status",           view_sql_instances[sql_esu_status],
 				        "sql_esu_cores",            view_sql_instances[sql_esu_cores],
 				        "sql_esu_basecost_monthly", view_sql_instances[sql_esu_basecost_monthly],
@@ -550,6 +558,7 @@ table view_esu
 				    "sql_resource_key",         [sql_resource_key],
 				    "server_resource_key",      [parent_resource_key],
 				    "sql_instance_name",        [sql_instance_name],
+				    "service_type",             [service_type],
 				    "sql_esu_status",           [sql_esu_status],
 				    "sql_esu_cores",            IF ( [is_developer_workload], 0, [sql_esu_cores] ),
 				    "sql_esu_basecost_monthly", IF ( [is_developer_workload], 0, [sql_esu_basecost_monthly] ),

@@ -1,9 +1,9 @@
-# Licensing declaration setup
+# Software Assurance core inputs
 
 The template keeps licensing model, Arc/Azure billing mode, Software Assurance
-(SA), and Azure Hybrid Benefit (AHB) eligibility as separate concepts. Arc
-values such as `Paid`, `LicenseOnly`, or `ServerCAL` are retained as source
-signals and never treated as proof of SA entitlement.
+(SA), and Azure Hybrid Benefit (AHB) demand as separate concepts. Arc values
+such as `Paid`, `LicenseOnly`, or `ServerCAL` are retained as source signals
+and never converted into owned SA cores.
 
 ## Configure the public PBIT
 
@@ -11,16 +11,12 @@ When opening the PBIT, set these Power Query parameters:
 
 | Parameter | Required value |
 | --- | --- |
-| `Licensing_SA_Status` | `Confirmed`, `Not confirmed`, or `Unknown` |
 | `Licensing_Standard_SA_Cores` | Non-negative whole number |
 | `Licensing_Enterprise_SA_Cores` | Non-negative whole number |
-| `Licensing_Evidence_Source` | Evidence reference, such as an agreement review or licensing statement |
-| `Licensing_Effective_Date` | ISO date in `YYYY-MM-DD` format |
-| `Licensing_Assessment_Run` | Customer or assessment-run identifier |
 
-If entitlement is not confirmed, keep the status as `Unknown` or
-`Not confirmed`. The report leaves AHB-covered and uncovered core measures
-blank rather than converting billing metadata into entitlement.
+The values are trusted customer inputs. The template does not request or retain
+licensing evidence, agreement references, effective dates, or confidence
+ratings.
 
 After changing a parameter in Power BI Desktop, select **Apply changes** and
 refresh the model. After publishing, parameters can also be updated under the
@@ -31,24 +27,24 @@ semantic model's **Settings > Parameters**, followed by a refresh.
 - **Licensing model** is populated only when the source explicitly reports
   Core or Server/CAL. Ambiguous values remain `Unknown`.
 - **Billing mode** preserves the Arc extension or Azure SQL VM configuration.
-- **SA status** comes only from the customer declaration parameters.
-- **AHB-covered cores** are the lower of declared SA cores and observed
-  Database Engine cores for the matching edition.
-- **SSIS cores** are reported separately and never increase Database Engine
-  AHB coverage.
-- Azure Migrate and ESU source costs remain as reported. The model discloses
-  the eligible core coverage but does not automatically apply a discount.
+- **Owned SA cores** come only from the two trusted customer parameters.
+- **Current core gap** compares edition-matched owned SA cores with current
+  Standard and Enterprise Database Engine cores. SSIS and free editions such
+  as Developer are excluded.
+- **Target AHB core gap** compares the same owned SA position with the Database
+  Standard and Enterprise Database Engine cores predicted by the existing ESU
+  Forecast migration assessment.
+- The focused core position appears on the existing `ESU Forecast` page; there
+  is no separate licensing inventory page.
+- Azure Migrate and ESU source costs remain as reported. The model does not
+  automatically apply an AHB discount to those source estimates.
 
 ## Durable Fabric option
 
-For repeat assessments, store the same declaration fields in a governed
-Lakehouse table keyed by customer and assessment run:
+For repeat assessments, the two edition-level core values can optionally be
+stored in a governed customer-owned Lakehouse table:
 
-`assessment_run`, `effective_date`, `software_assurance_status`,
-`standard_sa_cores`, `enterprise_sa_cores`, `evidence_source`, and
-`declaration_confidence`.
+`standard_sa_cores` and `enterprise_sa_cores`.
 
-Replace the single-row `licensing_declaration` parameter table with that
-Lakehouse table and select the applicable assessment run in the semantic
-model. This preserves licensing history and evidence lineage without embedding
-customer-owned data in the public PBIT.
+Replace the single-row `licensing_inputs` parameter table with that Lakehouse
+table when central management of the trusted core values is required.

@@ -419,26 +419,10 @@ expression fnUbuntuPatchCveRows =
 		    UbuntuRows
 	lineageTag: 58b5504b-161a-4c13-828b-77dc027347d7
 
-/// Customer-declared Software Assurance status. Use Confirmed, Not confirmed, or Unknown.
-expression Licensing_SA_Status = "Unknown" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: 5bc3d79d-2bfb-43ea-87af-29252f46d25a
-
-/// Customer-declared SQL Server Standard edition cores covered by active Software Assurance.
+/// Customer-owned SQL Server Standard edition cores covered by active Software Assurance.
 expression Licensing_Standard_SA_Cores = "0" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	lineageTag: 8472f77f-4309-4d8a-a9b4-2893020dac25
 
-/// Customer-declared SQL Server Enterprise edition cores covered by active Software Assurance.
+/// Customer-owned SQL Server Enterprise edition cores covered by active Software Assurance.
 expression Licensing_Enterprise_SA_Cores = "0" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	lineageTag: a436d869-0fad-4620-af69-6dcea3ea0880
-
-/// Source used to substantiate the customer licensing declaration, such as a licensing statement or agreement review.
-expression Licensing_Evidence_Source = "Not provided" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: e5da2e9b-ed52-465e-aa3b-06d67feb27bd
-
-/// Effective date for the customer licensing declaration in ISO format YYYY-MM-DD.
-expression Licensing_Effective_Date = "Not provided" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: 5b86c039-4769-4f3a-bcce-8a28eadcf8f3
-
-/// Assessment run, customer, or evidence-set identifier associated with the licensing declaration.
-expression Licensing_Assessment_Run = "Not provided" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: e6799dac-3c94-42f2-9307-78b1bde6d7c3

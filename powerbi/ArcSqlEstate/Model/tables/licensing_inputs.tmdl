@@ -1,0 +1,46 @@
+/// Single-row trusted customer input used to compare owned Software Assurance cores with current and forecast Azure Hybrid Benefit demand.
+table licensing_inputs
+	lineageTag: 6dc6949a-a051-468d-9c98-eb8bc517a357
+
+	/// Customer-owned Standard edition cores covered by active Software Assurance.
+	column standard_sa_cores
+		dataType: int64
+		isHidden
+		lineageTag: e1c86643-3260-4971-bcf9-6e170b4705ea
+		summarizeBy: none
+		sourceColumn: standard_sa_cores
+
+	/// Customer-owned Enterprise edition cores covered by active Software Assurance.
+	column enterprise_sa_cores
+		dataType: int64
+		isHidden
+		lineageTag: fe6e02ac-5d4d-4979-a609-dbf534b39cc3
+		summarizeBy: none
+		sourceColumn: enterprise_sa_cores
+
+	partition licensing_inputs = m
+		mode: import
+		source =
+				let
+				    ParseCores = (value as any) as number =>
+				        let parsed = try Number.RoundDown(Number.FromText(Text.Trim(Text.From(value)), "en-GB")) otherwise 0
+				        in if parsed < 0 then 0 else parsed,
+				    Raw = #table(
+				        type table [
+				            standard_sa_cores = number,
+				            enterprise_sa_cores = number
+				        ],
+				        {{
+				            ParseCores(Licensing_Standard_SA_Cores),
+				            ParseCores(Licensing_Enterprise_SA_Cores)
+				        }}
+				    ),
+				    Source = Table.TransformColumnTypes(
+				        Raw,
+				        {
+				            {"standard_sa_cores", Int64.Type},
+				            {"enterprise_sa_cores", Int64.Type}
+				        }
+				    )
+				in
+				    Source

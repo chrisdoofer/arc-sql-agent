@@ -21,10 +21,6 @@ const generatedPages = [
     name: "ab568abcf57d47f68c03",
     displayName: "DMV Audit",
   },
-  {
-    name: "f4b8a9c2d7e64130a904",
-    displayName: "Licensing Position",
-  },
 ];
 
 const layout = JSON.parse(
@@ -36,8 +32,13 @@ const sqlSource = layout.sections.find(
 const extensionSource = layout.sections.find(
   (section) => section.displayName === "Extensions",
 );
-if (!sqlSource || !extensionSource) {
-  throw new Error("Required SQL Instances or Extensions page not found");
+const esuSource = layout.sections.find(
+  (section) => section.displayName === "ESU Forecast",
+);
+if (!sqlSource || !extensionSource || !esuSource) {
+  throw new Error(
+    "Required SQL Instances, Extensions, or ESU Forecast page not found",
+  );
 }
 
 function getConfig(visual) {
@@ -1467,235 +1468,106 @@ function buildDmvPage() {
   return finalizePage(page, generatedPages[2], 7);
 }
 
-function buildLicensingPage() {
-  const page = structuredClone(sqlSource);
-  const templates = {
-    shape: structuredClone(findVisual(page, 1000)),
-    heading: structuredClone(findVisual(page, 7000)),
-    card: structuredClone(findVisual(page, 28000)),
-    bar: structuredClone(findVisual(page, 0)),
-    donut: structuredClone(findVisual(page, 13000)),
-    table: structuredClone(findVisual(page, 32000)),
-  };
-  clearPageToChrome(page, [5000, 20000, 23000]);
-  updateTextbox(page, 5000, "Arc Jumpstart | Licensing");
-  updateTextbox(page, 20000, "Licensing Position");
+function enhanceEsuForecastPage() {
+  const removedTabOrders = new Set([45000, 46000, 53000, 54000]);
+  esuSource.visualContainers = esuSource.visualContainers.filter(
+    (visual) => !removedTabOrders.has(getTabOrder(visual)),
+  );
 
-  const populationCard = structuredClone(templates.card);
-  setPosition(populationCard, {
-    x: 16,
-    y: 60,
-    z: 70000,
-    width: 600,
-    height: 104,
-    tabOrder: 70000,
+  updateTextbox(esuSource, 47000, "Pricing and AHB position:");
+
+  setPosition(findVisual(esuSource, 49000), {
+    x: 983,
+    y: 600,
+    z: 49000,
+    width: 122,
+    height: 30,
+    tabOrder: 49000,
   });
-  stampVisualName(populationCard, page, 70000);
-  replaceVisual(populationCard, {
-    kpi_azure_sql_instance_count: "kpi_engine_licensable_cores",
+  setPosition(findVisual(esuSource, 51000), {
+    x: 1088,
+    y: 593,
+    z: 51000,
+    width: 170,
+    height: 36,
+    tabOrder: 51000,
+  });
+  setPosition(findVisual(esuSource, 50000), {
+    x: 984,
+    y: 638,
+    z: 50000,
+    width: 121,
+    height: 30,
+    tabOrder: 50000,
+  });
+  setPosition(findVisual(esuSource, 48000), {
+    x: 1089,
+    y: 631,
+    z: 48000,
+    width: 170,
+    height: 36,
+    tabOrder: 48000,
+  });
+
+  const positionCard = structuredClone(findVisual(sqlSource, 28000));
+  setPosition(positionCard, {
+    x: 990,
+    y: 526,
+    z: 55000,
+    width: 268,
+    height: 60,
+    tabOrder: 55000,
+  });
+  stampVisualName(positionCard, esuSource, 55000);
+  replaceVisual(positionCard, {
+    kpi_azure_sql_instance_count: "kpi_owned_sa_cores",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_engine_licensable_cores",
-    kpi_azure_sql_cores: "kpi_ssis_licensable_cores",
+      "all_measures.kpi_owned_sa_cores",
+    kpi_azure_sql_cores: "kpi_engine_licensable_cores",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_ssis_licensable_cores",
-    kpi_azure_sql_memory: "kpi_declared_sa_cores",
+      "all_measures.kpi_engine_licensable_cores",
+    kpi_azure_sql_memory: "kpi_target_ahb_required_cores",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_declared_sa_cores",
+      "all_measures.kpi_target_ahb_required_cores",
   });
-  page.visualContainers.push(populationCard);
+  esuSource.visualContainers.push(positionCard);
   setMeasureMetadata(
-    page,
-    70000,
-    ["Engine cores", "SSIS cores", "Declared SA cores"],
+    esuSource,
+    55000,
+    ["Owned SA", "Current Engine", "Target AHB"],
     ["#,##0", "#,##0", "#,##0"],
   );
-  compactKpiCard(page, 70000, "all_measures.kpi_engine_licensable_cores");
+  compactKpiCard(esuSource, 55000, "all_measures.kpi_owned_sa_cores");
 
-  const coverageCard = structuredClone(templates.card);
-  setPosition(coverageCard, {
-    x: 630,
-    y: 60,
-    z: 71000,
-    width: 606,
-    height: 104,
-    tabOrder: 71000,
+  const gapCard = structuredClone(findVisual(sqlSource, 28000));
+  setPosition(gapCard, {
+    x: 990,
+    y: 673,
+    z: 56000,
+    width: 268,
+    height: 39,
+    tabOrder: 56000,
   });
-  stampVisualName(coverageCard, page, 71000);
-  replaceVisual(coverageCard, {
-    kpi_azure_sql_instance_count: "kpi_ahb_covered_engine_cores",
+  stampVisualName(gapCard, esuSource, 56000);
+  replaceVisual(gapCard, {
+    kpi_azure_sql_instance_count: "kpi_current_sa_core_gap",
     "all_measures.kpi_azure_sql_instance_count":
-      "all_measures.kpi_ahb_covered_engine_cores",
-    kpi_azure_sql_cores: "kpi_ahb_uncovered_engine_cores",
+      "all_measures.kpi_current_sa_core_gap",
+    kpi_azure_sql_cores: "kpi_target_ahb_core_gap",
     "all_measures.kpi_azure_sql_cores":
-      "all_measures.kpi_ahb_uncovered_engine_cores",
-    kpi_azure_sql_memory: "kpi_ahb_engine_coverage_pct",
+      "all_measures.kpi_target_ahb_core_gap",
+    kpi_azure_sql_memory: "kpi_target_ahb_covered_cores",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_ahb_engine_coverage_pct",
+      "all_measures.kpi_target_ahb_covered_cores",
   });
-  page.visualContainers.push(coverageCard);
+  esuSource.visualContainers.push(gapCard);
   setMeasureMetadata(
-    page,
-    71000,
-    ["AHB-covered engine cores", "Uncovered engine cores", "AHB coverage"],
-    ["#,##0", "#,##0", "0.0%"],
+    esuSource,
+    56000,
+    ["Current gap", "Target gap", "Target covered"],
+    ["#,##0", "#,##0", "#,##0"],
   );
-  compactKpiCard(
-    page,
-    71000,
-    "all_measures.kpi_ahb_covered_engine_cores",
-  );
-
-  addPanel(
-    page,
-    templates,
-    72000,
-    { x: 16, y: 174, z: 72000, width: 390, height: 208 },
-    "Database Engine cores by billing mode",
-  );
-  const billingChart = structuredClone(templates.donut);
-  setPosition(billingChart, {
-    x: 28,
-    y: 206,
-    z: 72002,
-    width: 366,
-    height: 164,
-    tabOrder: 72002,
-  });
-  stampVisualName(billingChart, page, 72002);
-  bindCategoryMeasure(
-    billingChart,
-    "view_sql_instances",
-    "billing_mode",
-    "Billing mode",
-    "kpi_engine_licensable_cores",
-    "Engine cores",
-  );
-  showDonutMetrics(billingChart);
-  page.visualContainers.push(billingChart);
-
-  addPanel(
-    page,
-    templates,
-    73000,
-    { x: 422, y: 174, z: 73000, width: 390, height: 208 },
-    "Database Engine cores by AHB eligibility",
-  );
-  const eligibilityChart = structuredClone(templates.bar);
-  setPosition(eligibilityChart, {
-    x: 434,
-    y: 206,
-    z: 73002,
-    width: 366,
-    height: 164,
-    tabOrder: 73002,
-  });
-  stampVisualName(eligibilityChart, page, 73002);
-  bindCategoryMeasure(
-    eligibilityChart,
-    "view_sql_instances",
-    "ahb_eligibility",
-    "AHB eligibility",
-    "kpi_engine_licensable_cores",
-    "Engine cores",
-  );
-  showBarMetrics(eligibilityChart);
-  page.visualContainers.push(eligibilityChart);
-
-  addPanel(
-    page,
-    templates,
-    74000,
-    { x: 828, y: 174, z: 74000, width: 408, height: 208 },
-    "Customer-declared licensing evidence",
-  );
-  const declarationTable = structuredClone(templates.table);
-  setPosition(declarationTable, {
-    x: 840,
-    y: 206,
-    z: 74002,
-    width: 384,
-    height: 164,
-    tabOrder: 74002,
-  });
-  stampVisualName(declarationTable, page, 74002);
-  bindTable(declarationTable, "licensing_declaration", [
-    { column: "software_assurance_status", label: "SA status" },
-    { column: "evidence_source", label: "Evidence source" },
-    { column: "effective_date", label: "Effective date", dataType: "datetime" },
-    { column: "assessment_run", label: "Assessment run" },
-    { column: "declaration_confidence", label: "Confidence" },
-  ]);
-  page.visualContainers.push(declarationTable);
-
-  addPanel(
-    page,
-    templates,
-    75000,
-    { x: 16, y: 392, z: 75000, width: 780, height: 344 },
-    "Licensing evidence by SQL resource",
-  );
-  const instanceTable = structuredClone(templates.table);
-  setPosition(instanceTable, {
-    x: 28,
-    y: 424,
-    z: 75002,
-    width: 756,
-    height: 300,
-    tabOrder: 75002,
-  });
-  stampVisualName(instanceTable, page, 75002);
-  bindTable(instanceTable, "view_sql_instances", [
-    { column: "sql_instance_name", label: "SQL resource" },
-    { column: "service_type", label: "Service type" },
-    { column: "sql_edition", label: "Edition" },
-    { column: "licensable_cores", label: "Cores" },
-    { column: "licensing_model", label: "Licensing model" },
-    { column: "billing_mode", label: "Billing mode" },
-    { column: "software_assurance_status", label: "SA status" },
-    { column: "ahb_eligibility", label: "AHB eligibility" },
-    { column: "licensing_confidence", label: "Confidence" },
-  ]);
-  page.visualContainers.push(instanceTable);
-
-  addPanel(
-    page,
-    templates,
-    76000,
-    { x: 812, y: 392, z: 76000, width: 424, height: 344 },
-    "Assumptions and data gaps",
-  );
-  const assumptionsTable = structuredClone(templates.table);
-  setPosition(assumptionsTable, {
-    x: 824,
-    y: 424,
-    z: 76002,
-    width: 400,
-    height: 300,
-    tabOrder: 76002,
-  });
-  stampVisualName(assumptionsTable, page, 76002);
-  bindMeasureTable(assumptionsTable, [
-    {
-      table: "all_measures",
-      measure: "licensing_data_gap_text",
-      label: "Evidence status",
-    },
-    {
-      table: "all_measures",
-      measure: "licensing_cost_assumption_text",
-      label: "Cost assumption",
-    },
-  ]);
-  const assumptionsConfig = getConfig(assumptionsTable);
-  assumptionsConfig.singleVisual.objects.values ??= [{ properties: {} }];
-  assumptionsConfig.singleVisual.objects.values[0].properties ??= {};
-  assumptionsConfig.singleVisual.objects.values[0].properties.wordWrap = {
-    expr: { Literal: { Value: "true" } },
-  };
-  assumptionsTable.config = JSON.stringify(assumptionsConfig);
-  page.visualContainers.push(assumptionsTable);
-
-  return finalizePage(page, generatedPages[3], 8);
+  compactKpiCard(esuSource, 56000, "all_measures.kpi_current_sa_core_gap");
 }
 
 updateVisual(sqlSource, 32000, {
@@ -1711,6 +1583,8 @@ updateVisual(sqlSource, 35000, {
   "License Type": "Billing Mode",
 });
 
+enhanceEsuForecastPage();
+
 layout.sections = layout.sections.filter(
   (section) =>
     !generatedPages.some(
@@ -1722,6 +1596,5 @@ layout.sections.push(
   buildSecurityPage(),
   buildBestPracticesPage(),
   buildDmvPage(),
-  buildLicensingPage(),
 );
 fs.writeFileSync(outputPath, JSON.stringify(layout), "utf16le");
