@@ -392,12 +392,115 @@ table view_sql_instances
 
 		annotation SummarizationSetBy = Automatic
 
+	/// Deprecated compatibility field. Do not use for entitlement analysis because it historically conflated billing mode with Azure Hybrid Benefit.
 	column sql_license_type
+		isHidden
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [sql_license_type]
 
 		annotation SummarizationSetBy = Automatic
+
+	/// Normalized Arc extension or Azure SQL VM billing/licence configuration. This field does not prove Software Assurance entitlement.
+	column billing_mode =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			VAR _rawValue =
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )
+			    )
+			VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, "" ) ) )
+			VAR _compact =
+			    SUBSTITUTE (
+			        SUBSTITUTE (
+			            SUBSTITUTE ( _normalized, " ", "" ),
+			            "/",
+			            ""
+			        ),
+			        "+",
+			        ""
+			    )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _compact = "", "Unknown",
+			        _compact = "paid", "Paid",
+			        _compact = "payg", "PAYG",
+			        _compact = "licenseonly", "License only",
+			        _compact IN { "ahub", "azurehybridbenefit" }, "AHB configured",
+			        _compact = "servercal", "Server/CAL source signal",
+			        _rawValue
+			    )
+		dataType: string
+		lineageTag: 831f2ea5-43ca-429f-abb4-b7c3e2e2ec9d
+		summarizeBy: none
+
+	/// Current SQL licensing model where explicitly supported by source evidence; ambiguous billing values remain Unknown.
+	column licensing_model =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			VAR _rawValue =
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )
+			    )
+			VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, "" ) ) )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _normalized IN { "servercal", "server/cal", "server + cal" }, "Server/CAL",
+			        _normalized IN { "core", "percore", "per core" }, "Core",
+			        "Unknown"
+			    )
+		dataType: string
+		lineageTag: 52ff3815-2d31-42a1-ac48-d495751119d3
+		summarizeBy: none
+
+	/// Customer-declared Software Assurance status from the Licensing parameters; never inferred from Arc or Azure billing properties.
+	column software_assurance_status = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[software_assurance_status] ), "Unknown" )
+		dataType: string
+		lineageTag: 9cd65b37-b239-4ce6-9086-cb8d343c1965
+		summarizeBy: none
+
+	/// Azure Hybrid Benefit eligibility based on declared Software Assurance and edition entitlement. SSIS is deliberately assessed separately.
+	column ahb_eligibility =
+			VAR _serviceType = LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) )
+			VAR _edition = LOWER ( TRIM ( COALESCE ( view_sql_instances[sql_edition], "" ) ) )
+			VAR _saStatus = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[software_assurance_status] ), "Unknown" )
+			VAR _standardCores = MAXX ( licensing_declaration, licensing_declaration[standard_sa_cores] )
+			VAR _enterpriseCores = MAXX ( licensing_declaration, licensing_declaration[enterprise_sa_cores] )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _serviceType <> "engine", "Separate SSIS assessment",
+			        _saStatus = "Not confirmed", "Not confirmed",
+			        _saStatus <> "Confirmed", "Unknown",
+			        CONTAINSSTRING ( _edition, "enterprise" ) && COALESCE ( _enterpriseCores, 0 ) > 0, "Eligible - declared Enterprise SA",
+			        CONTAINSSTRING ( _edition, "standard" ) && COALESCE ( _standardCores, 0 ) > 0, "Eligible - declared Standard SA",
+			        "No matching declared entitlement"
+			    )
+		dataType: string
+		lineageTag: 68d13886-5238-4e6a-8d43-860322221f26
+		summarizeBy: none
+
+	/// Core count used for licensing reconciliation at SQL resource grain, preferring reported SQL vCores/cores and then parent logical cores.
+	column licensable_cores =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			RETURN
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[vcore], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_arc_sql_instances[cores], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        view_sql_instances[logical_cores]
+			    )
+		dataType: int64
+		formatString: #,##0
+		lineageTag: 6d190ab7-6c59-4bfa-bcfd-797ace444664
+		summarizeBy: none
+
+	/// Confidence in the licensing interpretation based on the customer declaration and evidence metadata.
+	column licensing_confidence = COALESCE ( MAXX ( licensing_declaration, licensing_declaration[declaration_confidence] ), "Low" )
+		dataType: string
+		lineageTag: 1b59ba2b-2535-46e2-b0a0-b73eef79d7f1
+		summarizeBy: none
 
 	partition view_sql_instances = calculated
 		mode: import
@@ -844,4 +947,3 @@ table view_sql_instances
 				```
 
 	annotation PBI_Id = 5416845d12fe4828851c1f042cdd4182
-

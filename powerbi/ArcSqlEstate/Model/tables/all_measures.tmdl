@@ -209,6 +209,7 @@ table all_measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
+	/// SQL Server ESU cost from lifecycle pricing and observed licensable cores. No Software Assurance entitlement discount is automatically applied; see licensing_cost_assumption_text.
 	measure sql_esu_cost_total = ```
 			
 			VAR SelectedMonths =
@@ -232,6 +233,7 @@ table all_measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
+	/// Azure target run cost sourced from Azure migration evidence. No Azure Hybrid Benefit discount is automatically applied; see licensing_cost_assumption_text.
 	measure azure_run_cost =
 			
 			SUMX (
@@ -289,6 +291,7 @@ table all_measures
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
 
+	/// Difference between reported ESU cost and reported Azure target run cost. Licensing savings are not automatically applied; see licensing_cost_assumption_text.
 	measure azure_saving_vs_esu = [total_esu_cost]-[azure_run_cost]
 		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
 		displayFolder: kpi\esu
@@ -1275,6 +1278,121 @@ table all_measures
 		displayFolder: Best Practices
 		lineageTag: 3f890647-31c4-49ae-9124-bb08c733d319
 
+	/// Database Engine cores used for licensing reconciliation; SSIS cores are excluded.
+	measure kpi_engine_licensable_cores =
+			CALCULATE (
+			    SUM ( view_sql_instances[licensable_cores] ),
+			    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) ) = "engine" )
+			)
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 8945d9ff-759f-48d3-adc5-22b3499257af
+
+	/// SSIS cores reported separately from the Database Engine licensing population.
+	measure kpi_ssis_licensable_cores =
+			CALCULATE (
+			    SUM ( view_sql_instances[licensable_cores] ),
+			    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) ) = "ssis" )
+			)
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 57b68e77-735e-4526-ac5a-f0a1f9eba93a
+
+	/// Customer-declared Standard edition cores covered by active Software Assurance.
+	measure kpi_declared_standard_sa_cores = MAX ( licensing_declaration[standard_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 8eb68336-6024-43bd-aab4-023e8faad5de
+
+	/// Customer-declared Enterprise edition cores covered by active Software Assurance.
+	measure kpi_declared_enterprise_sa_cores = MAX ( licensing_declaration[enterprise_sa_cores] )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: cbf92d6c-5d43-4ca9-813f-b9bdd1d06efc
+
+	/// Total customer-declared SQL Server cores covered by active Software Assurance.
+	measure kpi_declared_sa_cores = COALESCE ( [kpi_declared_standard_sa_cores], 0 ) + COALESCE ( [kpi_declared_enterprise_sa_cores], 0 )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 00d41cae-2ffe-41c2-bf2b-6b00f16633df
+
+	/// Database Engine cores eligible for Azure Hybrid Benefit after reconciling declared SA cores to the matching SQL edition.
+	measure kpi_ahb_covered_engine_cores =
+			VAR _saStatus = SELECTEDVALUE ( licensing_declaration[software_assurance_status], "Unknown" )
+			VAR _enterpriseEngineCores =
+			    SUMX (
+			        FILTER (
+			            view_sql_instances,
+			            LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_sql_instances[sql_edition], "" ) ), "enterprise" )
+			        ),
+			        view_sql_instances[licensable_cores]
+			    )
+			VAR _standardEngineCores =
+			    SUMX (
+			        FILTER (
+			            view_sql_instances,
+			            LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) ) = "engine"
+			                && CONTAINSSTRING ( LOWER ( COALESCE ( view_sql_instances[sql_edition], "" ) ), "standard" )
+			        ),
+			        view_sql_instances[licensable_cores]
+			    )
+			VAR _enterpriseCovered = MIN ( COALESCE ( [kpi_declared_enterprise_sa_cores], 0 ), COALESCE ( _enterpriseEngineCores, 0 ) )
+			VAR _standardCovered = MIN ( COALESCE ( [kpi_declared_standard_sa_cores], 0 ), COALESCE ( _standardEngineCores, 0 ) )
+			RETURN
+			    IF ( _saStatus = "Confirmed", _enterpriseCovered + _standardCovered )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 484f8276-ffed-44f3-b03d-9471c0135606
+
+	/// Database Engine cores not covered by the declared edition-matched Software Assurance entitlement.
+	measure kpi_ahb_uncovered_engine_cores =
+			VAR _coveredCores = [kpi_ahb_covered_engine_cores]
+			RETURN
+			    IF ( NOT ISBLANK ( _coveredCores ), MAX ( 0, [kpi_engine_licensable_cores] - _coveredCores ) )
+		formatString: #,##0
+		displayFolder: Licensing
+		lineageTag: 622877fe-6478-4bba-9348-fbaa3313fd12
+
+	/// Share of Database Engine cores covered by declared edition-matched Software Assurance entitlement.
+	measure kpi_ahb_engine_coverage_pct = DIVIDE ( [kpi_ahb_covered_engine_cores], [kpi_engine_licensable_cores] )
+		formatString: 0.0%
+		displayFolder: Licensing
+		lineageTag: d76fb6a2-70b8-4806-b053-674489ffeb51
+
+	/// Customer-facing licensing evidence gap or completeness statement.
+	measure licensing_data_gap_text =
+			VAR _status = SELECTEDVALUE ( licensing_declaration[software_assurance_status], "Unknown" )
+			VAR _source = SELECTEDVALUE ( licensing_declaration[evidence_source], "Not provided" )
+			VAR _effectiveDate = SELECTEDVALUE ( licensing_declaration[effective_date] )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _status = "Unknown", "Data gap: Software Assurance status is unknown; no AHB entitlement is assumed.",
+			        _status = "Confirmed" && _source = "Not provided", "Data gap: SA is declared but an evidence source has not been provided.",
+			        _status = "Confirmed" && ISBLANK ( _effectiveDate ), "Data gap: SA is declared but the effective date has not been provided.",
+			        _status = "Not confirmed", "Software Assurance is not confirmed; no AHB entitlement is assumed.",
+			        "Declared licensing evidence is complete for this assessment run."
+			    )
+		formatString: General
+		displayFolder: Licensing
+		lineageTag: 2f181053-68b0-44eb-af40-64441e9dc7fa
+
+	/// Discloses whether licensing savings are assumed in Azure target and ESU cost outputs.
+	measure licensing_cost_assumption_text =
+			VAR _status = SELECTEDVALUE ( licensing_declaration[software_assurance_status], "Unknown" )
+			VAR _covered = [kpi_ahb_covered_engine_cores]
+			VAR _engineCores = [kpi_engine_licensable_cores]
+			RETURN
+			    IF (
+			        _status = "Confirmed",
+			        "AHB eligibility reconciles " & FORMAT ( COALESCE ( _covered, 0 ), "#,##0" ) & " of " & FORMAT ( COALESCE ( _engineCores, 0 ), "#,##0" ) & " Database Engine cores. Azure Migrate and ESU source costs remain as reported; this model does not automatically discount them.",
+			        "No SA/AHB savings are applied because entitlement is not confirmed. Azure Migrate and ESU source costs remain as reported."
+			    )
+		formatString: General
+		displayFolder: Licensing
+		lineageTag: 6b1b8248-73a0-4ca0-beac-59a668efa645
+
 	partition all_measures = m
 		mode: import
 		source =
@@ -1288,4 +1406,3 @@ table all_measures
 	annotation PBI_ResultType = Table
 
 	annotation PBI_NavigationStepName = Navigation
-

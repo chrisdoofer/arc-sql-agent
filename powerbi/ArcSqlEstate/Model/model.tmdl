@@ -58,5 +58,6 @@ ref table dim_linux_patch_cve_mapping
 ref table dim_patch_kb
 ref table view_patch_cve_mappings
 ref table view_best_practice_findings
+ref table licensing_declaration
 
 ref cultureInfo en-GB
