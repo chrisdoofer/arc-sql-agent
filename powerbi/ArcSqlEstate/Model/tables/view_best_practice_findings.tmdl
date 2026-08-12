@@ -92,6 +92,7 @@ table view_best_practice_findings
 				    FILTER (
 				        ext_arc_sql_instances,
 				        NOT ISBLANK ( ext_arc_sql_instances[resource_key] )
+				            && LOWER ( TRIM ( COALESCE ( ext_arc_sql_instances[service_type], "" ) ) ) = "engine"
 				    )
 				VAR _databases =
 				    FILTER (

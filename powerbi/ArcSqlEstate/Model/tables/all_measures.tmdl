@@ -1265,6 +1265,16 @@ table all_measures
 		displayFolder: Best Practices
 		lineageTag: 47dfd766-d608-4b8c-8672-bc0c853c5365
 
+	/// Database Engine resources represented by the best-practice assessment population.
+	measure kpi_bpa_engine_instance_count =
+			CALCULATE (
+			    COUNTROWS ( view_sql_instances ),
+			    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], "" ) ) ) = "engine" )
+			)
+		formatString: #,##0
+		displayFolder: Best Practices
+		lineageTag: 3f890647-31c4-49ae-9124-bb08c733d319
+
 	partition all_measures = m
 		mode: import
 		source =

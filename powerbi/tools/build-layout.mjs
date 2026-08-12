@@ -1098,15 +1098,15 @@ function buildBestPracticesPage() {
     kpi_azure_sql_cores: "kpi_bpa_check_count",
     "all_measures.kpi_azure_sql_cores":
       "all_measures.kpi_bpa_check_count",
-    kpi_azure_sql_memory: "kpi_arc_instance_count",
+    kpi_azure_sql_memory: "kpi_bpa_engine_instance_count",
     "all_measures.kpi_azure_sql_memory":
-      "all_measures.kpi_arc_instance_count",
+      "all_measures.kpi_bpa_engine_instance_count",
   });
   page.visualContainers.push(coverageCard);
   setMeasureMetadata(
     page,
     61000,
-    ["Affected machines", "Checks represented", "Arc SQL instances"],
+    ["Affected machines", "Checks represented", "Database Engines"],
     ["#,##0", "#,##0", "#,##0"],
   );
   compactKpiCard(

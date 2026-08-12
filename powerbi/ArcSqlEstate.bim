@@ -6971,6 +6971,14 @@
             "formatString": "#,##0",
             "displayFolder": "Best Practices",
             "lineageTag": "47dfd766-d608-4b8c-8672-bc0c853c5365"
+          },
+          {
+            "name": "kpi_bpa_engine_instance_count",
+            "description": "Database Engine resources represented by the best-practice assessment population.",
+            "expression": "CALCULATE (\n    COUNTROWS ( view_sql_instances ),\n    KEEPFILTERS ( LOWER ( TRIM ( COALESCE ( view_sql_instances[service_type], \"\" ) ) ) = \"engine\" )\n)",
+            "formatString": "#,##0",
+            "displayFolder": "Best Practices",
+            "lineageTag": "3f890647-31c4-49ae-9124-bb08c733d319"
           }
         ],
         "annotations": [
@@ -14531,6 +14539,7 @@
                 "    FILTER (",
                 "        ext_arc_sql_instances,",
                 "        NOT ISBLANK ( ext_arc_sql_instances[resource_key] )",
+                "            && LOWER ( TRIM ( COALESCE ( ext_arc_sql_instances[service_type], \"\" ) ) ) = \"engine\"",
                 "    )",
                 "VAR _databases =",
                 "    FILTER (",
