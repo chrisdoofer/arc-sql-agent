@@ -1,0 +1,54 @@
+table dim_subscriptions
+	isHidden
+
+	column subscription_id
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: subscription_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_subscriptions = m
+		mode: import
+		queryGroup: Dimensions
+		source = ```
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // Resolve subscription display names from resourcecontainers via ARG
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        resourcecontainers
+				        | where type =~ 'microsoft.resources/subscriptions'
+				        | project
+				            subscription_id = tolower(trim(' ', subscriptionId)),
+				            subscription_name = tostring(name)
+				        ",
+				        null, null, null, [ resultTruncated = false ]
+				    ),
+
+				    Typed = Table.TransformColumnTypes(SourceRaw,
+				        {
+				            {"subscription_id", type text},
+				            {"subscription_name", type text}
+				        }
+				    )
+				in
+				    Typed
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
