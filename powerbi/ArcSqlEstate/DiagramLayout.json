@@ -1,0 +1,511 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 154.45922695206309,
+        "y": 233.52370670874845
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1890.2208068224027,
+            "y": 958.59166070785932
+          },
+          "nodeIndex": "dim_azure_regions",
+          "nodeLineageTag": "c0d43ce3-2cb2-4d6c-bcc7-5109ff6ae2a0",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 12,
+          "expandedHeight": 248
+        },
+        {
+          "location": {
+            "x": 1890.6132976106235,
+            "y": 1179.2881045134593
+          },
+          "nodeIndex": "dim_azure_vm_skus",
+          "nodeLineageTag": "03721c98-8014-434e-bf1a-37ce13b249a2",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 17,
+          "expandedHeight": 176
+        },
+        {
+          "location": {
+            "x": 1889.720894555187,
+            "y": 1084.9828954135241
+          },
+          "nodeIndex": "dim_sql_patches",
+          "nodeLineageTag": "f1589bbd-1dc0-420f-bb74-b8c40f8e8883",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 8,
+          "expandedHeight": 248
+        },
+        {
+          "location": {
+            "x": 1891.2312983378565,
+            "y": 856.63720465195831
+          },
+          "nodeIndex": "dim_software_lifecycle",
+          "nodeLineageTag": "94b99f70-a315-4777-a115-a51a2719098a",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 7,
+          "expandedHeight": 272
+        },
+        {
+          "location": {
+            "x": 2157.3173239435869,
+            "y": 947.92917707655658
+          },
+          "nodeIndex": "dim_period_selector",
+          "nodeLineageTag": "44ae036d-0e48-4108-8fc3-f867458e794f",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 9,
+          "expandedHeight": 128
+        },
+        {
+          "location": {
+            "x": 2147.8037434836278,
+            "y": 372.73987630995953
+          },
+          "nodeIndex": "dim_date",
+          "nodeLineageTag": "07a4097a-00c0-4956-bb16-3a6afebf98f1",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 18,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 2152.0701433269546,
+            "y": 745.995379952727
+          },
+          "nodeIndex": "dim_extension_types",
+          "nodeLineageTag": "ea7517d0-d570-4a64-81ab-268675bbb134",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 10,
+          "expandedHeight": 248
+        },
+        {
+          "location": {
+            "x": 1880.736937104592,
+            "y": 372.73987630995941
+          },
+          "nodeIndex": "all_measures",
+          "nodeLineageTag": "f62bfe97-f359-4830-8e8b-eb8732ca573f",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 6,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 14.17205121146047,
+            "y": 1047.1848743111859
+          },
+          "nodeIndex": "ext_arc_servers",
+          "nodeLineageTag": "817d4ecd-a6a6-420e-bef5-25034616ca54",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 15,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 13.779980303284418,
+            "y": 1328.3111879808682
+          },
+          "nodeIndex": "ext_azure_servers",
+          "nodeLineageTag": "a58ca0bc-438a-40f1-bb89-02e8d701c843",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 16,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 20.669970454926627,
+            "y": 750.81857937164682
+          },
+          "nodeIndex": "ext_arc_sql_instances",
+          "nodeLineageTag": "7735699d-3802-43b2-8155-fc26d6cc3cab",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 21,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 19.15583232102378,
+            "y": 893.8255463146487
+          },
+          "nodeIndex": "ext_azure_sql_instances",
+          "nodeLineageTag": "e5e83fd7-b573-4c28-b2d3-c9761c7a19be",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 20,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 15.157978333612874,
+            "y": 1193.1511013731
+          },
+          "nodeIndex": "ext_arc_sql_databases",
+          "nodeLineageTag": "776652c1-abb9-4b9f-ba78-69754319f3d9",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 19,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 2155.8853854063377,
+            "y": 849.91926571177669
+          },
+          "nodeIndex": "dim_migration_strategy",
+          "nodeLineageTag": "e9ba4707-4ad9-4e9b-8a99-40896539fab8",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 3,
+          "expandedHeight": 200
+        },
+        {
+          "location": {
+            "x": 1895.576163426603,
+            "y": 749.49746070926085
+          },
+          "nodeIndex": "dim_server_savings_plan",
+          "nodeLineageTag": "29719cd9-845a-4452-911c-932ed3fd4653",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 4,
+          "expandedHeight": 128
+        },
+        {
+          "location": {
+            "x": 2156.1501653711466,
+            "y": 1172.5428560200926
+          },
+          "nodeIndex": "dim_sql_savings_plan",
+          "nodeLineageTag": "91b950fe-a39c-4ace-959a-e63ed1c02f4b",
+          "size": {
+            "height": 72,
+            "width": 234
+          },
+          "zIndex": 5,
+          "expandedHeight": 128
+        },
+        {
+          "location": {
+            "x": 17.913974394269744,
+            "y": 607.11023770864108
+          },
+          "nodeIndex": "ext_all_extensions",
+          "nodeLineageTag": "8dc7784e-8a0f-4f17-8388-f9729a799d48",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 22,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 12.401982272955991,
+            "y": 1474.9563379964732
+          },
+          "nodeIndex": "ext_resource_tags",
+          "nodeLineageTag": "9b941d3b-4768-4075-80a8-9312b28f3964",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 11,
+          "expandedHeight": 248
+        },
+        {
+          "location": {
+            "x": 1227.9890088863724,
+            "y": 1223.970777838306
+          },
+          "nodeIndex": "view_arc_sql_databases",
+          "nodeLineageTag": "c8eca79a-397d-4898-b8ce-f3a9cb2a4e4f",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 23,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 1230.0906093984429,
+            "y": 757.70783466564228
+          },
+          "nodeIndex": "view_extensions",
+          "nodeLineageTag": "0c0c6b9c-0ca4-4607-b1be-8669b467b5a5",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 28,
+          "expandedHeight": 599.02557258127206
+        },
+        {
+          "location": {
+            "x": 1230.5327377873282,
+            "y": 563.8697088878771
+          },
+          "nodeIndex": "view_extension_deployments",
+          "nodeLineageTag": "43716426-8df4-46ad-a49d-6f82d09dcab3",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 13,
+          "expandedHeight": 152
+        },
+        {
+          "location": {
+            "x": 1236.6977304844979,
+            "y": 923.00917341931734
+          },
+          "nodeIndex": "view_servers",
+          "nodeLineageTag": "2d84a625-ef6d-4e34-a4f7-dd6160ed11ab",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 14,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 1227.5119302219891,
+            "y": 1377.6195839406394
+          },
+          "nodeIndex": "view_esu",
+          "nodeLineageTag": "3a9816f5-e8d1-42f9-8058-e06eaafec7ca",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 25,
+          "expandedHeight": 551.38949773375293
+        },
+        {
+          "location": {
+            "x": 1233.4262461286191,
+            "y": 1081.8824473085447
+          },
+          "nodeIndex": "view_sql_instances",
+          "nodeLineageTag": "52f363ee-8742-4c04-b5a3-82a1fe736985",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 24,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 406.22510414623736,
+            "y": 1000.0071569412963
+          },
+          "nodeIndex": "fact_keys",
+          "nodeLineageTag": "5fde52a9-6367-4782-ae9c-ca5087c2c24c",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 797.36567376175492,
+            "y": 1515.1999691205062
+          },
+          "nodeIndex": "bridge_resource_tags",
+          "nodeLineageTag": "bb68c3d8-aa03-4e11-964d-77803aeaf286",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 1,
+          "expandedHeight": 200
+        },
+        {
+          "location": {
+            "x": 798.74367179208286,
+            "y": 760.492996451018
+          },
+          "nodeIndex": "fact_resources",
+          "nodeLineageTag": "fc8e115d-f86c-4fc1-9538-63076bbdd322",
+          "size": {
+            "height": 682.29931061495506,
+            "width": 234
+          },
+          "zIndex": 27
+        },
+        {
+          "location": {
+            "x": 1231.4350533152137,
+            "y": 1526.2374329185172
+          },
+          "nodeIndex": "dim_tags",
+          "nodeLineageTag": "9b7ab7a4-a478-4c9e-b3f1-668ecc9d24e8",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 200
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 81.3621891660741,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    },
+    {
+      "ordinal": 1,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 791.217950766146,
+            "y": 665.84920218314528
+          },
+          "nodeIndex": "view_sql_instances",
+          "nodeLineageTag": "52f363ee-8742-4c04-b5a3-82a1fe736985",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 784.34310463136353,
+            "y": 1100.9010941359054
+          },
+          "nodeIndex": "view_servers",
+          "nodeLineageTag": "2d84a625-ef6d-4e34-a4f7-dd6160ed11ab",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 792.68925233292578,
+            "y": 503.93712104264819
+          },
+          "nodeIndex": "view_extensions",
+          "nodeLineageTag": "0c0c6b9c-0ca4-4607-b1be-8669b467b5a5",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 791.85775016702428,
+            "y": 237.77717119242863
+          },
+          "nodeIndex": "view_extension_deployments",
+          "nodeLineageTag": "43716426-8df4-46ad-a49d-6f82d09dcab3",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 248
+        },
+        {
+          "location": {
+            "x": 794.21611579491912,
+            "y": 864.46275358290075
+          },
+          "nodeIndex": "view_esu",
+          "nodeLineageTag": "3a9816f5-e8d1-42f9-8058-e06eaafec7ca",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 300
+        },
+        {
+          "location": {
+            "x": 788.17216777655221,
+            "y": 1289.6813083985328
+          },
+          "nodeIndex": "view_arc_sql_databases",
+          "nodeLineageTag": "c8eca79a-397d-4898-b8ce-f3a9cb2a4e4f",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0,
+          "expandedHeight": 300
+        }
+      ],
+      "name": "Report",
+      "zoomValue": 79.553182037699813,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

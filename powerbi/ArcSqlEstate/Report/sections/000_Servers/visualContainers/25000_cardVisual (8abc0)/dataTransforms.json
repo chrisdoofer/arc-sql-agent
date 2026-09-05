@@ -1,0 +1,811 @@
+{
+  "objects": {
+    "value": [
+      {
+        "properties": {
+          "horizontalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "referenceLabelLayout": [
+      {
+        "properties": {
+          "arrangement": {
+            "expr": {
+              "Literal": {
+                "Value": "'columns'"
+              }
+            }
+          },
+          "horizontalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          },
+          "labelSpace": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          },
+          "outerPadding": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "divider": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "dividerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "shapeCustomRectangle": [
+      {
+        "properties": {
+          "tileShape": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          },
+          "rectangleRoundedCurve": {
+            "expr": {
+              "Literal": {
+                "Value": "9L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "layout": [
+      {
+        "properties": {
+          "maxTiles": {
+            "expr": {
+              "Literal": {
+                "Value": "1L"
+              }
+            }
+          },
+          "cellPadding": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          },
+          "backgroundShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'top'"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outline": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "weight": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          },
+          "lineColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 8,
+                    "Percent": 0.4
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "shadowCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "glowCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "glowPositionPreset": {
+            "expr": {
+              "Literal": {
+                "Value": "'bottomLeft'"
+              }
+            }
+          },
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 2,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "accentBar": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 2,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "width": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "fillCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "fillColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 9,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "spacing": [
+      {
+        "properties": {
+          "verticalSpacing": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "label": [
+      {
+        "properties": {
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          },
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "heading": {
+            "expr": {
+              "Literal": {
+                "Value": "'Normal'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "referenceLabel": [
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "kpi_all_server_cores"
+              }
+            }
+          },
+          "formatString": {
+            "expr": {
+              "Literal": {
+                "Value": "'0'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85",
+          "order": 0
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "kpi_all_server_memory"
+              }
+            }
+          },
+          "formatString": {
+            "expr": {
+              "Literal": {
+                "Value": "'0.0'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-201f5cb9-0592-aa5d-b7cf-94a54866aa7c",
+          "order": 1
+        }
+      },
+      {
+        "properties": {
+          "backgroundShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      },
+      {
+        "properties": {},
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-c4145602-22dc-5acf-da72-f0a0c1e10b07",
+          "order": 2
+        }
+      }
+    ],
+    "referenceLabelTitle": [
+      {
+        "properties": {
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          },
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Cores'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85"
+        }
+      },
+      {
+        "properties": {
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          },
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Memory (GB)'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-201f5cb9-0592-aa5d-b7cf-94a54866aa7c"
+        }
+      }
+    ],
+    "referenceLabelDetail": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "all_measures.kpi_all_server_count"
+        }
+      },
+      {
+        "properties": {
+          "detailValue": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "server_cores_license_type"
+              }
+            }
+          },
+          "formatString": {
+            "expr": {
+              "Literal": {
+                "Value": "'0'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85"
+        }
+      },
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "all_measures.kpi_all_server_count",
+          "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85"
+        }
+      }
+    ],
+    "cardCalloutArea": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "image": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "padding": [
+      {
+        "properties": {
+          "paddingUniform": {
+            "expr": {
+              "Literal": {
+                "Value": "9L"
+              }
+            }
+          },
+          "paddingIndividual": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "topMargin": {
+            "expr": {
+              "Literal": {
+                "Value": "5L"
+              }
+            }
+          },
+          "bottomMargin": {
+            "expr": {
+              "Literal": {
+                "Value": "4L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ]
+  },
+  "projectionOrdering": {
+    "Data": [
+      0
+    ]
+  },
+  "queryMetadata": {
+    "Select": [
+      {
+        "Restatement": "Total Servers",
+        "Name": "all_measures.kpi_all_server_count",
+        "Type": 3,
+        "Format": "0"
+      }
+    ]
+  },
+  "visualElements": [
+    {
+      "DataRoles": [
+        {
+          "Name": "Data",
+          "Projection": 0,
+          "isActive": false
+        }
+      ]
+    }
+  ],
+  "selects": [
+    {
+      "displayName": "Total Servers",
+      "format": "0",
+      "queryName": "all_measures.kpi_all_server_count",
+      "roles": {
+        "Data": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "kpi_all_server_count"
+        }
+      }
+    },
+    {
+      "displayName": "kpi_all_server_cores",
+      "format": "0",
+      "queryName": "all_measures.kpi_all_server_cores",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "kpi_all_server_cores"
+        }
+      },
+      "relatedObjects": {
+        "referenceLabel": {
+          "value": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 0
+                  }
+                }
+              ],
+              "metadata": "all_measures.kpi_all_server_count",
+              "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85",
+              "order": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "kpi_all_server_memory",
+      "format": "0.0",
+      "queryName": "all_measures.kpi_all_server_memory",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 259
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "kpi_all_server_memory"
+        }
+      },
+      "relatedObjects": {
+        "referenceLabel": {
+          "value": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 0
+                  }
+                }
+              ],
+              "metadata": "all_measures.kpi_all_server_count",
+              "id": "field-201f5cb9-0592-aa5d-b7cf-94a54866aa7c",
+              "order": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "server_cores_license_type",
+      "format": "0",
+      "queryName": "all_measures.server_cores_license_type",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "server_cores_license_type"
+        }
+      },
+      "relatedObjects": {
+        "referenceLabelDetail": {
+          "detailValue": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 0
+                  }
+                }
+              ],
+              "metadata": "all_measures.kpi_all_server_count",
+              "id": "field-2210153f-50d8-c897-0de6-e90c8190bb85"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "v",
+              "Entity": "view_arc_sql_databases",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "space_available_mb"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "CountNonNull(view_arc_sql_databases.space_available_mb)",
+              "NativeReferenceName": "Free Space"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "log_file_size_mb"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "CountNonNull(view_arc_sql_databases.log_file_size_mb)",
+              "NativeReferenceName": "Log Space"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "size_mb"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "CountNonNull(view_arc_sql_databases.size_mb)",
+              "NativeReferenceName": "DB Space"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "sql_db_full_name"
+              },
+              "Name": "view_arc_sql_databases.sql_db_full_name",
+              "NativeReferenceName": "sql_db_full_name"
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "v"
+                          }
+                        },
+                        "Property": "sql_database_type"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'User'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 2,
+              "Expression": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "size_mb"
+                    }
+                  },
+                  "Function": 0
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 4,
+            "Primary": {
+              "Window": {
+                "Count": 1000
+              }
+            }
+          },
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

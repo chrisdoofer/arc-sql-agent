@@ -1,0 +1,56 @@
+{
+  "name": "1bf953662303c0e3437c",
+  "layouts": [
+    {
+      "id": 0,
+      "position": {
+        "x": 88.085106382978722,
+        "y": 15.957446808510639,
+        "z": 15000,
+        "width": 297.44680851063828,
+        "height": 48.51063829787234,
+        "tabOrder": 8000
+      }
+    }
+  ],
+  "singleVisual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Arc Jumpstart | Extensions",
+                    "textStyle": {
+                      "fontSize": "18pt",
+                      "color": "#ffffff"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "vcObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

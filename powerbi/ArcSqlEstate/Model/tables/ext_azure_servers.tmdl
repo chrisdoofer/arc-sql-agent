@@ -1,0 +1,426 @@
+/// Stores all properties of this resource
+table ext_azure_servers
+	isHidden
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version_number
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_version_number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: vm_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_edition
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_edition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column memory_gb
+		dataType: double
+		isHidden
+		formatString: 0.0
+		summarizeBy: sum
+		sourceColumn: memory_gb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column logical_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: logical_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_name
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: server_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column os_sku
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: os_sku
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_sku_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: vm_sku_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column server_license_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: server_license_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_azure_servers = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source = ```
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				    
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG call (ARG-first; NO comments inside the KQL)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw =
+				        AzureResourceGraph.Query(
+				            "
+				            resources
+				            | where type =~ 'microsoft.compute/virtualmachines'
+				            | extend props = properties
+				            | extend rid = trim(' ', tolower(id))
+				            | extend rid = replace_string(rid, '//', '/')
+				            | extend resource_id = replace_regex(rid, '/+$', '')
+				            | extend
+				                location        = trim(' ', tolower(location)),
+				                subscription_id = trim(' ', tolower(subscriptionId)),
+				                resource_group  = trim(' ', tolower(resourceGroup))
+				            | summarize take_any(*) by id
+				            | project
+				                resource_id,
+				                resource_name        = tostring(name),
+				                platform             = 'Azure',
+				                resource_type        = tostring(type),
+				                server_name          = tostring(name),
+				                location,
+				                subscription_id,
+				                resource_group,
+				                provisioning_state = tostring(props.provisioningState),
+				                server_license_type = iff(tostring(props.licenseType) == 'Windows_Server', 'AHUB', 'PAYG'),
+				                os_type            = tostring(props.storageProfile.osDisk.osType),
+				                status             = tostring(props.extended.instanceView.powerState.displayStatus),
+				                vm_id              = tostring(props.vmId),
+				                vm_sku_name        = tostring(props.hardwareProfile.vmSize),
+				                os_version_number  = coalesce(
+				                                        tostring(props.extended.instanceView.osVersion),
+				                                        tostring(props.storageProfile.imageReference.exactVersion),
+				                                        tostring(props.storageProfile.imageReference.version)
+				                                    ),
+				                guest_os_name      = tostring(props.extended.instanceView.osName),
+				                image_sku          = tostring(props.storageProfile.imageReference.sku)
+				            ",
+				            null, null, null, [ resultTruncated = false ]
+				        ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text,
+				            resource_name = text,
+				            platform = text,
+				            resource_type = text,
+				            server_name = text,
+				            location = text,
+				            subscription_id = text,
+				            resource_group = text,
+				            provisioning_state = text,
+				            os_type = text,
+				            status = text,
+				            os_version_number = text,
+				            server_license_type = text,
+				            vm_id = text,
+				            guest_os_name = text,
+				            image_sku = text,
+				            vm_sku_name = text
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard (adds missing cols as null; preserves typed-empty)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Minimal normalization in M (ids already normalized in KQL)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Normalized = Table.TransformColumns(
+				        Validated,
+				        {
+				            {"resource_id", each NormId(_), type text},
+				            {"subscription_id", each NormId(_), type text},
+				            {"server_name", each if _ = null then null else Text.Trim(ToText(_)), type text}
+				        }
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5) OS SKU derive (robust against malformed SKUs)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    AddCustomOS = Table.AddColumn(
+				        Normalized, "os_sku",
+				        each
+				            let
+				                rawName = [guest_os_name],
+				                imgSku  = [image_sku],
+				                cleanedImgSku =
+				                    if imgSku = null then null else
+				                    let
+				                        replaced    = Text.Replace(Text.Replace(imgSku, "-gensecond", ""), "-g2", ""),
+				                        parts       = Text.Split(replaced, "-"),
+				                        capitalized = Text.Combine(List.Transform(parts, each Text.Proper(_)), " ")
+				                    in
+				                        if Text.Contains(replaced, "datacenter", Comparer.OrdinalIgnoreCase)
+				                        then "Windows Server " & capitalized
+				                        else capitalized
+				            in
+				                if rawName <> null and rawName <> "" then rawName else cleanedImgSku,
+				        type text
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 6) Split os_version / os_edition (single pass) — null-safe Windows check
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    AddSplit = Table.AddColumn(
+				        AddCustomOS, "os_split",
+				        each
+				            let
+				                osName    = [os_sku],
+				                osTypeTxt = ToText([os_type])
+				            in
+				                if osTypeTxt <> null and Text.Lower(osTypeTxt) = "windows" and osName <> null then
+				                    let lastSpace = Text.PositionOfAny(osName, {" "}, Occurrence.Last) in
+				                        if lastSpace > 0
+				                        then { Text.Start(osName, lastSpace), Text.Range(osName, lastSpace + 1) }
+				                        else { osName, null }
+				                else null
+				    ),
+				    AddOSVersion = Table.AddColumn(AddSplit, "os_version", each try [os_split]{0} otherwise [os_sku]),
+				    AddOSEdition = Table.AddColumn(AddOSVersion, "os_edition", each try [os_split]{1} otherwise null),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 7) Cleanup and join to VM SKU dimension
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Clean1    = Table.RemoveColumns(AddOSEdition, {"os_split", "guest_os_name", "image_sku"}),
+				    JoinedSKU = Table.NestedJoin(Clean1, {"vm_sku_name"}, dim_azure_vm_skus, {"vm_sku_name"}, "sku_data", JoinKind.LeftOuter),
+				    ExpandSKU = Table.ExpandTableColumn(JoinedSKU, "sku_data", {"vm_sku_key", "logical_cores", "memory_gb"}, {"vm_sku_key", "logical_cores", "memory_gb"}),
+				
+				    // 7.1) If SKU missing (vm_sku_key = null), default numeric metrics to 0 (no errors)
+				    DefaultNumericForMissingSKU =
+				        let
+				            addCores = Table.AddColumn(ExpandSKU, "logical_cores_safe",
+				                        each if [vm_sku_key] = null then 0 else try Number.From([logical_cores]) otherwise 0, Int64.Type),
+				            addMem   = Table.AddColumn(addCores, "memory_gb_safe",
+				                        each if [vm_sku_key] = null then 0 else try Number.From([memory_gb]) otherwise 0, type number),
+				            dropOld  = Table.RemoveColumns(addMem, {"logical_cores","memory_gb"}),
+				            rename   = Table.RenameColumns(dropOld, {{"logical_cores_safe","logical_cores"},{"memory_gb_safe","memory_gb"}})
+				        in
+				            rename,
+				
+				    // 7.2) Defend the key itself: default vm_sku_key to "UnKnown" when SKU not found
+				    DefendSKUKey = Table.TransformColumns(
+				        DefaultNumericForMissingSKU,
+				        {{"vm_sku_name", each if _ = null then "UnKnown" else _, type text}}
+				    ),
+				
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 7.3) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(DefendSKUKey, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 8) Final projection and typing 
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 8.1) Add parent_resource_id at the end (set to null for root resources)
+				    AddParentNull = Table.AddColumn(Deduplicated, "parent_resource_id", each null, type text),
+				
+				    Selected = Table.SelectColumns(
+				        AddParentNull,
+				        {
+				            "resource_id", "parent_resource_id", "resource_name", "platform", "resource_type", "server_name",
+				            "provisioning_state", "os_type", "status",
+				            "os_version_number",
+				            "vm_id",
+				            "os_sku", "os_version", "os_edition", "server_license_type",
+				            "vm_sku_name", 
+				            "logical_cores", "memory_gb",
+				            "location", "subscription_id", "resource_group"
+				        }
+				    ),
+				
+				    Typed = Table.TransformColumnTypes(
+				        Selected,
+				        {
+				            {"logical_cores", Int64.Type},
+				            {"memory_gb", type number},
+				            {"location", type text},
+				            {"subscription_id", type text},
+				            {"resource_group", type text}
+				        },
+				        "en-GB"
+				    ),
+				    #"Sorted Rows" = Table.Sort(Typed,{{"resource_id", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

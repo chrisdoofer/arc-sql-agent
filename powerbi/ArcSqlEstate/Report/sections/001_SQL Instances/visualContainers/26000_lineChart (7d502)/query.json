@@ -1,0 +1,125 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "a",
+              "Entity": "all_measures",
+              "Type": 0
+            },
+            {
+              "Name": "v",
+              "Entity": "view_sql_instances",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "arc_sql_total_latency_hrs"
+              },
+              "Name": "dim_arc_sql_servers.arc_sql_total_latency_hrs",
+              "NativeReferenceName": "Total Latency"
+            },
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "arc_sql_ok_latency_hrs"
+              },
+              "Name": "dim_arc_sql_servers.arc_sql_ok_latency_hrs",
+              "NativeReferenceName": "OK"
+            },
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "arc_sql_warning_latency_hrs"
+              },
+              "Name": "dim_arc_sql_servers.arc_sql_warning_latency_hrs",
+              "NativeReferenceName": "Warning"
+            },
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "arc_sql_critical_latency_hrs"
+              },
+              "Name": "dim_arc_sql_servers.arc_sql_critical_latency_hrs",
+              "NativeReferenceName": "Critical"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "sql_instance_name"
+              },
+              "Name": "view_sql_instances.sql_instance_name",
+              "NativeReferenceName": "sql_instance_name1"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 2,
+              "Expression": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Source": "a"
+                    }
+                  },
+                  "Property": "arc_sql_total_latency_hrs"
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4
+                ]
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 4,
+            "Primary": {
+              "Window": {
+                "Count": 1000
+              }
+            }
+          },
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

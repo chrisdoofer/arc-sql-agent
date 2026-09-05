@@ -1,0 +1,182 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "a",
+              "Entity": "all_measures",
+              "Type": 0
+            },
+            {
+              "Name": "v",
+              "Entity": "view_servers",
+              "Type": 0
+            },
+            {
+              "Name": "f",
+              "Entity": "fact_resources",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "a"
+                  }
+                },
+                "Property": "kpi_all_server_count"
+              },
+              "Name": "all_measures.kpi_all_server_count",
+              "NativeReferenceName": "Count"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "platform"
+              },
+              "Name": "view_all_servers.platform",
+              "NativeReferenceName": "Platfom"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "region_name"
+              },
+              "Name": "view_all_servers.region_name",
+              "NativeReferenceName": "Location"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "longitude"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_all_servers.longitude)",
+              "NativeReferenceName": "Longitude"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "latitude"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_all_servers.latitude)",
+              "NativeReferenceName": "Latitude"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "f"
+                      }
+                    },
+                    "Property": "resource_name"
+                  }
+                },
+                "Function": 5
+              },
+              "Name": "CountNonNull(fact_resources.resource_name)"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 2,
+              "Expression": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Source": "a"
+                    }
+                  },
+                  "Property": "kpi_all_server_count"
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  2
+                ]
+              }
+            ]
+          },
+          "Secondary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  3,
+                  4,
+                  5
+                ]
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 6,
+            "Primary": {
+              "Top": {}
+            },
+            "Secondary": {
+              "Top": {}
+            }
+          },
+          "Aggregates": [
+            {
+              "Select": 5,
+              "Aggregations": [
+                {
+                  "Min": {}
+                },
+                {
+                  "Max": {}
+                }
+              ]
+            }
+          ],
+          "SuppressedJoinPredicates": [
+            5
+          ],
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

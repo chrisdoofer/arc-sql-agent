@@ -1,0 +1,373 @@
+/// Stores all properties of this resource
+table ext_all_extensions
+	isHidden
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: extension_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column extension_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: extension_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column publisher
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: publisher
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column type_handler_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: type_handler_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column auto_upgrade_minor_version
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: auto_upgrade_minor_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column force_update_tag
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: force_update_tag
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column settings
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: settings
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column protected_settings
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: protected_settings
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column timestamp
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: timestamp
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instanceview_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instanceview_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_type_handler_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instanceview_type_handler_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_status_level
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instanceview_status_level
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instanceview_status_code
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instanceview_status_code
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		formatString: 0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key = ```
+			
+			LOOKUPVALUE(
+			    fact_keys[resource_key],
+			    fact_keys[resource_id], [parent_resource_id]
+			)
+			
+			```
+		formatString: 0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_all_extensions = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source =
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    //    - ToText: safely convert to text (returns null on failure)
+				    //    - NormId : normalize IDs to trimmed lowercase text
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) KQL Query (ARG-first, self-keyed)
+				    //    - All flattening done at source
+				    //    - resource_key = resource_id
+				    //    - parent_resource_key = parent_resource_id
+				    //    - No joins required in M
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    KQLQuery = "
+				    resources
+				    | where type =~ 'microsoft.hybridcompute/machines/extensions' or type =~ 'microsoft.compute/virtualmachines/extensions'
+				    | summarize take_any(*) by id
+				    | project
+				        resource_id          = tolower(trim(' ', id)),
+				        resource_name        = trim(' ', name),
+				        resource_type        = tolower(trim(' ', type)),
+				        parent_resource_id   = tolower(trim(' ', tostring(split(id, '/extensions')[0]))),
+				        platform             = iff(type =~ 'microsoft.hybridcompute/machines/extensions', 'Arc', 'Azure'),
+				        extension_name       = name,
+				        extension_type       = tostring(properties.type),
+				        publisher            = tostring(properties.publisher),
+				        provisioning_state   = tostring(properties.provisioningState),
+				        type_handler_version = tostring(properties.typeHandlerVersion),
+				        auto_upgrade_minor_version = tobool(properties.autoUpgradeMinorVersion),
+				        force_update_tag     = tostring(properties.forceUpdateTag),
+				        settings             = tostring(properties.settings),
+				        protected_settings   = tostring(properties.protectedSettings),
+				        timestamp            = todatetime(properties.timestamp),
+				        instanceview_name    = tostring(properties.instanceView.name),
+				        instanceview_type    = tostring(properties.instanceView.type),
+				        instanceview_type_handler_version = tostring(properties.instanceView.typeHandlerVersion),
+				        instanceview_status_level = tostring(properties.instanceView.status.level),
+				        instanceview_status_code  = tostring(properties.instanceView.status.code),
+				        location             = tolower(trim(' ', location)),
+				        subscription_id      = tolower(trim(' ', subscriptionId)),
+				        resource_group       = tolower(trim(' ', resourceGroup))
+				    ",
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Execute ARG
+				    //    - resultTruncated=false to avoid partial datasets
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(KQLQuery, null, null, null, [ resultTruncated = false ]),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Typed-empty fallback schema (0-row safe; no Table.Combine)
+				    //    - Guarantees stable headers for downstream dependencies
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text,
+				            resource_name = text,
+				            resource_type = text,
+				            parent_resource_id = text,
+				            platform = text,
+				            extension_name = text,
+				            extension_type = text,
+				            publisher = text,
+				            provisioning_state = text,
+				            type_handler_version = text,
+				            auto_upgrade_minor_version = logical,
+				            force_update_tag = text,
+				            settings = text,
+				            protected_settings = text,
+				            timestamp = datetime,
+				            instanceview_name = text,
+				            instanceview_type = text,
+				            instanceview_type_handler_version = text,
+				            instanceview_status_level = text,
+				            instanceview_status_code = text,
+				            location = text,
+				            subscription_id = text,
+				            resource_group = text
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Schema guard & column selection
+				    //    - If ARG returns non-table, use Fallback
+				    //    - Select Fallback columns; fill missing with nulls
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 5) Final type enforcement (metadata only; no logic)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(SafeSelected, {"resource_id"}),
+				    Final = Table.TransformColumnTypes(
+				        Deduplicated,
+				        {
+				            {"auto_upgrade_minor_version", type logical},
+				            {"timestamp", type datetime}
+				        },
+				        "en-GB"
+				    )
+				in
+				    Final
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

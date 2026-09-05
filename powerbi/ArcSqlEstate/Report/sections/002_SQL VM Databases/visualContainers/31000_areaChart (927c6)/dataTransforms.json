@@ -1,0 +1,580 @@
+{
+  "objects": {
+    "legend": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "dataPoint": [
+      {
+        "properties": {
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "51D"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "50D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.TotalSQLLatencyHrs"
+        }
+      }
+    ],
+    "valueAxis": [
+      {
+        "properties": {
+          "start": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          },
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "labelColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "showAxisTitle": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "titleColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "gridlineColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E6E6E6'"
+                  }
+                }
+              }
+            }
+          },
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Latency (Hrs)'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "categoryAxis": [
+      {
+        "properties": {
+          "labelColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "showAxisTitle": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "lineStyles": [
+      {
+        "properties": {
+          "strokeShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "showMarker": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "markerShape": {
+            "expr": {
+              "Literal": {
+                "Value": "'diamond'"
+              }
+            }
+          },
+          "markerSize": {
+            "expr": {
+              "Literal": {
+                "Value": "7D"
+              }
+            }
+          },
+          "markerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 3,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "lineChartType": {
+            "expr": {
+              "Literal": {
+                "Value": "'step'"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "strokeShow": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "strokeWidth": {
+            "expr": {
+              "Literal": {
+                "Value": "2D"
+              }
+            }
+          },
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.TotalSQLLatencyHrs"
+        }
+      },
+      {
+        "properties": {
+          "markerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#D6D6D6'"
+                  }
+                }
+              }
+            }
+          },
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.SQLLatencyWarn"
+        }
+      },
+      {
+        "properties": {
+          "markerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 7,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.SQLLatencyCritical"
+        }
+      },
+      {
+        "properties": {
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.SQLLatencyOk"
+        }
+      },
+      {
+        "properties": {
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "markerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 7,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "dim_arc_sql_databases.arc_sql_database_critical_latency_hrs"
+        }
+      },
+      {
+        "properties": {
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "dim_arc_sql_databases.arc_sql_database_ok_latency_hrs"
+        }
+      },
+      {
+        "properties": {
+          "areaShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "markerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "dim_arc_sql_databases.arc_sql_database_warning_latency_hrs"
+        }
+      },
+      {
+        "properties": {
+          "strokeShow": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "showMarker": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "dim_arc_sql_databases.arc_sql_database_total_latency_hrsm"
+        }
+      }
+    ]
+  },
+  "projectionOrdering": {
+    "Y": [
+      0,
+      1,
+      3,
+      2
+    ],
+    "Category": [
+      4
+    ]
+  },
+  "projectionActiveItems": {
+    "Category": [
+      {
+        "queryRef": "view_arc_sql_databases.sql_db_full_name",
+        "suppressConcat": false
+      }
+    ]
+  },
+  "queryMetadata": {
+    "Select": [
+      {
+        "Restatement": "arc_sql_database_total_latency_hrs",
+        "Name": "dim_arc_sql_databases.arc_sql_database_total_latency_hrsm",
+        "Type": 3
+      },
+      {
+        "Restatement": "arc_sql_database_ok_latency_hrs",
+        "Name": "dim_arc_sql_databases.arc_sql_database_ok_latency_hrs",
+        "Type": 3
+      },
+      {
+        "Restatement": "arc_sql_database_critical_latency_hrs",
+        "Name": "dim_arc_sql_databases.arc_sql_database_critical_latency_hrs",
+        "Type": 3
+      },
+      {
+        "Restatement": "arc_sql_database_warning_latency_hrs",
+        "Name": "dim_arc_sql_databases.arc_sql_database_warning_latency_hrs",
+        "Type": 3
+      },
+      {
+        "Restatement": "sql_db_full_name",
+        "Name": "view_arc_sql_databases.sql_db_full_name",
+        "Type": 2048
+      }
+    ]
+  },
+  "visualElements": [
+    {
+      "DataRoles": [
+        {
+          "Name": "Y",
+          "Projection": 0,
+          "isActive": false
+        },
+        {
+          "Name": "Y",
+          "Projection": 1,
+          "isActive": false
+        },
+        {
+          "Name": "Y",
+          "Projection": 3,
+          "isActive": false
+        },
+        {
+          "Name": "Y",
+          "Projection": 2,
+          "isActive": false
+        },
+        {
+          "Name": "Category",
+          "Projection": 4,
+          "isActive": true
+        }
+      ]
+    }
+  ],
+  "selects": [
+    {
+      "displayName": "arc_sql_database_total_latency_hrs",
+      "queryName": "dim_arc_sql_databases.arc_sql_database_total_latency_hrsm",
+      "roles": {
+        "Y": true
+      },
+      "sort": 2,
+      "sortOrder": 0,
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "arc_sql_database_total_latency_hrs"
+        }
+      }
+    },
+    {
+      "displayName": "arc_sql_database_ok_latency_hrs",
+      "queryName": "dim_arc_sql_databases.arc_sql_database_ok_latency_hrs",
+      "roles": {
+        "Y": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "arc_sql_database_ok_latency_hrs"
+        }
+      }
+    },
+    {
+      "displayName": "arc_sql_database_critical_latency_hrs",
+      "queryName": "dim_arc_sql_databases.arc_sql_database_critical_latency_hrs",
+      "roles": {
+        "Y": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "arc_sql_database_critical_latency_hrs"
+        }
+      }
+    },
+    {
+      "displayName": "arc_sql_database_warning_latency_hrs",
+      "queryName": "dim_arc_sql_databases.arc_sql_database_warning_latency_hrs",
+      "roles": {
+        "Y": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "arc_sql_database_warning_latency_hrs"
+        }
+      }
+    },
+    {
+      "displayName": "sql_db_full_name",
+      "queryName": "view_arc_sql_databases.sql_db_full_name",
+      "roles": {
+        "Category": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "sql_db_full_name"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+table dim_sql_savings_plan
+	isHidden
+
+	column type
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column discount
+		isHidden
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [discount]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition dim_sql_savings_plan = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "type", STRING, "discount", DOUBLE,
+				    {
+				        {"None - Pay As You Go", 1.0},
+				        {"Reservation - 1 Year", 0.647962306},
+				        {"Reservation - 3 Year", 0.448741484}
+				    }
+				)
+
+	annotation PBI_Id = b70d5aa2955c4522b520e29bceda3238
+

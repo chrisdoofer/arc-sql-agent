@@ -1,0 +1,1139 @@
+{
+  "objects": {
+    "value": [
+      {
+        "properties": {
+          "horizontalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "20D"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      },
+      {
+        "properties": {
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "25D"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 1,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers"
+        }
+      }
+    ],
+    "referenceLabelLayout": [
+      {
+        "properties": {
+          "arrangement": {
+            "expr": {
+              "Literal": {
+                "Value": "'columns'"
+              }
+            }
+          },
+          "horizontalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'center'"
+              }
+            }
+          },
+          "labelSpace": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          },
+          "outerPadding": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "divider": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "dividerColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "shapeCustomRectangle": [
+      {
+        "properties": {
+          "tileShape": {
+            "expr": {
+              "Literal": {
+                "Value": "'rectangleRoundedByPixel'"
+              }
+            }
+          },
+          "rectangleRoundedCurve": {
+            "expr": {
+              "Literal": {
+                "Value": "9L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "layout": [
+      {
+        "properties": {
+          "maxTiles": {
+            "expr": {
+              "Literal": {
+                "Value": "1L"
+              }
+            }
+          },
+          "cellPadding": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          },
+          "backgroundShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'top'"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "topOuterMargin": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "outline": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "weight": {
+            "expr": {
+              "Literal": {
+                "Value": "1D"
+              }
+            }
+          },
+          "lineColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#666666'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "shadowCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "glowCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "glowPositionPreset": {
+            "expr": {
+              "Literal": {
+                "Value": "'bottomLeft'"
+              }
+            }
+          },
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#E6E6E6'"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "accentBar": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 4,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "27D"
+              }
+            }
+          },
+          "width": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "fillCustom": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "fillColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 9,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "label": [
+      {
+        "properties": {
+          "heading": {
+            "expr": {
+              "Literal": {
+                "Value": "'Normal'"
+              }
+            }
+          },
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "10D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers"
+        }
+      },
+      {
+        "properties": {
+          "heading": {
+            "expr": {
+              "Literal": {
+                "Value": "'Normal'"
+              }
+            }
+          },
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "11D"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "spacing": [
+      {
+        "properties": {
+          "verticalSpacing": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers"
+        }
+      },
+      {
+        "properties": {
+          "verticalSpacing": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "referenceLabel": [
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "SQLInstances"
+                      }
+                    },
+                    "Property": "LogicalCores"
+                  }
+                },
+                "Function": 0
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-8633036f-c0c0-f90e-39f9-4596f60f77ae",
+          "order": 0
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "SQLInstances"
+                      }
+                    },
+                    "Property": "sqlMemoryGB"
+                  }
+                },
+                "Function": 0
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-4428e66a-d3be-0e7e-d05f-9322804ab858",
+          "order": 1
+        }
+      },
+      {
+        "properties": {},
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-695eb19c-bd10-2367-ac95-0a3e995e2309",
+          "order": 0
+        }
+      },
+      {
+        "properties": {},
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-83f7b687-8150-1bba-dfaa-1414c4890768",
+          "order": 1
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "server_esu_cost_pct"
+              }
+            }
+          },
+          "formatString": {
+            "expr": {
+              "Literal": {
+                "Value": "'0.00%;-0.00%;0.00%'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-ac1fb29f-77d4-b6c8-43f2-28dfd5505a82",
+          "order": 0
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "all_measures"
+                  }
+                },
+                "Property": "sql_esu_cost_pct"
+              }
+            }
+          },
+          "formatString": {
+            "expr": {
+              "Literal": {
+                "Value": "'0.00%;-0.00%;0.00%'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 0
+              }
+            }
+          ],
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-ed90922c-35a5-0975-06ba-b00e7e7d171c",
+          "order": 1
+        }
+      },
+      {
+        "properties": {
+          "backgroundShow": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "referenceLabelTitle": [
+      {
+        "properties": {
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Cores'"
+              }
+            }
+          },
+          "titleFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 7,
+                    "Percent": 0.4
+                  }
+                }
+              }
+            }
+          },
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-f01dacdd-e2ac-9a8c-fd2b-4f0cffeba80a"
+        }
+      },
+      {
+        "properties": {
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Cores'"
+              }
+            }
+          },
+          "titleFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "titleFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "titleFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          },
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-8633036f-c0c0-f90e-39f9-4596f60f77ae"
+        }
+      },
+      {
+        "properties": {
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Memory GB'"
+              }
+            }
+          },
+          "titleFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "titleFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-c1a0e702-1fb1-f625-c597-1ad9cb6147ad"
+        }
+      },
+      {
+        "properties": {
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Memory (GB)'"
+              }
+            }
+          },
+          "titleFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "titleFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "titleFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          },
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-4428e66a-d3be-0e7e-d05f-9322804ab858"
+        }
+      },
+      {
+        "properties": {
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          },
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'Windows ESU %'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-ac1fb29f-77d4-b6c8-43f2-28dfd5505a82"
+        }
+      },
+      {
+        "properties": {
+          "titleContentType": {
+            "expr": {
+              "Literal": {
+                "Value": "'custom'"
+              }
+            }
+          },
+          "titleText": {
+            "expr": {
+              "Literal": {
+                "Value": "'SQL ESU %'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+          "id": "field-ed90922c-35a5-0975-06ba-b00e7e7d171c"
+        }
+      }
+    ],
+    "referenceLabelValue": [
+      {
+        "properties": {
+          "valueFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 7,
+                    "Percent": 0.4
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-f01dacdd-e2ac-9a8c-fd2b-4f0cffeba80a"
+        }
+      },
+      {
+        "properties": {
+          "valueFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          },
+          "valueFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "valueFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-8633036f-c0c0-f90e-39f9-4596f60f77ae"
+        }
+      },
+      {
+        "properties": {
+          "valueFontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": -0.6
+                  }
+                }
+              }
+            }
+          },
+          "valueFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "valueFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-4428e66a-d3be-0e7e-d05f-9322804ab858"
+        }
+      },
+      {
+        "properties": {
+          "valueFontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "9D"
+              }
+            }
+          },
+          "valueFontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'wf_standard-font, helvetica, arial, sans-serif'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.Total SQL Servers",
+          "id": "field-c1a0e702-1fb1-f625-c597-1ad9cb6147ad"
+        }
+      }
+    ],
+    "referenceLabelDetail": [
+      {
+        "properties": {
+          "show": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "bridge_os_sql_servers_vms.total_esu_cost"
+        }
+      }
+    ],
+    "padding": [
+      {
+        "properties": {
+          "paddingUniform": {
+            "expr": {
+              "Literal": {
+                "Value": "7L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ],
+    "cardCalloutArea": [
+      {
+        "properties": {
+          "paddingUniform": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          }
+        },
+        "selector": {
+          "id": "default"
+        }
+      }
+    ]
+  },
+  "projectionOrdering": {
+    "Data": [
+      0
+    ]
+  },
+  "queryMetadata": {
+    "Select": [
+      {
+        "Restatement": "Total ESU Cost",
+        "Name": "bridge_os_sql_servers_vms.total_esu_cost",
+        "Type": 1,
+        "Format": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+      }
+    ]
+  },
+  "visualElements": [
+    {
+      "DataRoles": [
+        {
+          "Name": "Data",
+          "Projection": 0,
+          "isActive": false
+        }
+      ]
+    }
+  ],
+  "selects": [
+    {
+      "displayName": "Total ESU Cost",
+      "format": "\\$#,0.00;(\\$#,0.00);\\$#,0.00",
+      "queryName": "bridge_os_sql_servers_vms.total_esu_cost",
+      "roles": {
+        "Data": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 259
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "total_esu_cost"
+        }
+      }
+    },
+    {
+      "displayName": "server_esu_cost_pct",
+      "format": "0.00%;-0.00%;0.00%",
+      "queryName": "all_measures.server_esu_cost_pct",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 259
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "server_esu_cost_pct"
+        }
+      },
+      "relatedObjects": {
+        "referenceLabel": {
+          "value": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 0
+                  }
+                }
+              ],
+              "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+              "id": "field-ac1fb29f-77d4-b6c8-43f2-28dfd5505a82",
+              "order": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "sql_esu_cost_pct",
+      "format": "0.00%;-0.00%;0.00%",
+      "queryName": "all_measures.sql_esu_cost_pct",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 259
+      },
+      "expr": {
+        "Measure": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "all_measures"
+            }
+          },
+          "Property": "sql_esu_cost_pct"
+        }
+      },
+      "relatedObjects": {
+        "referenceLabel": {
+          "value": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 0
+                  }
+                }
+              ],
+              "metadata": "bridge_os_sql_servers_vms.total_esu_cost",
+              "id": "field-ed90922c-35a5-0975-06ba-b00e7e7d171c",
+              "order": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

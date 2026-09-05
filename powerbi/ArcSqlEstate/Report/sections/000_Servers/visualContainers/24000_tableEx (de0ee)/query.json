@@ -1,0 +1,244 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "v",
+              "Entity": "view_servers",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "server_name"
+              },
+              "Name": "view_all_servers.server_name",
+              "NativeReferenceName": "Server Name"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "platform"
+              },
+              "Name": "view_all_servers.platform",
+              "NativeReferenceName": "Type"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "logical_cores"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "Sum(view_all_servers.logical_cores)",
+              "NativeReferenceName": "Cores"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "memory_gb"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "Sum(view_all_servers.memory_gb)",
+              "NativeReferenceName": "Mem (GB)"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "os_version"
+              },
+              "Name": "view_all_servers.os_version",
+              "NativeReferenceName": "Operating System"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "os_edition"
+              },
+              "Name": "view_all_servers.os_edition",
+              "NativeReferenceName": "Edition"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "pgsql_discovered"
+              },
+              "Name": "view_all_servers.pgsql_discovered",
+              "NativeReferenceName": "Has Postgres"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "mssql_discovered"
+              },
+              "Name": "view_all_servers.mssql_discovered",
+              "NativeReferenceName": "Has SQL"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "sql_instance_count"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "Sum(view_all_servers.sql_instance_count)",
+              "NativeReferenceName": "SQL Inst."
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "sql_database_count"
+                  }
+                },
+                "Function": 0
+              },
+              "Name": "Sum(view_all_servers.sql_database_count)",
+              "NativeReferenceName": "SQL DBs"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "server_license_type"
+              },
+              "Name": "view_servers.server_license_type",
+              "NativeReferenceName": "License Type"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "server_license_type"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_servers.server_license_type)"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 2,
+              "Expression": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "v"
+                        }
+                      },
+                      "Property": "sql_database_count"
+                    }
+                  },
+                  "Function": 0
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11
+                ],
+                "Subtotal": 1
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 3,
+            "Primary": {
+              "Window": {
+                "Count": 500
+              }
+            }
+          },
+          "SuppressedJoinPredicates": [
+            11
+          ],
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

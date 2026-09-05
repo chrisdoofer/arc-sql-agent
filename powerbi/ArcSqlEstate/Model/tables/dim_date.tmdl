@@ -1,0 +1,188 @@
+table dim_date
+	isHidden
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isHidden
+		isKey
+		formatString: Long Date
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Name'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Month Name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Quarter
+		sortByColumn: QuarterNumber
+
+		changedProperty = IsHidden
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Month Number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearQuarter
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: YearQuarter
+		sortByColumn: YearQuarterIndex
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week Number'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Week Number
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearQuarterIndex
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: YearQuarterIndex
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthIndex
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: MonthIndex
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: Index
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column QuarterNumber = QUARTER('dim_date'[Date])
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Year Hierarchy'
+		isHidden
+
+		level Year
+			column: Year
+
+		level Quarter
+			column: Quarter
+
+		changedProperty = IsHidden
+
+	partition dim_date = m
+		mode: import
+		queryGroup: Dimensions
+		source = ```
+				let
+				    // Parameters
+				    Today = DateTime.Date(DateTime.LocalNow()),
+				    StartDate = Date.StartOfMonth(Today),
+				    EndDate = #date(2032, 12, 31),
+				    
+				    // Generate List & Table
+				    Count = Duration.Days(EndDate - StartDate) + 1,
+				    Source = List.Dates(StartDate, Count, #duration(1, 0, 0, 0)),
+				    DateTable = Table.FromList(Source, Splitter.SplitByNothing(), {"Date"}, null, ExtraValues.Error),
+				    
+				    // Set initial type for better performance in subsequent steps
+				    TypedTable = Table.TransformColumnTypes(DateTable, {{"Date", type date}}),
+				
+				    // Add Columns in bulk-style logic
+				    AddColumns = Table.AddColumn(TypedTable, "CustomColumns", each 
+				        let 
+				            y = Date.Year([Date]),
+				            m = Date.Month([Date]),
+				            q = Date.QuarterOfYear([Date])
+				        in [
+				            Year = y,
+				            Month Number = m,
+				            Month Name = Date.ToText([Date], "MMMM"),
+				            Quarter = "Q" & Text.From(q),
+				            YearQuarter = Text.From(y) & " Q" & Text.From(q),
+				            Week Number = Date.WeekOfYear([Date]),
+				            YearQuarterIndex = (y * 10) + q,
+				            MonthIndex = (y * 12) + m
+				        ]
+				    ),
+				    
+				    // Expand the record and set types
+				    Expanded = Table.ExpandRecordColumn(AddColumns, "CustomColumns", 
+				        {"Year", "Month Number", "Month Name", "Quarter", "YearQuarter", "Week Number", "YearQuarterIndex", "MonthIndex"}),
+				    
+				    // Final touch: Add the sequential index if specifically needed for DAX
+				    FinalTable = Table.AddIndexColumn(Expanded, "Index", 1, 1, Int64.Type)
+				in
+				    FinalTable
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

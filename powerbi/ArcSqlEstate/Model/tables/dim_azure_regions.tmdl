@@ -1,0 +1,115 @@
+table dim_azure_regions
+	isHidden
+
+	column location
+		dataType: string
+		isHidden
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column region_name
+		dataType: string
+		isHidden
+		dataCategory: Place
+		summarizeBy: none
+		sourceColumn: region_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		isHidden
+		dataCategory: County
+		summarizeBy: none
+		sourceColumn: country
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		isHidden
+		dataCategory: Latitude
+		summarizeBy: sum
+		sourceColumn: latitude
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		isHidden
+		dataCategory: Longitude
+		summarizeBy: sum
+		sourceColumn: longitude
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column location_key
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: location_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_azure_regions = m
+		mode: import
+		queryGroup: Dimensions
+		source = ```
+				let
+				    // 1. Pull data from the new optimized CSV
+				    Source = Csv.Document(
+				        Web.Contents("https://github.com/Azure/arc_jumpstart_drops/raw/refs/heads/main/ui_dashboard_workbook/arc_pbi_dashboard/artifacts/reference/dim_azure_regions.csv"),
+				        [Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None]
+				    ),
+				    
+				    // 2. Promote Headers (now includes location_key and optimized snake_case names)
+				    Header = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    
+				    // 3. Apply types directly to the final schema
+				    Typed = Table.TransformColumnTypes(Header, {
+				        {"location_key", Int64.Type},
+				        {"location", type text}, 
+				        {"region_name", type text}, 
+				        {"country", type text}, 
+				        {"latitude", type number}, 
+				        {"longitude", type number},
+				        {"city", type text}
+				    })
+				in
+				    Typed
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

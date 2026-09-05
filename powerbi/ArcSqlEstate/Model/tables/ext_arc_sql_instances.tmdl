@@ -1,0 +1,830 @@
+/// Stores all properties of this resource
+table ext_arc_sql_instances
+	isHidden
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_defender_status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: azure_defender_status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column azure_defender_status_last_updated
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: azure_defender_status_last_updated
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_inventory_upload_time
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: last_inventory_upload_time
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column max_server_memory_mb
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: max_server_memory_mb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column last_usage_upload_time
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: last_usage_upload_time
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_license_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_license_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_current_version
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_current_version
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_patch_level
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_patch_level
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_edition
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_edition
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vcore
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: vcore
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column instance_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: instance_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column collation
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: collation
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column always_on_role
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: always_on_role
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_type
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: service_type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_hadr_enabled
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: is_hadr_enabled
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column monitoring_enabled
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: monitoring_enabled
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column migration_enabled
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: migration_enabled
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column assessment_upload_time
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: assessment_upload_time
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_blockers
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: mi_blockers
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: mi_status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_compute_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: mi_compute_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: mi_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: mi_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_storage_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: mi_storage_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_total_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: mi_total_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_blockers
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: vm_blockers
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: vm_status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_compute_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: vm_compute_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: vm_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: vm_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_storage_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: vm_storage_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_total_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: vm_total_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_blockers
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: db_blockers
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: db_status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_compute_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: db_compute_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_sql_license_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: db_sql_license_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_target_cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: db_target_cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_storage_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: db_storage_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_total_cost
+		dataType: double
+		isHidden
+		summarizeBy: sum
+		sourceColumn: db_total_cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column backup_policy
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: backup_policy
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_fci
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: is_fci
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column client_connections
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: client_connections
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_instance_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_instance_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column cores
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: cores
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_master_key_exists
+		dataType: boolean
+		isHidden
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: db_master_key_exists
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column tcp_static_ports
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: tcp_static_ports
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column tcp_dynamic_ports
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: tcp_dynamic_ports
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_inventory_upload_hrs = ```
+			
+			VAR t = ext_arc_sql_instances[last_inventory_upload_time] 
+			RETURN IF ( NOT ISBLANK(t), DATEDIFF ( t, NOW(), HOUR ) )
+			```
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		formatString: 0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key = ```
+			
+			LOOKUPVALUE(
+			    fact_keys[resource_key],
+			    fact_keys[resource_id], [parent_resource_id]
+			)
+			
+			```
+		formatString: 0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_arc_sql_instances = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source =
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG call (all flattening done in KQL)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(
+				    "
+				        resources
+				        | where type == 'microsoft.azurearcdata/sqlserverinstances'
+				        | extend props = properties
+				        | extend resource_id = trim(' ', tolower(id)), parent_id = trim(' ', tolower(tostring(props.containerResourceId))), patch = tostring(props.patchLevel)
+				        | join kind=leftouter (
+				            resources
+				            | where type == 'microsoft.hybridcompute/machines/extensions'
+				            | where properties.type in ('WindowsAgent.SqlServer','LinuxAgent.SqlServer')
+				            | extend machineId = tolower(substring(id, 0, indexof(id, '/extensions/')))
+				            | project machineId, Extension_License_Type = tostring(properties.settings.LicenseType)
+				        ) on $left.parent_id == $right.machineId
+				        | extend p1 = indexof(patch, '.'), p2 = indexof(patch, '.', indexof(patch, '.') + 1)
+				        | extend sql_patch_level_norm = iif(p1 >= 0 and p2 > p1, strcat(substring(patch, 0, p1 + 1), '0', substring(patch, p2, strlen(patch) - p2)), patch)
+				        | summarize take_any(*) by id
+				        | project
+				            resource_id,
+				            parent_resource_id = parent_id,
+				            resource_name = name,
+				            resource_type = type,
+				            platform = 'Arc',
+				            location = trim(' ', tolower(location)),
+				            subscription_id = trim(' ', tolower(subscriptionId)),
+				            resource_group = trim(' ', tolower(resourceGroup)),
+				            provisioning_state = tostring(props.provisioningState),
+				            sql_instance_name = name,
+				            status = tostring(props.status),
+				            azure_defender_status = tostring(props.azureDefenderStatus),
+				            azure_defender_status_last_updated = todatetime(props.azureDefenderStatusLastUpdated),
+				            last_inventory_upload_time = todatetime(props.lastInventoryUploadTime),
+				            max_server_memory_mb = tolong(coalesce(props.maxServerMemoryMB, props.configuration.maxServerMemoryMB)),
+				            last_usage_upload_time = todatetime(props.lastUsageUploadTime),
+				            sql_license_type = Extension_License_Type,
+				            sql_version = tostring(props.version),
+				            sql_current_version = tostring(props.currentVersion),
+				            sql_patch_level = tostring(sql_patch_level_norm),
+				            sql_edition = tostring(props.edition),
+				            vcore = toint(props.vCore),
+				            cores = toint(props.cores),
+				            db_master_key_exists = tobool(props.dbMasterKeyExists),
+				            tcp_static_ports = tostring(props.tcpStaticPorts),
+				            tcp_dynamic_ports = tostring(props.tcpDynamicPorts),
+				            instance_name = tostring(props.instanceName),
+				            collation = tostring(props.collation),
+				            always_on_role = tostring(props.alwaysOnRole),
+				            service_type = tostring(props.serviceType),
+				            is_hadr_enabled = coalesce(tobool(props.isHadrEnabled), false),
+				            monitoring_enabled = tobool(props.migration.assessment.enabled),
+				            migration_enabled = tobool(props.migration.assessment.enabled),
+				            assessment_upload_time = todatetime(props.migration.assessment.assessmentUploadTime),
+				            backup_policy = tostring(props.backupPolicy),
+				            is_fci = coalesce(tobool(props.failoverCluster), false),
+				            client_connections = toint(props.clientConnection),
+				            mi_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.numberOfServerBlockerIssues),
+				            mi_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.recommendationStatus),
+				            mi_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.computeCost),
+				            mi_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.sqlLicenseCost),
+				            mi_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.targetSku.computeSize),
+				            mi_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.storageCost),
+				            mi_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlManagedInstance.monthlyCost.totalCost),
+				            vm_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.numberOfServerBlockerIssues),
+				            vm_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.recommendationStatus),
+				            vm_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.computeCost),
+				            vm_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.sqlLicenseCost),
+				            vm_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.targetSku.computeSize),
+				            vm_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.storageCost),
+				            vm_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlVirtualMachine.monthlyCost.totalCost),
+				            db_blockers = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.numberOfServerBlockerIssues),
+				            db_status = tostring(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.recommendationStatus),
+				            db_compute_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.computeCost),
+				            db_sql_license_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.sqlLicenseCost),
+				            db_target_cores = toint(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.targetSku.computeSize),
+				            db_storage_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.storageCost),
+				            db_total_cost = todouble(props.migration.assessment.skuRecommendationResults.azureSqlDatabase.monthlyCost.totalCost)
+				            ",
+				        null, null, null, [ resultTruncated = false ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text, parent_resource_id = text, resource_name = text, resource_type = text, platform = text, location = text,
+				            subscription_id = text, resource_group = text, provisioning_state = text, sql_instance_name = text, status = text,
+				            azure_defender_status = text, azure_defender_status_last_updated = datetime,
+				            last_inventory_upload_time = datetime, max_server_memory_mb = Int64.Type, last_usage_upload_time = datetime,
+				            sql_license_type = text, sql_version = text, sql_current_version = text,
+				            sql_patch_level = text, sql_edition = text, vcore = Int64.Type, cores = Int64.Type,
+				            db_master_key_exists = logical, tcp_static_ports = text, tcp_dynamic_ports = text,
+				            instance_name = text, collation = text, always_on_role = text, service_type = text,
+				            is_hadr_enabled = logical, monitoring_enabled = logical, migration_enabled = logical,
+				            assessment_upload_time = datetime, backup_policy = text, is_fci = logical,
+				            client_connections = Int64.Type, mi_blockers = Int64.Type, mi_status = text,
+				            mi_compute_cost = number, mi_sql_license_cost = number, mi_target_cores = Int64.Type, mi_storage_cost = number, mi_total_cost = number,
+				            vm_blockers = Int64.Type, vm_status = text, vm_compute_cost = number, vm_sql_license_cost = number, vm_target_cores = Int64.Type,
+				            vm_storage_cost = number, vm_total_cost = number, db_blockers = Int64.Type,
+				            db_status = text, db_compute_cost = number, db_sql_license_cost = number, db_target_cores = Int64.Type, db_storage_cost = number, db_total_cost = number
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard (adds missing cols as null; keeps typed-empty when needed)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3.1) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(Validated, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Final type assertion (keys are whole numbers; enforce Int64)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Selected = Table.TransformColumnTypes(
+				        Deduplicated,
+				        {
+				            {"vcore", Int64.Type},
+				            {"cores", Int64.Type},
+				            {"max_server_memory_mb", Int64.Type},
+				            {"db_master_key_exists", type logical},
+				            {"is_hadr_enabled", type logical},
+				            {"monitoring_enabled", type logical},
+				            {"migration_enabled", type logical},
+				            {"is_fci", type logical},
+				            {"client_connections", Int64.Type},
+				            {"mi_blockers", Int64.Type},
+				            {"mi_compute_cost", type number},
+				            {"mi_sql_license_cost", type number},
+				            {"mi_target_cores", Int64.Type},
+				            {"mi_storage_cost", type number},
+				            {"mi_total_cost", type number},
+				            {"vm_blockers", Int64.Type},
+				            {"vm_compute_cost", type number},
+				            {"vm_sql_license_cost", type number},
+				            {"vm_target_cores", Int64.Type},
+				            {"vm_storage_cost", type number},
+				            {"vm_total_cost", type number},
+				            {"db_blockers", Int64.Type},
+				            {"db_compute_cost", type number},
+				            {"db_sql_license_cost", type number},
+				            {"db_target_cores", Int64.Type},
+				            {"db_storage_cost", type number},
+				            {"db_total_cost", type number},
+				            {"azure_defender_status_last_updated", type datetime},
+				            {"last_inventory_upload_time", type datetime},
+				            {"last_usage_upload_time", type datetime},
+				            {"assessment_upload_time", type datetime}
+				        },
+				        "en-GB"
+				    )
+				in
+				    Selected
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table

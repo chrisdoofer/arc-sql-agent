@@ -1,0 +1,84 @@
+/// Authoritative Microsoft Security Response Center mapping from Knowledge Base updates to CVEs.
+table dim_patch_cve_mapping
+	isHidden
+
+	column kb_numeric
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: kb_numeric
+
+	column cve_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cve_id
+
+	column product
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: product
+
+	column severity
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: severity
+
+	column source_url
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: source_url
+
+	partition dim_patch_cve_mapping = m
+		mode: import
+		queryGroup: Dimensions
+		source =
+				let
+				    UpdateIndexJson = Json.Document(Web.Contents("https://api.msrc.microsoft.com", [RelativePath="cvrf/v3.0/updates", Headers=[Accept="application/json"]])),
+				    UpdateRecords =
+				        if UpdateIndexJson is record and Record.HasFields(UpdateIndexJson, "value")
+				        then UpdateIndexJson[value]
+				        else error "MSRC update index did not return the expected value collection.",
+				    UpdateTable = Table.FromRecords(UpdateRecords),
+				    TypedUpdates = Table.TransformColumnTypes(UpdateTable, {{"ID", type text}, {"InitialReleaseDate", type datetimezone}}),
+				    RecentUpdates = Table.SelectRows(TypedUpdates, each Date.From([InitialReleaseDate]) >= Date.AddMonths(Date.From(DateTimeZone.UtcNow()), -18)),
+				    LoadDocument = (documentId as text) as table =>
+				        let
+				            DocumentJson = Json.Document(Web.Contents("https://api.msrc.microsoft.com", [RelativePath="cvrf/v3.0/cvrf/" & documentId, Headers=[Accept="application/json"]])),
+				            Vulnerabilities =
+				                if DocumentJson is record and Record.HasFields(DocumentJson, "Vulnerability")
+				                then DocumentJson[Vulnerability]
+				                else error "MSRC document " & documentId & " did not return a Vulnerability collection.",
+				            VulnerabilityRows = List.Combine(List.Transform(Vulnerabilities, (v as record) =>
+				                let
+				                    CveId = try Text.From(v[CVE]) otherwise null,
+				                    Product = try Text.From(v[Title][Value]) otherwise null,
+				                    Threats = try v[Threats] otherwise {},
+				                    SeverityThreat = List.First(List.Select(Threats, each try _[Type] = 3 otherwise false), null),
+				                    Severity = if SeverityThreat is null then null else try Text.From(SeverityThreat[Description][Value]) otherwise null,
+				                    Remediations = try v[Remediations] otherwise {},
+				                    SecurityUpdates = List.Select(Remediations, each try _[Type] = 2 and Record.HasFields(_, "Description") otherwise false),
+				                    Rows = List.Transform(SecurityUpdates, (r as record) =>
+				                        let
+				                            KbNumeric = try Text.Select(Text.From(r[Description][Value]), {"0".."9"}) otherwise null
+				                        in
+				                            [kb_numeric=KbNumeric, cve_id=CveId, product=Product, severity=Severity, source_url="https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/" & documentId]
+				                    )
+				                in
+				                    Rows
+				            ))
+				        in
+				            if List.Count(VulnerabilityRows) = 0
+				            then #table(type table [kb_numeric=text, cve_id=text, product=text, severity=text, source_url=text], {})
+				            else Table.FromRecords(VulnerabilityRows),
+				    MappingTables = List.Transform(RecentUpdates[ID], each LoadDocument(_)),
+				    MappingRows = Table.Combine(MappingTables),
+				    ValidMappings = Table.SelectRows(MappingRows, each [kb_numeric] <> null and [kb_numeric] <> "" and [cve_id] <> null and [cve_id] <> ""),
+				    DistinctMappings = Table.Distinct(ValidMappings, {"kb_numeric", "cve_id"})
+				in
+				    DistinctMappings
+
+	annotation PBI_ResultType = Table

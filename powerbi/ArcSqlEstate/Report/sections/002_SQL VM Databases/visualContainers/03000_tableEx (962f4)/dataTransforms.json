@@ -1,0 +1,2659 @@
+{
+  "objects": {
+    "values": [
+      {
+        "properties": {
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          },
+          "fontColorPrimary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "fontColorSecondary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "backColorSecondary": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#282828'"
+                  }
+                }
+              }
+            }
+          },
+          "wordWrap": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#97009C'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#97009C'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "Sum(SQLInstances.DaysBehind)"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "FillRule": {
+                    "Input": {
+                      "Measure": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Entity": "AllMeasures"
+                          }
+                        },
+                        "Property": "sqlPatchesBehindCount"
+                      }
+                    },
+                    "FillRule": {
+                      "linearGradient3": {
+                        "min": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#0067B6'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "10D"
+                            }
+                          }
+                        },
+                        "mid": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#32B0E7'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "15D"
+                            }
+                          }
+                        },
+                        "max": {
+                          "color": {
+                            "Literal": {
+                              "Value": "'#97009C'"
+                            }
+                          },
+                          "value": {
+                            "Literal": {
+                              "Value": "20D"
+                            }
+                          }
+                        },
+                        "nullColoringStrategy": {
+                          "strategy": {
+                            "Literal": {
+                              "Value": "'specificColor'"
+                            }
+                          },
+                          "color": {
+                            "Literal": {
+                              "Value": "'#808080'"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "SQLInstances.sqlPatchStatus"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_close_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_close_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_auto_close_on"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_shrink_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_shrink_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_auto_shrink_on"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_create_stats_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_create_stats_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_auto_create_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_update_stats_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_auto_update_stats_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_auto_update_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_trustworthy_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_trustworthy_on"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_trustworthy_on"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_read_only"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_read_only"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_read_only"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_encrypted"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "is_encrypted"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "1D"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.is_encrypted"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "last_full_backup_days"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "null"
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "And": {
+                            "Left": {
+                              "Comparison": {
+                                "ComparisonKind": 1,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "30D"
+                                  }
+                                }
+                              }
+                            },
+                            "Right": {
+                              "Comparison": {
+                                "ComparisonKind": 3,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "9999D"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "And": {
+                            "Left": {
+                              "Comparison": {
+                                "ComparisonKind": 2,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "1D"
+                                  }
+                                }
+                              }
+                            },
+                            "Right": {
+                              "Comparison": {
+                                "ComparisonKind": 3,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "29D"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#32B0E7'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "And": {
+                            "Left": {
+                              "Comparison": {
+                                "ComparisonKind": 1,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "0D"
+                                  }
+                                }
+                              }
+                            },
+                            "Right": {
+                              "Comparison": {
+                                "ComparisonKind": 3,
+                                "Left": {
+                                  "Aggregation": {
+                                    "Expression": {
+                                      "Column": {
+                                        "Expression": {
+                                          "SourceRef": {
+                                            "Entity": "view_arc_sql_databases"
+                                          }
+                                        },
+                                        "Property": "last_full_backup_days"
+                                      }
+                                    },
+                                    "Function": 3
+                                  }
+                                },
+                                "Right": {
+                                  "Literal": {
+                                    "Value": "1D"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.last_full_backup_days"
+        }
+      },
+      {
+        "properties": {
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Conditional": {
+                    "Cases": [
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "last_log_status"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'Warning'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#32B0E7'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "last_log_status"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'OK'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#0067B6'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "last_log_status"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'Critical'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#97009C'"
+                          }
+                        }
+                      },
+                      {
+                        "Condition": {
+                          "Comparison": {
+                            "ComparisonKind": 0,
+                            "Left": {
+                              "Aggregation": {
+                                "Expression": {
+                                  "Column": {
+                                    "Expression": {
+                                      "SourceRef": {
+                                        "Entity": "view_arc_sql_databases"
+                                      }
+                                    },
+                                    "Property": "last_log_status"
+                                  }
+                                },
+                                "Function": 3
+                              }
+                            },
+                            "Right": {
+                              "Literal": {
+                                "Value": "'N/A'"
+                              }
+                            }
+                          },
+                          "Annotations": {
+                            "PowerBI.SQExprEvaluationKind": 1,
+                            "PowerBI.SQExprTextOperatorOption": 2
+                          }
+                        },
+                        "Value": {
+                          "Literal": {
+                            "Value": "'#666666'"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "selector": {
+          "data": [
+            {
+              "dataViewWildcard": {
+                "matchingOption": 1
+              }
+            }
+          ],
+          "metadata": "view_arc_sql_databases.last_log_status"
+        }
+      }
+    ],
+    "columnHeaders": [
+      {
+        "properties": {
+          "fontFamily": {
+            "expr": {
+              "Literal": {
+                "Value": "'''Segoe UI'', wf_segoe-ui_normal, helvetica, arial, sans-serif'"
+              }
+            }
+          },
+          "fontSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "wordWrap": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "columnWidth": [
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "42.85093313065104D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.ServiceType"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "112.40350386574607D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.name"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "49.68629212859372D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.BackupPolicy"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "50.272174377424605D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.AVG"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "45.71316705999452D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.Clustered"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "47D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.sqlMemoryGB)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "46.30236761744655D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "46.7975832124672D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.DaysBehind)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "73.47064852509139D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.sqlVersionNumber"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "54.034686728126985D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.sqlPatchStatus"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "39.0737275370247D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "Sum(SQLInstances.sqlCores)"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "197.60253801087967D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.sql_db_full_name"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "36.6387020879442D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_close_on"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "39.8927955035532D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_shrink_on"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "40.78553756108259D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_create_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "46.275810103607306D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_update_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "36.38460068724008D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_trustworthy_on"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "36.63873933412639D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_read_only"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "41.81120418920126D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_encrypted"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "48.07227110151585D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.last_full_backup_days"
+        }
+      },
+      {
+        "properties": {
+          "value": {
+            "expr": {
+              "Literal": {
+                "Value": "59.703934695839266D"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.last_log_status"
+        }
+      }
+    ],
+    "total": [
+      {
+        "properties": {
+          "totals": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "bold": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 0,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "grid": [
+      {
+        "properties": {
+          "gridHorizontal": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          },
+          "gridHorizontalColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 9,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "gridHorizontalWeight": {
+            "expr": {
+              "Literal": {
+                "Value": "0.5D"
+              }
+            }
+          },
+          "textSize": {
+            "expr": {
+              "Literal": {
+                "Value": "8D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "columnFormatting": [
+      {
+        "properties": {
+          "labelPrecision": {
+            "expr": {
+              "Literal": {
+                "Value": "0L"
+              }
+            }
+          },
+          "fontColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 8,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "backColor": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "ThemeDataColor": {
+                    "ColorId": 8,
+                    "Percent": 0
+                  }
+                }
+              }
+            }
+          },
+          "styleValues": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "styleTotal": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "AllMeasures.PatchesBehindCount"
+        }
+      },
+      {
+        "properties": {
+          "styleTotal": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "SQLInstances.CloudTypeDisplay"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_close_on"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_shrink_on"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_create_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_auto_update_stats_on"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_trustworthy_on"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_read_only"
+        }
+      },
+      {
+        "properties": {
+          "alignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Center'"
+              }
+            }
+          }
+        },
+        "selector": {
+          "metadata": "view_arc_sql_databases.is_encrypted"
+        }
+      }
+    ]
+  },
+  "projectionOrdering": {
+    "Values": [
+      0,
+      1,
+      2,
+      4,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "queryMetadata": {
+    "Select": [
+      {
+        "Restatement": "Database",
+        "Name": "view_arc_sql_databases.sql_db_full_name",
+        "Type": 2048
+      },
+      {
+        "Restatement": "Auto Close",
+        "Name": "view_arc_sql_databases.is_auto_close_on",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Auto Shrink",
+        "Name": "view_arc_sql_databases.is_auto_shrink_on",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Auto Update Stats",
+        "Name": "view_arc_sql_databases.is_auto_update_stats_on",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Auto Create Stats",
+        "Name": "view_arc_sql_databases.is_auto_create_stats_on",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Is Trust On",
+        "Name": "view_arc_sql_databases.is_trustworthy_on",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Is Read On",
+        "Name": "view_arc_sql_databases.is_read_only",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Is Encryp",
+        "Name": "view_arc_sql_databases.is_encrypted",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Days last full backup",
+        "Name": "view_arc_sql_databases.last_full_backup_days",
+        "Type": 3,
+        "Format": "0"
+      },
+      {
+        "Restatement": "Log Backup Status",
+        "Name": "view_arc_sql_databases.last_log_status",
+        "Type": 2048
+      }
+    ]
+  },
+  "visualElements": [
+    {
+      "DataRoles": [
+        {
+          "Name": "Values",
+          "Projection": 0,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 1,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 2,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 4,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 3,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 5,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 6,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 7,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 8,
+          "isActive": false
+        },
+        {
+          "Name": "Values",
+          "Projection": 9,
+          "isActive": false
+        }
+      ]
+    }
+  ],
+  "selects": [
+    {
+      "displayName": "Database",
+      "queryName": "view_arc_sql_databases.sql_db_full_name",
+      "roles": {
+        "Values": true
+      },
+      "sort": 1,
+      "sortOrder": 0,
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "sql_db_full_name"
+        }
+      }
+    },
+    {
+      "displayName": "Auto Close",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_auto_close_on",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_auto_close_on"
+        }
+      }
+    },
+    {
+      "displayName": "Auto Shrink",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_auto_shrink_on",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_auto_shrink_on"
+        }
+      }
+    },
+    {
+      "displayName": "Auto Update Stats",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_auto_update_stats_on",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_auto_update_stats_on"
+        }
+      }
+    },
+    {
+      "displayName": "Auto Create Stats",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_auto_create_stats_on",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_auto_create_stats_on"
+        }
+      }
+    },
+    {
+      "displayName": "Is Trust On",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_trustworthy_on",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_trustworthy_on"
+        }
+      }
+    },
+    {
+      "displayName": "Is Read On",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_read_only",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_read_only"
+        }
+      }
+    },
+    {
+      "displayName": "Is Encryp",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.is_encrypted",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "is_encrypted"
+        }
+      }
+    },
+    {
+      "displayName": "Days last full backup",
+      "format": "0",
+      "queryName": "view_arc_sql_databases.last_full_backup_days",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "last_full_backup_days"
+        }
+      }
+    },
+    {
+      "displayName": "Log Backup Status",
+      "queryName": "view_arc_sql_databases.last_log_status",
+      "roles": {
+        "Values": true
+      },
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Column": {
+          "Expression": {
+            "SourceRef": {
+              "Entity": "view_arc_sql_databases"
+            }
+          },
+          "Property": "last_log_status"
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_auto_close_on",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_auto_close_on)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_auto_close_on"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_auto_close_on"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_auto_shrink_on",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_auto_shrink_on)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_auto_shrink_on"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_auto_shrink_on"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_auto_create_stats_on",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_auto_create_stats_on)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_auto_create_stats_on"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_auto_create_stats_on"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_auto_update_stats_on",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_auto_update_stats_on)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_auto_update_stats_on"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_auto_update_stats_on"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_trustworthy_on",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_trustworthy_on)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_trustworthy_on"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_trustworthy_on"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_read_only",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_read_only)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_read_only"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_read_only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of is_encrypted",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.is_encrypted)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "is_encrypted"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.is_encrypted"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "Min of last_full_backup_days",
+      "format": "0",
+      "queryName": "Min(view_arc_sql_databases.last_full_backup_days)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 260
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "last_full_backup_days"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.last_full_backup_days"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "displayName": "First last_log_status",
+      "queryName": "Min(view_arc_sql_databases.last_log_status)",
+      "roles": {},
+      "type": {
+        "category": null,
+        "underlyingType": 1
+      },
+      "expr": {
+        "Aggregation": {
+          "Expression": {
+            "Column": {
+              "Expression": {
+                "SourceRef": {
+                  "Entity": "view_arc_sql_databases"
+                }
+              },
+              "Property": "last_log_status"
+            }
+          },
+          "Function": 3
+        }
+      },
+      "relatedObjects": {
+        "values": {
+          "backColor": [
+            {
+              "data": [
+                {
+                  "dataViewWildcard": {
+                    "matchingOption": 1
+                  }
+                }
+              ],
+              "metadata": "view_arc_sql_databases.last_log_status"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

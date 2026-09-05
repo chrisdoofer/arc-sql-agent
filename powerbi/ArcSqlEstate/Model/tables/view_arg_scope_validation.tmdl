@@ -1,0 +1,44 @@
+/// Resource Graph scope coverage for Arc machines and Arc-enabled SQL instances, grouped by subscription and resource type.
+table view_arg_scope_validation
+	lineageTag: efc57732-4fb2-4276-93b3-d487d504d353
+
+	/// Azure resource type included in scope validation.
+	column resource_type
+		dataType: string
+		lineageTag: af4ca4ce-4648-4996-9c27-bd97281b579b
+		summarizeBy: none
+		sourceColumn: resource_type
+
+	/// Azure subscription identifier returned by Resource Graph.
+	column subscription_id
+		dataType: string
+		lineageTag: a2e36d70-ebbd-40e4-9ce0-ec5997fcb2dc
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+	/// Number of resources visible for the subscription and resource type.
+	column resource_count
+		dataType: int64
+		isHidden
+		lineageTag: d3287fd1-3c91-479a-9e67-80908b35f386
+		summarizeBy: sum
+		sourceColumn: resource_count
+
+	partition view_arg_scope_validation = m
+		mode: import
+		source =
+				let
+				    SourceRaw = AzureResourceGraph.Query(
+				        "
+				        resources
+				        | where type =~ 'microsoft.hybridcompute/machines'
+				            or type =~ 'microsoft.azurearcdata/sqlserverinstances'
+				        | summarize resource_count = count() by resource_type = tolower(type), subscription_id = tolower(subscriptionId)
+				        ",
+				        null, null, null, [resultTruncated = false]
+				    ),
+				    Selected = Table.SelectColumns(SourceRaw, {"resource_type", "subscription_id", "resource_count"}, MissingField.UseNull),
+				    Typed = Table.TransformColumnTypes(Selected, {{"resource_type", type text}, {"subscription_id", type text}, {"resource_count", Int64.Type}})
+				in
+				    Typed
+

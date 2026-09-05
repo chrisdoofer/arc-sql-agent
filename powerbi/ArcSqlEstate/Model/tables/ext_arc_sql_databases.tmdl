@@ -1,0 +1,528 @@
+/// Stores all properties of this resource
+table ext_arc_sql_databases
+	isHidden
+
+	column provisioning_state
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: provisioning_state
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_database_upload_time
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: last_database_upload_time
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column database_creation_date
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: database_creation_date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column compatibility_level
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: compatibility_level
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column last_full_backup
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: last_full_backup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column space_available_mb
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: space_available_mb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_auto_update_stats_on
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_auto_update_stats_on
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_auto_create_stats_on
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_auto_create_stats_on
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_memory_optimization_enabled
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_memory_optimization_enabled
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_trustworthy_on
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_trustworthy_on
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_auto_shrink_on
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_auto_shrink_on
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_auto_close_on
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_auto_close_on
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_encrypted
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_encrypted
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column collation_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: collation_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column recovery_mode
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: recovery_mode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_read_only
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: is_read_only
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column size_mb
+		dataType: int64
+		isHidden
+		formatString: 0.00
+		summarizeBy: sum
+		sourceColumn: size_mb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_file_size_mb
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: data_file_size_mb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column log_file_size_mb
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: log_file_size_mb
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column status
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: status
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_backup
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		summarizeBy: none
+		sourceColumn: last_log_backup
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_full_backup_days = ```
+			DATEDIFF([last_full_backup], TODAY(), DAY)
+			
+			```
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+
+		changedProperty = DataType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_backup_hours = DATEDIFF([last_log_backup], NOW(), HOUR)
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_log_status = SWITCH( TRUE(), [recovery_mode] <> "Full", "N/A",ISBLANK([last_log_backup]), "Critical", [last_log_backup_hours] <= 1, "OK", [last_log_backup_hours] <= 24, "Warning", "Critical")
+		isHidden
+		summarizeBy: none
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_full_backup_status = ```
+			SWITCH(TRUE(), [sql_database_type] <> "User" && ISBLANK([last_full_backup]), "N/A", ISBLANK([last_full_backup]), "Critical",
+			[last_full_backup_days] < 7, "OK", [last_full_backup_days] <= 30, "Warning", "Critical")
+			
+			```
+		isHidden
+		summarizeBy: none
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_database_name
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: sql_database_name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: parent_resource_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: location
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subscription_id
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: resource_group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_database_type =
+			
+			VAR db = LOWER ( ext_arc_sql_databases[sql_database_name] )
+			RETURN IF ( db IN { "master", "model", "msdb", "tempdb" }, "System", "User" )
+		isHidden
+		summarizeBy: none
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: resource_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key = RELATED ( fact_keys[resource_key] )
+		formatString: 0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key =
+			
+			LOOKUPVALUE(
+			    fact_keys[resource_key],
+			    fact_keys[resource_id], [parent_resource_id]
+			)
+		formatString: 0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ext_arc_sql_databases = m
+		mode: import
+		queryGroup: 'Extenal-Resource Graph'
+		source = ```
+				let
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 0) Helpers (ultralean + defensive)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    ToText = (x as nullable any) as nullable text =>
+				        if x is null then null else if x is text then x else try Text.From(x) otherwise null,
+				
+				    NormId = (x as nullable any) as nullable text =>
+				        let t = ToText(x) in if t is null then null else Text.Lower(Text.Trim(t)),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 1) ARG call (ARG-first normalization & projection)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceRaw = AzureResourceGraph.Query(
+				    "
+				    resources
+				    | where type == 'microsoft.azurearcdata/sqlserverinstances/databases'
+				    | extend resource_id = trim(' ', tolower(id))
+				    | extend parent_resource_id = trim(' ', tolower(split(resource_id, '/databases')[0]))
+				    | summarize take_any(*) by id
+				    | project
+				        resource_id,
+				        parent_resource_id,
+				        resource_name       = trim(' ', tostring(name)),
+				        platform            = 'Arc',
+				        resource_type       = trim(' ', tostring(type)),   
+				        sql_database_name   = trim(' ', tostring(name)),
+				        location            = trim(' ', tostring(location)),
+				        subscription_id     = trim(' ', tolower(subscriptionId)),
+				        resource_group      = trim(' ', tostring(resourceGroup)),
+				        provisioning_state  = tostring(properties.provisioningState),
+				        status              = tostring(properties.state),
+				        last_database_upload_time = todatetime(properties.lastDatabaseUploadTime),
+				        database_creation_date    = todatetime(properties.databaseCreationDate),
+				        compatibility_level       = tolong(coalesce(properties.compatibilityLevel, 0)),
+				        last_full_backup          = todatetime(properties.backupInformation.lastFullBackup),
+				        last_log_backup           = todatetime(properties.backupInformation.lastLogBackup),
+				        space_available_mb        = tolong(coalesce(properties.spaceAvailableMB, 0)),
+				        is_auto_update_stats_on       = iif(tobool(properties.databaseOptions.isAutoUpdateStatsOn) == true, 1, 0),
+				        is_auto_create_stats_on       = iif(tobool(properties.databaseOptions.isAutoCreateStatsOn) == true, 1, 0),
+				        is_memory_optimization_enabled= iif(tobool(properties.databaseOptions.isMemoryOptimizationEnabled) == true, 1, 0),
+				        is_trustworthy_on             = iif(tobool(properties.databaseOptions.isTrustworthyOn) == true, 1, 0),
+				        is_auto_shrink_on             = iif(tobool(properties.databaseOptions.isAutoShrinkOn) == true, 1, 0),
+				        is_auto_close_on              = iif(tobool(properties.databaseOptions.isAutoCloseOn) == true, 1, 0),
+				        is_encrypted                  = iif(tobool(properties.databaseOptions.isEncrypted) == true, 1, 0),
+				        is_read_only                  = iif(tobool(properties.isReadOnly) == true, 1, 0),
+				        collation_name           = tostring(properties.collationName),
+				        recovery_mode            = tostring(properties.recoveryMode),
+				        size_mb                  = tolong(coalesce(properties.sizeMB, 0)),
+				        data_file_size_mb        = tolong(coalesce(properties.dataFileSizeMB, 0)),
+				        log_file_size_mb         = tolong(coalesce(properties.logFileSizeMB, 0))
+				    ",
+				        null, null, null, [ resultTruncated = false ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 2) Typed-empty fallback schema (no Table.Combine)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Fallback = Table.FromRows(
+				        {},
+				        type table [
+				            resource_id = text, parent_resource_id = text, resource_name = text, resource_type = text, platform = text, sql_database_name = text, location = text,
+				            subscription_id = text, resource_group = text, provisioning_state = text, status = text,
+				            last_database_upload_time = datetime, database_creation_date = datetime,
+				            compatibility_level = Int64.Type,
+				            last_full_backup = datetime, last_log_backup = datetime,
+				            space_available_mb = Int64.Type,
+				            is_auto_update_stats_on = Int64.Type, is_auto_create_stats_on = Int64.Type,
+				            is_memory_optimization_enabled = Int64.Type, is_trustworthy_on = Int64.Type,
+				            is_auto_shrink_on = Int64.Type, is_auto_close_on = Int64.Type,
+				            is_encrypted = Int64.Type, is_read_only = Int64.Type,
+				            collation_name = text, recovery_mode = text,
+				            size_mb = Int64.Type, data_file_size_mb = Int64.Type, log_file_size_mb = Int64.Type
+				        ]
+				    ),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3) Schema guard (adds missing cols as null; keeps typed-empty when needed)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    SourceTable  = if Value.Is(SourceRaw, type table) then SourceRaw else Fallback,
+				    SafeSelected = Table.SelectColumns(SourceTable, Table.ColumnNames(Fallback), MissingField.UseNull),
+				    Validated    = if Table.IsEmpty(SafeSelected) then Fallback else SafeSelected,
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 3.1) Unique Guard (Local M-level deduplication safety net)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    Deduplicated = Table.Distinct(Validated, {"resource_id"}),
+				
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    // 4) Final type enforcement (single pass; Int64 + datetime + text)
+				    // ─────────────────────────────────────────────────────────────────────────────
+				    FinalTyped = Table.TransformColumnTypes(
+				        Deduplicated,
+				        {
+				            // integers (KQL used tolong)
+				            {"compatibility_level", Int64.Type},
+				            {"space_available_mb", Int64.Type},
+				            {"size_mb", Int64.Type},
+				            {"data_file_size_mb", Int64.Type},
+				            {"log_file_size_mb", Int64.Type},
+				
+				            // boolean flags emitted as 0/1 → keep as Int64 for model efficiency
+				            {"is_auto_update_stats_on", Int64.Type},
+				            {"is_auto_create_stats_on", Int64.Type},
+				            {"is_memory_optimization_enabled", Int64.Type},
+				            {"is_trustworthy_on", Int64.Type},
+				            {"is_auto_shrink_on", Int64.Type},
+				            {"is_auto_close_on", Int64.Type},
+				            {"is_encrypted", Int64.Type},
+				            {"is_read_only", Int64.Type},
+				
+				            // datetimes
+				            {"last_database_upload_time", type datetime},
+				            {"database_creation_date", type datetime},
+				            {"last_full_backup", type datetime},
+				            {"last_log_backup", type datetime}
+				        },
+				        "en-GB"
+				    )
+				in
+				    FinalTyped
+				```
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

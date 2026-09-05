@@ -1,0 +1,56 @@
+{
+  "name": "cf9ef7071e23815267ac",
+  "layouts": [
+    {
+      "id": 0,
+      "position": {
+        "x": 16.511497476163768,
+        "y": 720.04486819966348,
+        "z": 20000,
+        "width": 713.58384744812111,
+        "height": 55.277621985417831,
+        "tabOrder": 19000
+      }
+    }
+  ],
+  "singleVisual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "The information provided regarding the Extended Security Updates (ESU) minimum core requirements for SQL Server and Windows is based on current licensing rules. It is assumed that all servers in this report are virtual. All figures for ESU in this report are estimates and not official quotes. Please consult the official Microsoft documentation or your licensing provider for the most accurate and up-to-date information. ",
+                    "textStyle": {
+                      "fontSize": "8pt",
+                      "color": "#ffffff"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "vcObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

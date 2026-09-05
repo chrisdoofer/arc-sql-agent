@@ -1,0 +1,991 @@
+/// All SQL Instances view
+table view_sql_instances
+
+	column server_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [server_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column region_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [region_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_version
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_version]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_edition
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_edition]
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column provisioning_state
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [provisioning_state]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_patch_level
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_patch_level]
+
+		annotation SummarizationSetBy = Automatic
+
+	column instance_name
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [instance_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column always_on_role
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [always_on_role]
+
+		annotation SummarizationSetBy = Automatic
+
+	column service_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [service_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	column monitoring_enabled
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [monitoring_enabled]
+
+		annotation SummarizationSetBy = Automatic
+
+	column migration_enabled
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [migration_enabled]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_inventory_upload_time
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_inventory_upload_time]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_usage_upload_time
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_usage_upload_time]
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_inventory_upload_hrs
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [last_inventory_upload_hrs]
+
+		annotation SummarizationSetBy = Automatic
+
+	column current_release_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [current_release_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column latest_release_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [latest_release_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_patches_behind_count
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_patches_behind_count]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_patches_behind_days
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_patches_behind_days]
+
+		annotation SummarizationSetBy = Automatic
+
+	column logical_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [logical_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column memory_gb
+		formatString: 0.0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [memory_gb]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column sql_instance_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_instance_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [platform]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_fci
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_fci]
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_hadr_enabled
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [is_hadr_enabled]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_database_count
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_database_count]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_patch_status =
+			
+			SWITCH(
+			    TRUE(),
+			    ISBLANK([sql_patches_behind_count]), "Unknown",
+			    [sql_patches_behind_count] = 0, "Ok",
+			    [sql_patches_behind_count] <= 10, "Behind",
+			    [sql_patches_behind_count] > 10, "Outdated",
+			    "Unknown"
+			)
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column sql_esu_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_basecost_monthly
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_basecost_monthly]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sql_esu_start_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_start_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column sql_esu_end_date
+		formatString: General Date
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_esu_end_date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_compute_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_compute_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_compute_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_compute_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_sql_license_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_sql_license_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_target_cores
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_target_cores]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_storage_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_storage_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_storage_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_storage_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mi_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column db_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column vm_status
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_status]
+
+		annotation SummarizationSetBy = Automatic
+
+	column mi_total_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [mi_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column db_total_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [db_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vm_total_cost
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [vm_total_cost]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sql_user_db_count
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_user_db_count]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Deprecated compatibility field. Do not use for entitlement analysis because it historically conflated billing mode with Azure Hybrid Benefit.
+	column sql_license_type
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [sql_license_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Normalized Arc extension or Azure SQL VM billing/licence configuration. This field does not prove Software Assurance entitlement.
+	column billing_mode =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			VAR _rawValue =
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )
+			    )
+			VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, "" ) ) )
+			VAR _compact =
+			    SUBSTITUTE (
+			        SUBSTITUTE (
+			            SUBSTITUTE ( _normalized, " ", "" ),
+			            "/",
+			            ""
+			        ),
+			        "+",
+			        ""
+			    )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _compact = "", "Unknown",
+			        _compact = "paid", "Paid",
+			        _compact = "payg", "PAYG",
+			        _compact = "licenseonly", "License only",
+			        _compact IN { "ahub", "azurehybridbenefit" }, "AHB configured",
+			        _compact = "servercal", "Server/CAL source signal",
+			        _rawValue
+			    )
+		dataType: string
+		lineageTag: 831f2ea5-43ca-429f-abb4-b7c3e2e2ec9d
+		summarizeBy: none
+
+	/// Current SQL licensing model where explicitly supported by source evidence; ambiguous billing values remain Unknown.
+	column licensing_model =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			VAR _rawValue =
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], _resourceKey )
+			    )
+			VAR _normalized = LOWER ( TRIM ( COALESCE ( _rawValue, "" ) ) )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        _normalized IN { "servercal", "server/cal", "server + cal" }, "Server/CAL",
+			        _normalized IN { "core", "percore", "per core" }, "Core",
+			        "Unknown"
+			    )
+		dataType: string
+		lineageTag: 52ff3815-2d31-42a1-ac48-d495751119d3
+		summarizeBy: none
+
+	/// Core count used for licensing reconciliation at SQL resource grain, preferring reported SQL vCores/cores and then parent logical cores.
+	column licensable_cores =
+			VAR _resourceKey = view_sql_instances[resource_key]
+			RETURN
+			    COALESCE (
+			        LOOKUPVALUE ( ext_arc_sql_instances[vcore], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        LOOKUPVALUE ( ext_arc_sql_instances[cores], ext_arc_sql_instances[resource_key], _resourceKey ),
+			        view_sql_instances[logical_cores]
+			    )
+		dataType: int64
+		formatString: #,##0
+		lineageTag: 6d190ab7-6c59-4bfa-bcfd-797ace444664
+		summarizeBy: none
+
+	partition view_sql_instances = calculated
+		mode: import
+		source = ```
+				
+				VAR instances_base =
+				    FILTER ( fact_resources, fact_resources[resource_kind] = "SQL Instance" )
+				
+				-- 🔒 Guard: exclude rows with BLANK resource_key so this view never ends up on the
+				-- one side with blanks (prevents: “columns on the one side contain blank values…”)
+				VAR instances =
+				    FILTER ( instances_base, NOT ISBLANK ( fact_resources[resource_key] ) )
+				
+				
+				/* ===================== PASS 1: your existing shaping (unchanged) ===================== */
+				VAR t1 =
+				    ADDCOLUMNS (
+				        instances,
+				
+				        // ── linkage & friendly labels ───────────────────────────────────────
+				        //"parent_resource_key",   fact_resources[parent_resource_key],
+				        "server_name",
+				            VAR sk = fact_resources[parent_resource_key]
+				            RETURN COALESCE (
+				                LOOKUPVALUE ( fact_resources[resource_name], fact_resources[resource_key], sk ),
+				                "Unknown Server"
+				            ),
+				        "region_name",
+				            LOOKUPVALUE (
+				                dim_azure_regions[region_name],
+				                dim_azure_regions[location], fact_resources[location]
+				            ),
+				
+				        // ── Unified SQL License Type (Arc + Native + Normalization) ─────────
+				        "sql_license_type",
+				            VAR arc_license = LOOKUPVALUE ( ext_arc_sql_instances[sql_license_type], ext_arc_sql_instances[resource_key], fact_resources[resource_key] )
+				            VAR native_license = LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], fact_resources[resource_key] )
+				            VAR raw_license = COALESCE(arc_license, native_license)
+				            RETURN 
+				                SWITCH ( TRUE(),
+				                    ISBLANK(raw_license), "Unknown",
+				                    raw_license = "Paid", "AHUB",           -- Normalizing Arc "Paid" to "AHB"
+				                     raw_license = "LicenseOnly", "BYOL",           -- Normalizing Arc "Paid" to "AHB"
+				                    raw_license                            -- Return original if no match (e.g., LicenseOnly)
+				                ),
+				        "sql_version",
+				        COALESCE (
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_version],
+				                    ext_arc_sql_instances[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_version],
+				                    ext_arc_sql_instances[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_azure_sql_instances[sql_version],
+				                    ext_azure_sql_instances[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_azure_sql_instances[sql_version],
+				                    ext_azure_sql_instances[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            "Unknown"
+				        ),
+				
+				        // sql_edition
+				        "sql_edition",
+				        COALESCE (
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_edition],
+				                    ext_arc_sql_instances[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_arc_sql_instances[sql_edition],
+				                    ext_arc_sql_instances[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            IF (
+				                LOOKUPVALUE (
+				                    ext_azure_sql_instances[sql_edition],
+				                    ext_azure_sql_instances[resource_key], fact_resources[resource_key]
+				                ) = "",
+				                BLANK (),
+				                LOOKUPVALUE (
+				                    ext_azure_sql_instances[sql_edition],
+				                    ext_azure_sql_instances[resource_key], fact_resources[resource_key]
+				                )
+				            ),
+				            "Unknown"
+				        ),
+				
+				        // ── status/provisioning (coalesced) ─────────────────────────────────
+				        "status",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[status], ext_arc_servers[resource_key], fact_resources[parent_resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[status], ext_azure_servers[resource_key], fact_resources[parent_resource_key])
+				            ),
+				        "provisioning_state",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_sql_instances[provisioning_state], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				                LOOKUPVALUE ( ext_azure_sql_instances[provisioning_state], ext_azure_sql_instances[resource_key], fact_resources[resource_key] )
+				            ),
+				
+				        // ── Arc-only fields (BLANK for Azure) ───────────────────────────────
+				        "sql_current_version",
+				            LOOKUPVALUE ( ext_arc_sql_instances[sql_current_version], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "sql_patch_level",
+				            LOOKUPVALUE ( ext_arc_sql_instances[sql_patch_level],     ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "vcore",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vcore],               ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[cores],               ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "db_master_key_exists",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_master_key_exists], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "tcp_static_ports",
+				            LOOKUPVALUE ( ext_arc_sql_instances[tcp_static_ports],    ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "tcp_dynamic_ports",
+				            LOOKUPVALUE ( ext_arc_sql_instances[tcp_dynamic_ports],   ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "instance_name",
+				            LOOKUPVALUE ( ext_arc_sql_instances[instance_name],       ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "collation",
+				            LOOKUPVALUE ( ext_arc_sql_instances[collation],           ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "always_on_role",
+				            VAR ao_lookup = LOOKUPVALUE ( ext_arc_sql_instances[always_on_role], ext_arc_sql_instances[resource_key], fact_resources[resource_key] )
+				            RETURN
+				            -- Check if the text is not empty and not "None" to return "Y"
+				            IF ( 
+				                NOT ISBLANK(ao_lookup) && ao_lookup <> "" && ao_lookup <> "None", 
+				                "Y", 
+				                "N" 
+				            ),
+				        "service_type",
+				            LOOKUPVALUE ( ext_arc_sql_instances[service_type],        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "is_hadr_enabled",
+				            VAR hadr_lookup = LOOKUPVALUE ( ext_arc_sql_instances[is_hadr_enabled], ext_arc_sql_instances[resource_key], fact_resources[resource_key] )
+				            RETURN
+				            IF ( hadr_lookup = TRUE(), "Y", "N" ),
+				        "monitoring_enabled",
+				            LOOKUPVALUE ( ext_arc_sql_instances[monitoring_enabled],  ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "migration_enabled",
+				            LOOKUPVALUE ( ext_arc_sql_instances[migration_enabled],   ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "assessment_upload_time",
+				            LOOKUPVALUE ( ext_arc_sql_instances[assessment_upload_time], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "backup_policy",
+				            LOOKUPVALUE ( ext_arc_sql_instances[backup_policy],       ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "is_fci",
+				            VAR fci_lookup = LOOKUPVALUE ( ext_arc_sql_instances[is_fci], ext_arc_sql_instances[resource_key], fact_resources[resource_key] )
+				            RETURN
+				            IF ( fci_lookup = TRUE(), "Y", "N" ),
+				        "client_connections",
+				            LOOKUPVALUE ( ext_arc_sql_instances[client_connections],  ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        /* ---- COST & STATUS FIELDS (Arc‑only, BLANK for Azure) ---- */
+				        "mi_compute_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_compute_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "mi_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "mi_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_target_cores],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "db_compute_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_compute_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "db_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "db_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_target_cores],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "vm_compute_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_compute_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "vm_sql_license_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_sql_license_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "vm_target_cores",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_target_cores],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "mi_storage_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_storage_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "db_storage_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_storage_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "vm_storage_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_storage_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "mi_status",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_status],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "db_status",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_status],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "vm_status",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_status],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "mi_total_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[mi_total_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "db_total_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[db_total_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        "vm_total_cost",
+				            LOOKUPVALUE ( ext_arc_sql_instances[vm_total_cost],
+				                        ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        // timestamps (Arc) + hrs since last inventory (UTC)
+				        "last_inventory_upload_time",
+				            LOOKUPVALUE ( ext_arc_sql_instances[last_inventory_upload_time], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "last_usage_upload_time",
+				            LOOKUPVALUE ( ext_arc_sql_instances[last_usage_upload_time],     ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "last_inventory_upload_hrs",
+				            VAR t = LOOKUPVALUE ( ext_arc_sql_instances[last_inventory_upload_time], ext_arc_sql_instances[resource_key], fact_resources[resource_key] )
+				            RETURN IF ( NOT ISBLANK ( t ), DATEDIFF ( t, UTCNOW (), HOUR ) ),
+				
+				        // Defender (Arc)
+				        "azure_defender_status",
+				            LOOKUPVALUE ( ext_arc_sql_instances[azure_defender_status],            ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "azure_defender_status_last_updated",
+				            LOOKUPVALUE ( ext_arc_sql_instances[azure_defender_status_last_updated], ext_arc_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        // ── Azure‑only fields (BLANK for Arc) ────────────────────────────────
+				        "enable_automatic_upgrade",
+				            LOOKUPVALUE ( ext_azure_sql_instances[enable_automatic_upgrade], ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "os_type",
+				            LOOKUPVALUE ( ext_azure_sql_instances[os_type],                 ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "sql_server_license_type",
+				            LOOKUPVALUE ( ext_azure_sql_instances[sql_server_license_type], ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "least_privilege_mode",
+				            LOOKUPVALUE ( ext_azure_sql_instances[least_privilege_mode],    ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "sql_management",
+				            LOOKUPVALUE ( ext_azure_sql_instances[sql_management],          ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "sql_image_offer",
+				            LOOKUPVALUE ( ext_azure_sql_instances[sql_image_offer],         ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				        "additional_vm_patch",
+				            LOOKUPVALUE ( ext_azure_sql_instances[additional_vm_patch],     ext_azure_sql_instances[resource_key], fact_resources[resource_key] ),
+				
+				        // ── parent server specs ──────────────────────────────────────────────
+				        "logical_cores",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[logical_cores],   ext_arc_servers[resource_key], fact_resources[parent_resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[logical_cores], ext_azure_servers[resource_key], fact_resources[parent_resource_key] )
+				            ),
+				        "memory_gb",
+				            COALESCE (
+				                LOOKUPVALUE ( ext_arc_servers[memory_gb],   ext_arc_servers[resource_key], fact_resources[parent_resource_key] ),
+				                LOOKUPVALUE ( ext_azure_servers[memory_gb], ext_azure_servers[resource_key], fact_resources[parent_resource_key] )
+				            ),
+				
+				        // --- Databases on this SQL instance (from the spine); BLANK if none
+				        "sql_database_count",
+				        VAR inst_key = fact_resources[resource_key]   // this instance's key
+				        VAR cnt =
+				            COUNTROWS (
+				                FILTER (
+				                    ALL ( fact_resources ),
+				                    fact_resources[resource_kind] = "SQL Database"
+				                        && fact_resources[parent_resource_key] = inst_key
+				                )
+				            )
+				        RETURN IF ( cnt > 0, cnt, BLANK() ),
+				
+				    "sql_user_db_count",
+				    VAR instKey = fact_resources[resource_key]   // this instance’s numeric key
+				    RETURN
+				        IF (
+				            ISBLANK ( instKey ),
+				            BLANK (),
+				            VAR user_db_rows =
+				                FILTER (
+				                    view_arc_sql_databases,   // do not change this table
+				                    view_arc_sql_databases[parent_resource_key] = instKey
+				                        && LOWER ( TRIM ( view_arc_sql_databases[sql_database_type] ) ) = "user"
+				                )
+				            VAR c = COUNTROWS ( user_db_rows )
+				            RETURN IF ( c = 0, BLANK (), c )
+				        )
+				    )
+				/* ===================== PASS 2: lifecycle fields for SQL ESU ===================== */
+				VAR t2 =
+				    ADDCOLUMNS (
+				        t1,
+				        "sql_esu_status",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[software_status],
+				                dim_software_lifecycle[software_version], [sql_version],
+				                dim_software_lifecycle[software_edition], [sql_edition]
+				            ),
+				        "sql_esu_basecost_monthly",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[software_esu_monthly],
+				                dim_software_lifecycle[software_version], [sql_version],
+				                dim_software_lifecycle[software_edition], [sql_edition]
+				            ),
+				        "sql_esu_start_date",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[esu_start_date],
+				                dim_software_lifecycle[software_version], [sql_version],
+				                dim_software_lifecycle[software_edition], [sql_edition]
+				            ),
+				        "sql_esu_end_date",
+				            LOOKUPVALUE (
+				                dim_software_lifecycle[esu_end_date],
+				                dim_software_lifecycle[software_version], [sql_version],
+				                dim_software_lifecycle[software_edition], [sql_edition]
+				            )
+				    )
+				
+				/* ===================== PASS 3: derive sql_esu_cores with Multi-Instance Logic ===================== */
+				VAR t3 =
+				    ADDCOLUMNS (
+				        t2,
+				        "sql_esu_cores",
+				        VAR current_parent = [parent_resource_key]
+				        VAR current_edition = LOWER(TRIM([sql_edition]))
+				        VAR status_norm = LOWER ( TRIM ( [sql_esu_status] ) )
+				        
+				        -- 1. Identify all instances on THIS server
+				        VAR instances_on_server = 
+				            FILTER(t2, [parent_resource_key] = current_parent)
+				            
+				        -- 2. Check if Enterprise exists anywhere on this server
+				        VAR enterprise_exists = 
+				            NOT ISEMPTY(FILTER(instances_on_server, LOWER(TRIM([sql_edition])) = "enterprise"))
+				            
+				        -- 3. Determine if THIS specific row is the "Primary" instance for billing
+				        -- We pick one instance to hold the core count, others go to 0.
+				        VAR is_primary_instance = 
+				            IF(
+				                enterprise_exists,
+				                -- If enterprise exists, only the FIRST enterprise instance (by key) gets the cores
+				                [resource_key] = MINX(FILTER(instances_on_server, LOWER(TRIM([sql_edition])) = "enterprise"), [resource_key]),
+				                -- If no enterprise, only the FIRST standard instance (by key) gets the cores
+				                [resource_key] = MINX(instances_on_server, [resource_key])
+				            )
+				
+				        VAR raw_cores = COALESCE ( [vcore], [cores], [logical_cores] )
+				        VAR min_sql_esu = 4
+				
+				        RETURN
+				            IF (
+				                NOT ( status_norm IN { "esu", "upcoming" } ) || NOT(is_primary_instance),
+				                0,
+				                IF ( NOT ISBLANK ( raw_cores ) && raw_cores < min_sql_esu, min_sql_esu, raw_cores )
+				            )
+				    )
+				/* ===================== PASS 4: patch metadata (your existing logic) ===================== */
+				/* PASS 4a: base patch metadata (lookups + max) */
+				VAR t4a =
+				    ADDCOLUMNS (
+				        t3,
+				        "current_patch_index",
+				            LOOKUPVALUE (
+				                dim_sql_patches[patch_index],
+				                dim_sql_patches[sql_version_number], [sql_patch_level]
+				            ),
+				        "current_release_date",
+				            LOOKUPVALUE (
+				                dim_sql_patches[release_date],
+				                dim_sql_patches[sql_version_number], [sql_patch_level]
+				            ),
+				        "latest_release_date",
+				            MAXX (
+				                FILTER ( dim_sql_patches, dim_sql_patches[sql_version] = [sql_version] ),
+				                dim_sql_patches[release_date]
+				            )
+				    )
+				
+				/* PASS 4b: derived deltas using columns from 4a */
+				VAR t4 =
+				    ADDCOLUMNS (
+				        t4a,
+				        "sql_patches_behind_count",
+				            VAR idx = [current_patch_index]
+				            RETURN IF ( NOT ISBLANK ( idx ), idx - 1 ),
+				        "sql_patches_behind_days",
+				            VAR lr = [latest_release_date]
+				            VAR cr = [current_release_date]
+				            RETURN IF ( NOT ISBLANK ( lr ) && NOT ISBLANK ( cr ), DATEDIFF ( cr, lr, DAY ) )
+				    )
+				RETURN
+				SELECTCOLUMNS (
+				    t4,
+				
+				    // --- identity / linkage ---
+				    "resource_key",        [resource_key],     // inherited from fact_resources
+				    "sql_instance_name",   [resource_name],             // inherited
+				    "parent_resource_key", [parent_resource_key],
+				    "server_name",         [server_name],
+				    "region_name",         [region_name],
+				    "subscription_id",     [subscription_id],
+				    "resource_group",      [resource_group],
+				
+				    // --- core fields you want to expose ---
+				    "status",              [status],
+				    "provisioning_state",  [provisioning_state],
+				    "platform",            [platform],
+				    "sql_version",         [sql_version],
+				    "sql_edition",         [sql_edition], 
+				    "sql_patch_level",     [sql_patch_level],
+				    "current_release_date",[current_release_date],
+				    "latest_release_date", [latest_release_date],
+				    "sql_patches_behind_count", [sql_patches_behind_count],
+				    "sql_patches_behind_days",  [sql_patches_behind_days],
+				    "sql_database_count",  [sql_database_count],
+				    "sql_user_db_count", [sql_user_db_count],
+				    // --- ESU fields (NEW) ---
+				    "sql_esu_status",              [sql_esu_status],
+				    "sql_esu_cores",               [sql_esu_cores],
+				    "sql_esu_basecost_monthly",    [sql_esu_basecost_monthly],
+				    "sql_esu_start_date",          [sql_esu_start_date],
+				    "sql_esu_end_date",            [sql_esu_end_date],
+				    "sql_license_type",            [sql_license_type],
+				    
+				    /* >>> the 12 cost/status fields  <<< */
+				    "mi_compute_cost", [mi_compute_cost],
+				    "mi_sql_license_cost", [mi_sql_license_cost],
+				    "mi_target_cores", [mi_target_cores],
+				    "db_compute_cost", [db_compute_cost],
+				    "db_sql_license_cost", [db_sql_license_cost],
+				    "db_target_cores", [db_target_cores],
+				    "vm_compute_cost", [vm_compute_cost],
+				    "vm_sql_license_cost", [vm_sql_license_cost],
+				    "vm_target_cores", [vm_target_cores],
+				    "mi_storage_cost", [mi_storage_cost],
+				    "db_storage_cost", [db_storage_cost],
+				    "vm_storage_cost", [vm_storage_cost],
+				    "mi_status",       [mi_status],
+				    "db_status",       [db_status],
+				    "vm_status",       [vm_status],
+				    "mi_total_cost",   [mi_total_cost],
+				    "db_total_cost",   [db_total_cost],
+				    "vm_total_cost",   [vm_total_cost],
+				    // --- arc-only you surfaced ---
+				    "instance_name",       [instance_name],
+				    "service_type",        [service_type],
+				    "always_on_role",      [always_on_role],
+				    "logical_cores",       [logical_cores],
+				    "memory_gb",           [memory_gb],
+				    "monitoring_enabled",  [monitoring_enabled],
+				    "migration_enabled",   [migration_enabled],
+				    "is_fci",              [is_fci],
+				    "is_hadr_enabled",     [is_hadr_enabled],
+				    "last_inventory_upload_time", [last_inventory_upload_time],
+				    "last_usage_upload_time",     [last_usage_upload_time],
+				    "last_inventory_upload_hrs",  [last_inventory_upload_hrs]
+				)
+				```
+
+	annotation PBI_Id = 5416845d12fe4828851c1f042cdd4182

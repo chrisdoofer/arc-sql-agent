@@ -1,0 +1,378 @@
+{
+  "Commands": [
+    {
+      "SemanticQueryDataShapeCommand": {
+        "Query": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "v",
+              "Entity": "view_arc_sql_databases",
+              "Type": 0
+            }
+          ],
+          "Select": [
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "sql_db_full_name"
+              },
+              "Name": "view_arc_sql_databases.sql_db_full_name",
+              "NativeReferenceName": "Database"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_auto_close_on"
+              },
+              "Name": "view_arc_sql_databases.is_auto_close_on",
+              "NativeReferenceName": "Auto Close"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_auto_shrink_on"
+              },
+              "Name": "view_arc_sql_databases.is_auto_shrink_on",
+              "NativeReferenceName": "Auto Shrink"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_auto_update_stats_on"
+              },
+              "Name": "view_arc_sql_databases.is_auto_update_stats_on",
+              "NativeReferenceName": "Auto Update Stats"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_auto_create_stats_on"
+              },
+              "Name": "view_arc_sql_databases.is_auto_create_stats_on",
+              "NativeReferenceName": "Auto Create Stats"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_trustworthy_on"
+              },
+              "Name": "view_arc_sql_databases.is_trustworthy_on",
+              "NativeReferenceName": "Is Trust On"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_read_only"
+              },
+              "Name": "view_arc_sql_databases.is_read_only",
+              "NativeReferenceName": "Is Read On"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "is_encrypted"
+              },
+              "Name": "view_arc_sql_databases.is_encrypted",
+              "NativeReferenceName": "Is Encryp"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "last_full_backup_days"
+              },
+              "Name": "view_arc_sql_databases.last_full_backup_days",
+              "NativeReferenceName": "Days last full backup"
+            },
+            {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Source": "v"
+                  }
+                },
+                "Property": "last_log_status"
+              },
+              "Name": "view_arc_sql_databases.last_log_status",
+              "NativeReferenceName": "Log Backup Status"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_auto_close_on"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_auto_close_on)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_auto_shrink_on"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_auto_shrink_on)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_auto_create_stats_on"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_auto_create_stats_on)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_auto_update_stats_on"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_auto_update_stats_on)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_trustworthy_on"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_trustworthy_on)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_read_only"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_read_only)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "is_encrypted"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.is_encrypted)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "last_full_backup_days"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.last_full_backup_days)"
+            },
+            {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Source": "v"
+                      }
+                    },
+                    "Property": "last_log_status"
+                  }
+                },
+                "Function": 3
+              },
+              "Name": "Min(view_arc_sql_databases.last_log_status)"
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "v"
+                          }
+                        },
+                        "Property": "sql_database_type"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'User'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "OrderBy": [
+            {
+              "Direction": 1,
+              "Expression": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Source": "v"
+                    }
+                  },
+                  "Property": "sql_db_full_name"
+                }
+              }
+            }
+          ]
+        },
+        "Binding": {
+          "Primary": {
+            "Groupings": [
+              {
+                "Projections": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  9,
+                  10,
+                  11,
+                  12,
+                  13,
+                  14,
+                  15,
+                  16,
+                  17,
+                  18
+                ]
+              }
+            ]
+          },
+          "DataReduction": {
+            "DataVolume": 3,
+            "Primary": {
+              "Window": {
+                "Count": 500
+              }
+            }
+          },
+          "SuppressedJoinPredicates": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18
+          ],
+          "Version": 1
+        },
+        "ExecutionMetricsKind": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+table dim_period_selector
+	isHidden
+
+	column period
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Period]
+
+		annotation SummarizationSetBy = Automatic
+
+	column months
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [months]
+
+		annotation SummarizationSetBy = User
+
+	partition dim_period_selector = calculated
+		mode: import
+		source = ```
+				
+				DATATABLE(
+				    "period", STRING, "months", INTEGER,
+				    {
+				        {"Monthly", 1},
+				        {"Yearly", 12},
+				        {"3-Year", 36}
+				    }
+				)
+				
+				```
+
+	annotation PBI_Id = e1997d80b5e84f3b86c8a05985fa2081
+

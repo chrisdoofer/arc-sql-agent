@@ -1,0 +1,156 @@
+/// Central spine and resource key build
+table fact_resources
+
+	column resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_key]
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_key
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_key]
+
+		annotation SummarizationSetBy = User
+
+	column resource_id
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column parent_resource_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [parent_resource_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_name
+		isDefaultLabel
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_name]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_kind
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_kind]
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [platform]
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [location]
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscription_id
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [subscription_id]
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Resolved subscription display name from dim_subscriptions via LOOKUPVALUE. Use this in slicers instead of subscription_id.
+	column subscription_name =
+			LOOKUPVALUE(
+			    dim_subscriptions[subscription_name],
+			    dim_subscriptions[subscription_id],
+			    fact_resources[subscription_id]
+			)
+		dataType: string
+		lineageTag: d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f90
+		summarizeBy: none
+
+	column resource_group
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_group]
+
+		annotation SummarizationSetBy = Automatic
+
+	column resource_type
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [resource_type]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_resources = calculated
+		mode: import
+		source = ```
+				
+				-- 1) Standardize and Group Sources
+				VAR RawUnion = 
+				    UNION (
+				        SELECTCOLUMNS(ext_arc_servers,         "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "Server"),
+				        SELECTCOLUMNS(ext_azure_servers,       "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "Server"),
+				        SELECTCOLUMNS(ext_arc_sql_instances,   "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "SQL Instance"),
+				        SELECTCOLUMNS(ext_azure_sql_instances, "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "SQL Instance"),
+				        SELECTCOLUMNS(ext_arc_sql_databases,   "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "SQL Database"),
+				        SELECTCOLUMNS(ext_all_extensions,      "id", [resource_id], "pid", [parent_resource_id], "name", [resource_name], "plat", [platform], "loc", [location], "sub", [subscription_id], "rg", [resource_group], "type", [resource_type], "kind", "Extension")
+				    )
+				
+				-- 2) Filter Blanks
+				VAR FilteredRows = FILTER(RawUnion, [id] <> BLANK() && [id] <> "")
+				
+				-- 3) Create Unique Key Map variable
+				VAR UniqueIDs = DISTINCT(SELECTCOLUMNS(FilteredRows, "resource_id", [id]))
+				VAR KeyMap = 
+				    ADDCOLUMNS(
+				        UniqueIDs,
+				        "key", RANKX(UniqueIDs, [resource_id], , ASC, DENSE)
+				    )
+				
+				-- 4) Enrichment using MAXX/FILTER (Standard workaround for Table Variables)
+				VAR Enriched = 
+				    ADDCOLUMNS(
+				        FilteredRows,
+				        "resource_key", 
+				            VAR CurrentID = [id] 
+				            RETURN MAXX(FILTER(KeyMap, [resource_id] = CurrentID), [key]),
+				        "parent_key",   
+				            VAR CurrentPID = [pid] 
+				            RETURN IF(ISBLANK(CurrentPID) || CurrentPID = "", BLANK(), 
+				                   MAXX(FILTER(KeyMap, [resource_id] = CurrentPID), [key]))
+				    )
+				
+				-- 5) Final Projection with Typed Keys
+				RETURN
+				SELECTCOLUMNS (
+				    Enriched,
+				    "resource_key",        INT( [resource_key] ),
+				    "parent_resource_key", INT( [parent_key] ),
+				    "resource_id",         [id],
+				    "parent_resource_id",  [pid],
+				    "resource_name",       [name],
+				    "resource_kind",       [kind],
+				    "platform",            [plat],
+				    "location",            [loc],
+				    "subscription_id",     [sub],
+				    "resource_group",      [rg],
+				    "resource_type",       [type]
+				)
+				```
+
+	annotation PBI_Id = 6b9bee3d4e4a41aa8161b852ba5e4c47
+
