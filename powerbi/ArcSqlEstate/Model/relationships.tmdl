@@ -99,7 +99,3 @@ relationship 7a658031-351e-4e9b-9394-945063b31fd5
 	fromColumn: view_patch_cve_mappings.kb_numeric
 	toColumn: dim_patch_kb.kb_numeric
 
-relationship a1b2c3d4-5e6f-7a8b-9c0d-e1f2a3b4c5d6
-	crossFilteringBehavior: bothDirections
-	fromColumn: fact_resources.subscription_id
-	toColumn: dim_subscriptions.subscription_id

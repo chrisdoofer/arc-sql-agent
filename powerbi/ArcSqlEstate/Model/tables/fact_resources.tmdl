@@ -70,6 +70,17 @@ table fact_resources
 
 		annotation SummarizationSetBy = Automatic
 
+	/// Resolved subscription display name from dim_subscriptions via LOOKUPVALUE. Use this in slicers instead of subscription_id.
+	column subscription_name =
+			LOOKUPVALUE(
+			    dim_subscriptions[subscription_name],
+			    dim_subscriptions[subscription_id],
+			    fact_resources[subscription_id]
+			)
+		dataType: string
+		lineageTag: d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f90
+		summarizeBy: none
+
 	column resource_group
 		summarizeBy: none
 		isNameInferred
