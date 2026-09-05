@@ -116,7 +116,7 @@ table dim_software_lifecycle
 		queryGroup: Dimensions
 		source = ```
 				let
-				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/markjones-msft/ArcDashboard/refs/heads/main/Dimensions/dim_software_lifecycle.csv"),[Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    Source = Csv.Document(Web.Contents("https://raw.githubusercontent.com/chrisdoofer/arc-sql-agent/refs/heads/main/powerbi/Dimensions/dim_software_lifecycle.csv"),[Delimiter=",", Encoding=1252, QuoteStyle=QuoteStyle.None]),
 				    
 				    // Dynamically promote headers without hardcoding column count
 				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
